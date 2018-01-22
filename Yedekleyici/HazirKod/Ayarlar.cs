@@ -4,15 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Windows.Forms;
 using System.Xml;
 using ArgeMup.HazirKod.Dönüştürme;
+using System.Reflection;
 
 namespace ArgeMup.HazirKod
 {
     public class Ayarlar_ : IDisposable 
     {
-        public const string Sürüm = "V2.1";
+        public const string Sürüm = "V2.3";
         #region Değişkenler
         int DeğişiklikleriKaydetmeAralığı_Sn;
         int KaynaklarıBoşaltmaAralığı_Dk;
@@ -38,23 +38,9 @@ namespace ArgeMup.HazirKod
         XmlDocument Döküman = null; XmlNode AyarlarDalı = null;
         #endregion
        
-        public Ayarlar_(out bool Sonuç, string AyarlarİçinParola = "", string AyarlarDosyası = "", bool Izin_AltDallarıdaKarıştır = false, int Süre_DeğişiklikleriKaydetmeAralığı_Sn = 30, int Süre_KaynaklarıBoşaltmaAralığı_Dk = 30, bool GerekirseKullanıcıyıBilgilendir = false)
+        public Ayarlar_(out bool Sonuç, string AyarlarİçinParola = "", string AyarlarDosyası = "", bool Izin_AltDallarıdaKarıştır = false, int Süre_DeğişiklikleriKaydetmeAralığı_Sn = 30, int Süre_KaynaklarıBoşaltmaAralığı_Dk = 30)
         {
-            bool BirDenemeDahaYapılabilir = true;
-            Yeniden_Dene:
-
             Sonuç = YenidenBaşlat(AyarlarİçinParola, AyarlarDosyası, Izin_AltDallarıdaKarıştır, Süre_DeğişiklikleriKaydetmeAralığı_Sn, Süre_KaynaklarıBoşaltmaAralığı_Dk);
-
-            if (!Sonuç && GerekirseKullanıcıyıBilgilendir && BirDenemeDahaYapılabilir)
-            {
-                DialogResult cevap = MessageBox.Show("Ayarlarınızın okunmaya çalışıldığı dosya ile bilgisayarınızın parmak izinin uyuşmaması veya bütünlük kontrolünü geçememiş olması veya parola korumalı ise hatalı parola girilmiş olması sebebiyle ayarlarınız okunamamaktadır.\r\rYeni bir ayarlar dosyası ürettirmek ister misiniz?\r\r" + AyarlarDosyasıYolu, "HATA", MessageBoxButtons.YesNo, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                if (cevap == DialogResult.Yes)
-                {
-                    File.Move(AyarlarDosyasıYolu, AyarlarDosyasıYolu + ".Parmak izi hatali");
-                    BirDenemeDahaYapılabilir = false;
-                    goto Yeniden_Dene;
-                }
-            }
         }
         public bool YenidenBaşlat(string AyarlarİçinParola = "", string AyarlarDosyası = "", bool Izin_AltDallarıdaKarıştır = false, int Süre_DeğişiklikleriKaydetmeAralığı_Sn = 30, int Süre_KaynaklarıBoşaltmaAralığı_Dk = 30)
         {
@@ -63,11 +49,18 @@ namespace ArgeMup.HazirKod
                 Dispose();
                 disposedValue = false;
 
-                if (AyarlarDosyası == "") AyarlarDosyasıYolu = GetType().Assembly.Location + ".Ayarlar";    
-                else if (AyarlarDosyası.Contains("\\")) AyarlarDosyasıYolu = AyarlarDosyası;               
-                else AyarlarDosyasıYolu = Path.GetDirectoryName(GetType().Assembly.Location) + "\\" + AyarlarDosyası + ".Ayarlar";
-
-                if (!File.Exists(AyarlarDosyasıYolu)) 
+				#if UUNNIITTYY
+					#if UNITY_EDITOR
+						AyarlarDosyası = AyarlarDosyası.Replace('/', '\\');
+					#endif
+					AyarlarDosyasıYolu = AyarlarDosyası;
+				#else
+					if (AyarlarDosyası == "") AyarlarDosyasıYolu = GetType().Assembly.Location + ".Ayarlar";    
+					else if (AyarlarDosyası.Contains("\\")) AyarlarDosyasıYolu = AyarlarDosyası;               
+					else AyarlarDosyasıYolu = Path.GetDirectoryName(GetType().Assembly.Location) + "\\" + AyarlarDosyası + ".Ayarlar";
+				#endif
+			
+				if (!File.Exists(AyarlarDosyasıYolu)) 
                 {
                     if (!Directory.Exists(Path.GetDirectoryName(AyarlarDosyasıYolu))) Directory.CreateDirectory(Path.GetDirectoryName(AyarlarDosyasıYolu));
                     FileStream gecici = File.Create(AyarlarDosyasıYolu);
@@ -116,9 +109,17 @@ namespace ArgeMup.HazirKod
 
                     XmlElement Uygulama = Döküman.CreateElement("Uygulama");
                     XmlElement Uygulama_1 = Döküman.CreateElement("Ad");
-                    Uygulama_1.InnerText = Application.ProductName;
+					#if UUNNIITTYY
+					Uygulama_1.InnerText = UnityEngine.Application.productName;
+					#else
+					Uygulama_1.InnerText = System.Windows.Forms.Application.ProductName;
+					#endif
                     XmlElement Uygulama_2 = Döküman.CreateElement("Surum");
-                    Uygulama_2.InnerText = "V" + Application.ProductVersion;
+					#if UUNNIITTYY
+					Uygulama_2.InnerText = "V" + UnityEngine.Application.version;
+					#else
+					Uygulama_2.InnerText = "V" + System.Windows.Forms.Application.ProductVersion;
+					#endif
                     Uygulama.AppendChild(Uygulama_1);
                     Uygulama.AppendChild(Uygulama_2);
 
@@ -224,7 +225,12 @@ namespace ArgeMup.HazirKod
         {
             try
             {
-                if (Mutex_ != null) { Mutex_.Dispose(); Mutex_ = null; }
+				#if UUNNIITTYY
+				if (Mutex_ != null) { Mutex_.Close(); Mutex_ = null; }
+				#else
+				if (Mutex_ != null) { Mutex_.Dispose(); Mutex_ = null; }
+				#endif
+
                 if (Zamanlayıcı != null) { Zamanlayıcı.Dispose(); Zamanlayıcı = null; }
                 if (Karmaşıklaştırma != null) { Karmaşıklaştırma.Dispose(); Karmaşıklaştırma = null; }
 
@@ -280,6 +286,29 @@ namespace ArgeMup.HazirKod
             }
             catch (Exception) { }
             return BulunamamasıDurumundakiDeğeri;
+        }
+        public bool Oku_AltDal_Yaz_SınıfDeğişkenleri(string Xml, ref object Sınıf)
+        {
+            try
+            {
+                foreach (FieldInfo field in Sınıf.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    string AltDal = Oku_AltDal(Xml, field.Name);
+                    if (!string.IsNullOrEmpty(AltDal))
+                    {
+                        if (field.FieldType.ToString() == Oku_AltDal(AltDal, "Tip"))
+                        {
+                            field.SetValue(Sınıf, D_Nesne.BaytDizisinden(D_HexMetin.BaytDizisine(Oku_AltDal(AltDal, "Bilgi"))));
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public bool Yaz(string Parametre, string Ayar)
@@ -362,6 +391,19 @@ namespace ArgeMup.HazirKod
             }
             catch (Exception) { }
             return false;
+        }
+        public bool Yaz_AltDal_Oku_SınıfDeğişkenleri(ref string Xml, object Sınıf)
+        {
+            foreach (FieldInfo field in Sınıf.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+            {
+                string AltDal = "";
+                if (!Yaz_AltDal(ref AltDal, "Tip", field.FieldType.ToString())) return false;
+                if (!Yaz_AltDal(ref AltDal, "Bilgi", D_HexMetin.BaytDizisinden(D_Nesne.BaytDizisine(field.GetValue(Sınıf))))) return false;
+
+                if (!Yaz_AltDal(ref Xml, field.Name, AltDal)) return false;
+            }
+
+            return true;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

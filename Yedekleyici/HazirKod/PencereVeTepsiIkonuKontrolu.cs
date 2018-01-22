@@ -42,6 +42,7 @@ namespace ArgeMup.HazirKod
         {
             Pencere = Pencere_;
             Pencere.Shown += Pencere_Shown;
+            Pencere.FormClosed += Pencere_FormClosed;
 
             if (ŞeffafBaşlangıç) { şeffaflık = 0; Pencere.Opacity = 0; }
             else şeffaflık = 1;
@@ -67,6 +68,7 @@ namespace ArgeMup.HazirKod
                 Pencere.Left = X; Pencere.Top = Y; Pencere.Width = Genişlik; Pencere.Height = Yükseklik;
             }
         }
+
         public void TepsiİkonunuBaşlat(bool İkonTıklandığındaUygulamaBüyüsün_ = true)
         {
             if (!UygulamaKüçültüldüğündeGörevÇubuğundaGörünsün && !İkonTıklandığındaUygulamaBüyüsün_) İkonTıklandığındaUygulamaBüyüsün_ = true;
@@ -75,11 +77,26 @@ namespace ArgeMup.HazirKod
                 Tepsiİkonu = new NotifyIcon();
                 if (İkonTıklandığındaUygulamaBüyüsün_) Tepsiİkonu.MouseClick += Tepsiİkonu_MouseClick;
 
+                Tepsiİkonu.BalloonTipShown += Tepsiİkonu_BalloonTipShown;
                 Tepsiİkonu.Icon = Pencere.Icon;
             }
             Tepsiİkonu.BalloonTipTitle = Pencere.Text;
             Tepsiİkonu.Text = Kırp(Pencere.Text, 63);
             Tepsiİkonu.Visible = true; 
+        }
+        public bool MetniBaloncuktaGöster(string Mesaj, ToolTipIcon İkon = ToolTipIcon.Warning, int ZamanAşımı = 3000)
+        {
+            if (Tepsiİkonu == null) return false;
+
+            if (Tepsiİkonu.Tag == null)
+            {
+                Tepsiİkonu.ShowBalloonTip(ZamanAşımı, Tepsiİkonu.Text, Mesaj, İkon);
+                Tepsiİkonu.Tag = Mesaj;
+                return true;
+            }
+         
+            Tepsiİkonu.Tag = Tepsiİkonu.Tag as string + "\r\r" + Mesaj;
+            return true;
         }
         public bool MetniTepsiİkonundaGöster(string Metin, Color Metin_Rengi = new Color(), Color ArkaPlan_Rengi = new Color())
         {
@@ -168,9 +185,9 @@ namespace ArgeMup.HazirKod
             Pencere.Opacity = şeffaflık;
 
             Pencere.WindowState = (FormWindowState)Convert.ToInt32(Ayarlar.Oku(TakmaAdı + "_PencereDurumu", "0"));
-            AnaEkran_Resize(null, null);
+            Pencere_Resize(null, null);
 
-            Pencere.Resize += AnaEkran_Resize;
+            Pencere.Resize += Pencere_Resize;
 
             while (Pencere.Opacity < 1 && Pencere.WindowState != FormWindowState.Minimized)
             {
@@ -180,11 +197,11 @@ namespace ArgeMup.HazirKod
             }
             Pencere.Opacity = 1;
         }
-        void AnaEkran_Resize(object sender, EventArgs e)
+        void Pencere_Resize(object sender, EventArgs e)
         {
             if (Pencere.WindowState == FormWindowState.Minimized)
             {
-                if (!UygulamaKüçültüldüğündeGörevÇubuğundaGörünsün) Pencere.Hide();
+                if (!UygulamaKüçültüldüğündeGörevÇubuğundaGörünsün && Tepsiİkonu != null) Pencere.Hide();
             }
             else
             {
@@ -197,6 +214,10 @@ namespace ArgeMup.HazirKod
                 }
             }
         }
+        private void Pencere_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (Tepsiİkonu != null) { Tepsiİkonu.Dispose(); Tepsiİkonu = null; }
+        }
         void Tepsiİkonu_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -207,6 +228,14 @@ namespace ArgeMup.HazirKod
 
                 Pencere.BringToFront();
             }
+        }
+        private void Tepsiİkonu_BalloonTipShown(object sender, EventArgs e)
+        {
+            if (Tepsiİkonu.Tag == null) return;
+
+            Tepsiİkonu.BalloonTipText = (string)Tepsiİkonu.Tag;
+            Tepsiİkonu.Tag = null;
+            Tepsiİkonu.ShowBalloonTip(3000);
         }
         void ZamanlayıcıKesmesi(object source, System.Timers.ElapsedEventArgs e)
         {
@@ -228,7 +257,6 @@ namespace ArgeMup.HazirKod
             if (Girdi.Length > Uzunluk) return Girdi.Insert(Uzunluk - 3, " .....").Substring(0, Uzunluk);
             else return Girdi;
         }
-
 
         #region GörevÇubuğuYüzdeGösterimi
         ITaskbarListesi TaskbarÖrneği; 
@@ -305,20 +333,22 @@ namespace ArgeMup.HazirKod
                     Ayarlar.DeğişiklikleriKaydet();
                 }
 
+                if (Tepsiİkonu != null) { Tepsiİkonu.Dispose(); Tepsiİkonu = null; }
+
+                if (TeİkMe.Fontu != null) { TeİkMe.Fontu.Dispose(); TeİkMe.Fontu = null; }
+                if (TeİkMe.Zamanlayıcı != null) { TeİkMe.Zamanlayıcı.Dispose(); TeİkMe.Zamanlayıcı = null; }
+
+                TaskbarÖrneği = null;
+
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
-
-                    if (Tepsiİkonu != null) { Tepsiİkonu.Dispose(); Tepsiİkonu = null; }
-
-                    if (TeİkMe.Fontu != null) { TeİkMe.Fontu.Dispose(); TeİkMe.Fontu = null; }
-                    if (TeİkMe.Zamanlayıcı != null) { TeİkMe.Zamanlayıcı.Dispose(); TeİkMe.Zamanlayıcı = null; }         
+                    // TODO: dispose managed state (managed objects).        
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
 
-                TaskbarÖrneği = null;
+                
 
                 //disposedValue = true;
             }

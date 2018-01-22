@@ -1,10 +1,13 @@
 ﻿// Copyright ArgeMup GNU GENERAL PUBLIC LICENSE Version 3 <http://www.gnu.org/licenses/> <https://github.com/ArgeMup/HazirKod>
 
 using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+
+#if !UUNNIITTYY
+using System.Drawing;
+#endif
 
 namespace ArgeMup.HazirKod.Dönüştürme
 {
@@ -117,7 +120,8 @@ namespace ArgeMup.HazirKod.Dönüştürme
             return System.Net.Dns.GetHostAddresses(Girdi)[0].ToString();
         }
     }
-
+		
+	#if !UUNNIITTYY
     public static class D_İkon
     {
         public const string Sürüm = "V1.0";
@@ -145,6 +149,7 @@ namespace ArgeMup.HazirKod.Dönüştürme
             ikon = null;
         }
     }
+	#endif
 
     public static class D_DosyaBoyutu
     {
@@ -181,7 +186,8 @@ namespace ArgeMup.HazirKod.Dönüştürme
             }
         }
     }
-
+	
+	#if !UUNNIITTYY
     public static class D_Parmakİzi
     {
         public const string Sürüm = "V1.0";
@@ -220,4 +226,5 @@ namespace ArgeMup.HazirKod.Dönüştürme
             return Çıktı;
         }
     }
+	#endif
 }

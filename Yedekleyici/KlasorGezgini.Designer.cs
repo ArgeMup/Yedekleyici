@@ -73,8 +73,8 @@
             this.İsim});
             this.dataGridView1.ContextMenuStrip = this.contextMenuStrip1;
             this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.dataGridView1.Location = new System.Drawing.Point(12, 30);
-            this.dataGridView1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.dataGridView1.Location = new System.Drawing.Point(9, 24);
+            this.dataGridView1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
@@ -84,7 +84,7 @@
             this.dataGridView1.ShowCellErrors = false;
             this.dataGridView1.ShowEditingIcon = false;
             this.dataGridView1.ShowRowErrors = false;
-            this.dataGridView1.Size = new System.Drawing.Size(447, 320);
+            this.dataGridView1.Size = new System.Drawing.Size(335, 260);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
             this.dataGridView1.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellDoubleClick);
@@ -95,28 +95,28 @@
             this.Klasör.HeaderText = "Klasör";
             this.Klasör.Name = "Klasör";
             this.Klasör.ReadOnly = true;
-            this.Klasör.Width = 77;
+            this.Klasör.Width = 61;
             // 
             // Dosya
             // 
             this.Dosya.HeaderText = "Dosya";
             this.Dosya.Name = "Dosya";
             this.Dosya.ReadOnly = true;
-            this.Dosya.Width = 77;
+            this.Dosya.Width = 62;
             // 
             // Boyut
             // 
             this.Boyut.HeaderText = "Boyut";
             this.Boyut.Name = "Boyut";
             this.Boyut.ReadOnly = true;
-            this.Boyut.Width = 73;
+            this.Boyut.Width = 59;
             // 
             // İsim
             // 
             this.İsim.HeaderText = "İsim";
             this.İsim.Name = "İsim";
             this.İsim.ReadOnly = true;
-            this.İsim.Width = 61;
+            this.İsim.Width = 50;
             // 
             // contextMenuStrip1
             // 
@@ -133,7 +133,7 @@
             this.toolStripMenuItem5});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.ShowImageMargin = false;
-            this.contextMenuStrip1.Size = new System.Drawing.Size(236, 212);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(236, 159);
             // 
             // toolStripComboBox1
             // 
@@ -143,7 +143,7 @@
             "Hesaplamalar Açık",
             "Hesaplamalar Kapalı"});
             this.toolStripComboBox1.Name = "toolStripComboBox1";
-            this.toolStripComboBox1.Size = new System.Drawing.Size(200, 28);
+            this.toolStripComboBox1.Size = new System.Drawing.Size(200, 23);
             // 
             // toolStripSeparator1
             // 
@@ -153,14 +153,14 @@
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(235, 26);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(235, 22);
             this.toolStripMenuItem1.Text = "Dosya Gezgininde Aç";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(235, 26);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(235, 22);
             this.toolStripMenuItem2.Text = "Yeni Sayfada Aç";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
@@ -172,7 +172,7 @@
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(235, 26);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(235, 22);
             this.toolStripMenuItem3.Text = "Göster / Gizle";
             this.toolStripMenuItem3.Click += new System.EventHandler(this.toolStripMenuItem3_Click);
             // 
@@ -185,7 +185,7 @@
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(235, 26);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(235, 22);
             this.toolStripMenuItem4.Text = "Kaynak";
             this.toolStripMenuItem4.Visible = false;
             this.toolStripMenuItem4.Click += new System.EventHandler(this.toolStripMenuItem4_Click);
@@ -193,7 +193,7 @@
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(235, 26);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(235, 22);
             this.toolStripMenuItem5.Text = "Hedef";
             this.toolStripMenuItem5.Visible = false;
             this.toolStripMenuItem5.Click += new System.EventHandler(this.toolStripMenuItem5_Click);
@@ -201,9 +201,10 @@
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(12, 9);
+            this.linkLabel1.Location = new System.Drawing.Point(9, 7);
+            this.linkLabel1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(20, 17);
+            this.linkLabel1.Size = new System.Drawing.Size(16, 13);
             this.linkLabel1.TabIndex = 3;
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "...";
@@ -211,9 +212,10 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(15, 30);
+            this.button1.Location = new System.Drawing.Point(11, 24);
+            this.button1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(88, 23);
+            this.button1.Size = new System.Drawing.Size(66, 19);
             this.button1.TabIndex = 4;
             this.button1.Text = "Durdur";
             this.button1.UseVisualStyleBackColor = true;
@@ -222,15 +224,15 @@
             // 
             // KlasorGezgini
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(471, 363);
+            this.ClientSize = new System.Drawing.Size(353, 301);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.dataGridView1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.MinimumSize = new System.Drawing.Size(318, 408);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.MinimumSize = new System.Drawing.Size(242, 339);
             this.Name = "KlasorGezgini";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Klasör Seçici";
