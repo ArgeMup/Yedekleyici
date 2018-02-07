@@ -59,7 +59,6 @@
             this.label10 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
@@ -108,15 +107,16 @@
             this.Arkaplan = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.Sağ_Menu_Durum = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
-            this.Sağ_Menu_Durum = new System.Windows.Forms.ToolStripComboBox();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.label3 = new System.Windows.Forms.LinkLabel();
             this.contextMenuStrip2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
@@ -235,6 +235,7 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.checkBox5);
             this.groupBox1.Controls.Add(this.textBox_Sifre);
             this.groupBox1.Controls.Add(this.radioButton_Coz);
@@ -251,7 +252,6 @@
             this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.Controls.Add(this.label14);
             this.groupBox1.Controls.Add(this.label11);
-            this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label16);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.textBox2);
@@ -476,16 +476,6 @@
             this.label11.Size = new System.Drawing.Size(32, 13);
             this.label11.TabIndex = 1;
             this.label11.Text = "Adımı";
-            // 
-            // label3
-            // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 51);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(43, 13);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "Kaynak";
             // 
             // label16
             // 
@@ -1020,15 +1010,29 @@
             // 
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Sağ_Menu_Durum,
             this.toolStripMenuItem3,
             this.toolStripMenuItem4,
-            this.toolStripMenuItem5,
-            this.Sağ_Menu_Durum});
+            this.toolStripMenuItem5});
             this.contextMenuStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Table;
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.ShowImageMargin = false;
             this.contextMenuStrip1.Size = new System.Drawing.Size(157, 97);
             this.contextMenuStrip1.Text = "13";
+            // 
+            // Sağ_Menu_Durum
+            // 
+            this.Sağ_Menu_Durum.AutoSize = false;
+            this.Sağ_Menu_Durum.AutoToolTip = true;
+            this.Sağ_Menu_Durum.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Sağ_Menu_Durum.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Sağ_Menu_Durum.Items.AddRange(new object[] {
+            "Durgun",
+            "Etkin"});
+            this.Sağ_Menu_Durum.MergeIndex = 0;
+            this.Sağ_Menu_Durum.Name = "Sağ_Menu_Durum";
+            this.Sağ_Menu_Durum.Size = new System.Drawing.Size(121, 23);
+            this.Sağ_Menu_Durum.SelectedIndexChanged += new System.EventHandler(this.Sağ_Menu_Durum_SelectedIndexChanged);
             // 
             // toolStripMenuItem3
             // 
@@ -1050,20 +1054,6 @@
             this.toolStripMenuItem5.Size = new System.Drawing.Size(156, 22);
             this.toolStripMenuItem5.Text = "Cıkış";
             this.toolStripMenuItem5.Click += new System.EventHandler(this.toolStripMenuItem5_Click);
-            // 
-            // Sağ_Menu_Durum
-            // 
-            this.Sağ_Menu_Durum.AutoSize = false;
-            this.Sağ_Menu_Durum.AutoToolTip = true;
-            this.Sağ_Menu_Durum.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Sağ_Menu_Durum.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Sağ_Menu_Durum.Items.AddRange(new object[] {
-            "Durgun",
-            "Etkin"});
-            this.Sağ_Menu_Durum.MergeIndex = 0;
-            this.Sağ_Menu_Durum.Name = "Sağ_Menu_Durum";
-            this.Sağ_Menu_Durum.Size = new System.Drawing.Size(121, 23);
-            this.Sağ_Menu_Durum.SelectedIndexChanged += new System.EventHandler(this.Sağ_Menu_Durum_SelectedIndexChanged);
             // 
             // timer2
             // 
@@ -1109,6 +1099,17 @@
             this.label5.Size = new System.Drawing.Size(153, 16);
             this.label5.TabIndex = 1;
             this.label5.Text = "...";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 52);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(43, 13);
+            this.label3.TabIndex = 11;
+            this.label3.TabStop = true;
+            this.label3.Text = "Kaynak";
+            this.label3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.KaynakSecici_LinkClicked);
             // 
             // AnaEkran
             // 
@@ -1157,7 +1158,6 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox1;
@@ -1240,6 +1240,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Hatalı;
         private System.Windows.Forms.DataGridViewTextBoxColumn Arkaplan;
         private System.Windows.Forms.ToolStripComboBox Sağ_Menu_Durum;
+        private System.Windows.Forms.LinkLabel label3;
     }
 }
 

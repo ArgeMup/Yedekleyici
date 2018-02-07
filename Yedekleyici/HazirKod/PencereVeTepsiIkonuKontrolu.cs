@@ -12,7 +12,7 @@ namespace ArgeMup.HazirKod
 {
     public class PencereVeTepsiIkonuKontrolu_ : IDisposable
     {
-        public const string Sürüm = "V1.7";
+        public const string Sürüm = "V1.9";
 
         #region Değişkenler
         public NotifyIcon Tepsiİkonu = null;
@@ -233,9 +233,13 @@ namespace ArgeMup.HazirKod
         {
             if (Tepsiİkonu.Tag == null) return;
 
-            Tepsiİkonu.BalloonTipText = (string)Tepsiİkonu.Tag;
+            if (Tepsiİkonu.BalloonTipText != (string)Tepsiİkonu.Tag)
+            {
+                Tepsiİkonu.BalloonTipText = (string)Tepsiİkonu.Tag;
+                Tepsiİkonu.ShowBalloonTip(3000);
+            }
+
             Tepsiİkonu.Tag = null;
-            Tepsiİkonu.ShowBalloonTip(3000);
         }
         void ZamanlayıcıKesmesi(object source, System.Timers.ElapsedEventArgs e)
         {

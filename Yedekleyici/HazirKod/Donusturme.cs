@@ -32,7 +32,7 @@ namespace ArgeMup.HazirKod.Dönüştürme
 
     public static class D_HexMetin
     {
-        public const string Sürüm = "V1.0";
+        public const string Sürüm = "V1.1";
 
         public static byte[] BaytDizisine(string Girdi)
         {
@@ -44,9 +44,9 @@ namespace ArgeMup.HazirKod.Dönüştürme
         }
         public static string BaytDizisinden(byte[] Girdi, int Boyut = int.MinValue)
         {
+            if (Girdi == null) return "";
             if (Boyut == int.MinValue) Boyut = Girdi.Length;
             if (Boyut > Girdi.Length) Boyut = Girdi.Length;
-            if (Girdi == null) return "";
 
             string Çıktı = "";
             for (int w = 0; w < Boyut; w++) Çıktı += Girdi[w].ToString("X2");

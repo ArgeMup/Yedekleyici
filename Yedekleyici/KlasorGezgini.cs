@@ -132,6 +132,8 @@ namespace Yedekleyici
                         Değiştir("*", subdirectory, DosyaBoyutu, KlasörSayisi, DosyaSayisi);
                     }
                 }
+
+                PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
             }
             catch (Exception) { }
 
@@ -140,7 +142,6 @@ namespace Yedekleyici
             toolStripMenuItem4.Enabled = true;
             toolStripMenuItem5.Enabled = true;
             button1.Visible = false;
-            PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
         }
         private void HedefBilgileriniTopla(string hedef)
         {

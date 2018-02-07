@@ -10,9 +10,243 @@ using System.Reflection;
 
 namespace ArgeMup.HazirKod
 {
+    public static class Depo
+    {
+        public const string Sürüm = "V1.0";
+        #region Değişkenler
+        public struct Biri
+        {
+            public string Adı;
+            public string İçeriği;
+
+            public Biri(string Adı_, string İçeriği_)
+            {
+                Adı = Adı_;
+                İçeriği = İçeriği_;
+            }
+        }
+        #endregion
+
+        public static string Oku(string Xml, string Adı, string BulunamamasıDurumundakiİçeriği = "")
+        {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(Xml);
+
+                //                          AnaKatman     Ayarlar       Parametre
+                foreach (XmlNode Par in doc.ChildNodes[0].ChildNodes)
+                {
+                    if (Par.InnerText == Adı) return Par.Attributes["C"].Value;
+                }
+            }
+            catch (Exception) { }
+            return BulunamamasıDurumundakiİçeriği;
+        }    
+        public static bool Yaz(ref string Xml, string Adı, string İçeriği)
+        {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                if (string.IsNullOrEmpty(Xml))
+                {
+                    XmlElement AnaKatman = doc.CreateElement("A");
+                    doc.AppendChild(AnaKatman);
+                    Xml = doc.InnerXml;
+                    doc.LoadXml(Xml);
+                }
+                else
+                {
+                    doc.LoadXml(Xml);
+                    if (doc.ChildNodes[0].Name != "A") return false;
+                }
+
+                //                          AnaKatman     Ayarlar       Parametre
+                foreach (XmlNode Par in doc.ChildNodes[0].ChildNodes)
+                {
+                    if (Par.InnerText == Adı)
+                    {
+                        //güncelleme
+                        Par.Attributes["C"].Value = İçeriği;
+                        Xml = doc.InnerXml;
+                        return true;
+                    }
+                }
+
+                //yeni
+                XmlElement Yeni = doc.CreateElement("B");
+                Yeni.InnerText = Adı;
+                Yeni.SetAttribute("C", İçeriği);
+
+                //  AnaKatman     Ayarlar     Parametre
+                doc.ChildNodes[0].AppendChild(Yeni);
+
+                Xml = doc.InnerXml;
+                return true;
+            }
+            catch (Exception) { }
+            return false;
+        }
+        
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public static List<Biri> Listele(string Xml)
+        {
+            List<Biri> Liste = new List<Biri>();
+
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(Xml);
+
+                //                          AnaKatman     Ayarlar       Parametre
+                foreach (XmlNode Par in doc.ChildNodes[0].ChildNodes)
+                {
+                    Biri Yeni = new Biri();
+                    Yeni.Adı = Par.InnerText;
+                    Yeni.İçeriği = Par.Attributes["C"].Value;
+
+                    Liste.Add(Yeni);
+                }
+            }
+            catch (Exception) { }
+            return Liste;
+        }
+        public static bool ListeyiEkle(ref string Xml, List<Biri> Liste)
+        {
+            try
+            {
+                foreach (var eleman in Liste) if (!Yaz(ref Xml, eleman.Adı, eleman.İçeriği)) return false;
+                return true;
+            }
+            catch (Exception) { }
+            return false;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public static bool SınıfDeğişkenleri_Oku(string Xml, object Sınıf)
+        {
+            try
+            {
+                foreach (FieldInfo field in Sınıf.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    string AltDal = Oku(Xml, field.Name);
+                    if (!string.IsNullOrEmpty(AltDal))
+                    {
+                        if (field.FieldType.ToString() == Oku(AltDal, "Tip"))
+                        {
+                            field.SetValue(Sınıf, D_Nesne.BaytDizisinden(D_HexMetin.BaytDizisine(Oku(AltDal, "Bilgi"))));
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        public static bool SınıfDeğişkenleri_Yaz(ref string Xml, object Sınıf)
+        {
+            foreach (FieldInfo field in Sınıf.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+            {
+                string AltDal = "";
+                if (!Yaz(ref AltDal, "Tip", field.FieldType.ToString())) return false;
+                if (!Yaz(ref AltDal, "Bilgi", D_HexMetin.BaytDizisinden(D_Nesne.BaytDizisine(field.GetValue(Sınıf))))) return false;
+
+                if (!Yaz(ref Xml, field.Name, AltDal)) return false;
+            }
+
+            return true;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public static int SıraNo(string Xml, string Adı)
+        {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(Xml);
+                int sırano = 0;
+
+                //                          AnaKatman     Ayarlar       Parametre
+                foreach (XmlNode Par in doc.ChildNodes[0].ChildNodes)
+                {
+                    if (Par.InnerText == Adı) return sırano;
+                    sırano++;
+                }
+            }
+            catch (Exception) { }
+            return -1;
+        }
+        public static bool Taşı(ref string Xml, int ŞuandakiSıraNo, int HedefSıraNo)
+        {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                if (string.IsNullOrEmpty(Xml))
+                {
+                    XmlElement AnaKatman = doc.CreateElement("A");
+                    doc.AppendChild(AnaKatman);
+                    Xml = doc.InnerXml;
+                    doc.LoadXml(Xml);
+                }
+                else
+                {
+                    doc.LoadXml(Xml);
+                    if (doc.ChildNodes[0].Name != "A") return false;
+                }
+
+                if (ŞuandakiSıraNo >= doc.ChildNodes[0].ChildNodes.Count) return false;
+                if (HedefSıraNo >= doc.ChildNodes[0].ChildNodes.Count) return false;
+
+                if (ŞuandakiSıraNo > HedefSıraNo) doc.ChildNodes[0].InsertBefore(doc.ChildNodes[0].ChildNodes[ŞuandakiSıraNo], doc.ChildNodes[0].ChildNodes[HedefSıraNo]);
+                else doc.ChildNodes[0].InsertAfter(doc.ChildNodes[0].ChildNodes[ŞuandakiSıraNo], doc.ChildNodes[0].ChildNodes[HedefSıraNo]);
+
+                Xml = doc.InnerXml;
+                return true;
+            }
+            catch (Exception) { }
+            return false;
+        }
+        public static bool Sil(ref string Xml, string Adı)
+        {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                if (string.IsNullOrEmpty(Xml)) return true;
+                else
+                {
+                    doc.LoadXml(Xml);
+                    if (doc.ChildNodes[0].Name != "A") return false;
+                }
+
+                //                      AnaKatman     Ayarlar       Parametre
+                for (int i = 0; i < doc.ChildNodes[0].ChildNodes.Count; i++)
+                {
+                    if (doc.ChildNodes[0].ChildNodes[i].InnerText == Adı)
+                    {
+                        //sil
+                        doc.ChildNodes[0].ChildNodes[i].ParentNode.RemoveChild(doc.ChildNodes[0].ChildNodes[i]);
+                        if (doc.InnerXml == "<A></A>") Xml = "";
+                        else Xml = doc.InnerXml;
+                        break;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception) { }
+            return false;
+        }
+    }
+
     public class Ayarlar_ : IDisposable 
     {
-        public const string Sürüm = "V2.3";
+        public const string Sürüm = "V2.4";
         #region Değişkenler
         int DeğişiklikleriKaydetmeAralığı_Sn;
         int KaynaklarıBoşaltmaAralığı_Dk;
@@ -23,17 +257,6 @@ namespace ArgeMup.HazirKod
         DateTime KaynaklarıBoşaltmaAnı;
         Mutex Mutex_;
         System.Timers.Timer Zamanlayıcı;
-        public struct BirParametre_
-        {
-            public string Parametre;
-            public string Ayar;
-
-            public BirParametre_(string Parametre_, string Ayar_)
-            {
-                Parametre = Parametre_;
-                Ayar = Ayar_;
-            }
-        }
         DahaCokKarmasiklastirma_ Karmaşıklaştırma;
         XmlDocument Döküman = null; XmlNode AyarlarDalı = null;
         #endregion
@@ -249,7 +472,7 @@ namespace ArgeMup.HazirKod
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public string Oku(string Parametre, string BulunamamasıDurumundakiDeğeri = "")
+        public string Oku(string Adı, string BulunamamasıDurumundakiİçeriği = "")
         {
             try
             {
@@ -257,7 +480,7 @@ namespace ArgeMup.HazirKod
 
                 foreach (XmlNode Par in AyarlarDalı.ChildNodes)
                 {
-                    if (Par.InnerText == Parametre)
+                    if (Par.InnerText == Adı)
                     {
                         if (string.IsNullOrEmpty(Parola)) return Par.Attributes["C"].Value;
                         else return Karmaşıklaştırma.Düzelt(Par.Attributes["C"].Value, Parola);
@@ -265,53 +488,18 @@ namespace ArgeMup.HazirKod
                 }
             }
             catch (Exception) { }
-            return BulunamamasıDurumundakiDeğeri;
+            return BulunamamasıDurumundakiİçeriği;
         }
-        public string Oku_AltDal(string Xml, string Parametre, string BulunamamasıDurumundakiDeğeri = "")
+        public string Oku_AltDal(string Xml, string Adı, string BulunamamasıDurumundakiİçeriği = "")
         {
-            try
-            {
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(Xml);
+            string çıktı = Depo.Oku(Xml, Adı, BulunamamasıDurumundakiİçeriği);
 
-                //                          AnaKatman     Ayarlar       Parametre
-                foreach (XmlNode Par in doc.ChildNodes[0].ChildNodes)
-                {
-                    if (Par.InnerText == Parametre)
-                    {
-                        if (string.IsNullOrEmpty(Parola) || !AltDallarıdaKarıştır) return Par.Attributes["C"].Value;
-                        else return Karmaşıklaştırma.Düzelt(Par.Attributes["C"].Value, Parola);
-                    }
-                }
-            }
-            catch (Exception) { }
-            return BulunamamasıDurumundakiDeğeri;
-        }
-        public bool Oku_AltDal_Yaz_SınıfDeğişkenleri(string Xml, ref object Sınıf)
-        {
-            try
-            {
-                foreach (FieldInfo field in Sınıf.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
-                {
-                    string AltDal = Oku_AltDal(Xml, field.Name);
-                    if (!string.IsNullOrEmpty(AltDal))
-                    {
-                        if (field.FieldType.ToString() == Oku_AltDal(AltDal, "Tip"))
-                        {
-                            field.SetValue(Sınıf, D_Nesne.BaytDizisinden(D_HexMetin.BaytDizisine(Oku_AltDal(AltDal, "Bilgi"))));
-                        }
-                    }
-                }
+            if (!string.IsNullOrEmpty(Parola) && AltDallarıdaKarıştır) çıktı = Karmaşıklaştırma.Düzelt(çıktı, Parola);
 
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return çıktı;
         }
 
-        public bool Yaz(string Parametre, string Ayar)
+        public bool Yaz(string Adı, string İçeriği)
         {
             try
             {
@@ -319,12 +507,12 @@ namespace ArgeMup.HazirKod
 
                 foreach (XmlNode Par in AyarlarDalı.ChildNodes)
                 {
-                    if (Par.InnerText == Parametre)
+                    if (Par.InnerText == Adı)
                     {
                         //güncelleme
                         Mutex_.WaitOne();
-                        if (string.IsNullOrEmpty(Parola)) Par.Attributes["C"].Value = Ayar;
-                        else Par.Attributes["C"].Value = Karmaşıklaştırma.Karıştır(Ayar, Parola);
+                        if (string.IsNullOrEmpty(Parola)) Par.Attributes["C"].Value = İçeriği;
+                        else Par.Attributes["C"].Value = Karmaşıklaştırma.Karıştır(İçeriği, Parola);
                         DosyadaDeğişiklikYapıldı = true;
                         Mutex_.ReleaseMutex();
                         return true;
@@ -333,9 +521,9 @@ namespace ArgeMup.HazirKod
 
                 //yeni
                 XmlElement Yeni = Döküman.CreateElement("B");
-                Yeni.InnerText = Parametre;
-                if (string.IsNullOrEmpty(Parola)) Yeni.SetAttribute("C", Ayar);
-                else Yeni.SetAttribute("C", Karmaşıklaştırma.Karıştır(Ayar, Parola));
+                Yeni.InnerText = Adı;
+                if (string.IsNullOrEmpty(Parola)) Yeni.SetAttribute("C", İçeriği);
+                else Yeni.SetAttribute("C", Karmaşıklaştırma.Karıştır(İçeriği, Parola));
 
                 Mutex_.WaitOne();
                 AyarlarDalı.AppendChild(Yeni);
@@ -346,134 +534,72 @@ namespace ArgeMup.HazirKod
             catch (Exception) { }
             return false;
         }
-        public bool Yaz_AltDal(ref string Xml, string Parametre, string Ayar)
+        public bool Yaz_AltDal(ref string Xml, string Adı, string İçeriği)
         {
-            try
-            {
-                XmlDocument doc = new XmlDocument();
-                if (string.IsNullOrEmpty(Xml))
-                {
-                    XmlElement AnaKatman = doc.CreateElement("A");
-                    doc.AppendChild(AnaKatman);
-                    Xml = doc.InnerXml;
-                    doc.LoadXml(Xml);
-                }
-                else
-                {
-                    doc.LoadXml(Xml);
-                    if (doc.ChildNodes[0].Name != "A") return false;
-                }
+            if (!string.IsNullOrEmpty(Parola) && AltDallarıdaKarıştır) İçeriği = Karmaşıklaştırma.Karıştır(İçeriği, Parola);
 
-                //                          AnaKatman     Ayarlar       Parametre
-                foreach (XmlNode Par in doc.ChildNodes[0].ChildNodes)
-                {
-                    if (Par.InnerText == Parametre)
-                    {
-                        //güncelleme
-                        if (string.IsNullOrEmpty(Parola) || !AltDallarıdaKarıştır) Par.Attributes["C"].Value = Ayar;
-                        else Par.Attributes["C"].Value = Karmaşıklaştırma.Karıştır(Ayar, Parola);
-                        Xml = doc.InnerXml;
-                        return true;
-                    }
-                }
-
-                //yeni
-                XmlElement Yeni = doc.CreateElement("B");
-                Yeni.InnerText = Parametre;
-                if (string.IsNullOrEmpty(Parola) || !AltDallarıdaKarıştır) Yeni.SetAttribute("C", Ayar);
-                else Yeni.SetAttribute("C", Karmaşıklaştırma.Karıştır(Ayar, Parola));
-
-                //  AnaKatman     Ayarlar     Parametre
-                doc.ChildNodes[0].AppendChild(Yeni);
-
-                Xml = doc.InnerXml;
-                return true;
-            }
-            catch (Exception) { }
-            return false;
+            return Depo.Yaz(ref Xml, Adı, İçeriği);
         }
-        public bool Yaz_AltDal_Oku_SınıfDeğişkenleri(ref string Xml, object Sınıf)
-        {
-            foreach (FieldInfo field in Sınıf.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
-            {
-                string AltDal = "";
-                if (!Yaz_AltDal(ref AltDal, "Tip", field.FieldType.ToString())) return false;
-                if (!Yaz_AltDal(ref AltDal, "Bilgi", D_HexMetin.BaytDizisinden(D_Nesne.BaytDizisine(field.GetValue(Sınıf))))) return false;
-
-                if (!Yaz_AltDal(ref Xml, field.Name, AltDal)) return false;
-            }
-
-            return true;
-        }
-
+      
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        public List<BirParametre_> Listele()
+        
+        public List<Depo.Biri> Listele()
         {
-            List<BirParametre_> Liste = new List<BirParametre_>();
+            List<Depo.Biri> Liste = new List<Depo.Biri>();
             try
             {
                 if (!EtkinMi()) throw new Exception();
 
                 foreach (XmlNode Par in AyarlarDalı.ChildNodes)
                 {
-                    BirParametre_ Yeni = new BirParametre_();
-                    Yeni.Parametre = Par.InnerText;
-                    if (string.IsNullOrEmpty(Parola)) Yeni.Ayar = Par.Attributes["C"].Value;
-                    else Yeni.Ayar = Karmaşıklaştırma.Düzelt(Par.Attributes["C"].Value, Parola);
+                    Depo.Biri Yeni = new Depo.Biri();
+                    Yeni.Adı = Par.InnerText;
+                    if (string.IsNullOrEmpty(Parola)) Yeni.İçeriği = Par.Attributes["C"].Value;
+                    else Yeni.İçeriği = Karmaşıklaştırma.Düzelt(Par.Attributes["C"].Value, Parola);
                     Liste.Add(Yeni);
                 }
             }
             catch (Exception) { }
             return Liste;
         }
-        public List<BirParametre_> Listele_AltDal(string Xml)
+        public List<Depo.Biri> Listele_AltDal(string Xml)
         {
-            List<BirParametre_> Liste = new List<BirParametre_>();
+            List<Depo.Biri> Liste = Depo.Listele(Xml);
+            if (string.IsNullOrEmpty(Parola) || !AltDallarıdaKarıştır) return Liste;
 
-            try
+            List<Depo.Biri> Liste_İki = new List<Depo.Biri>();
+            foreach (Depo.Biri Biri in Liste)
             {
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(Xml);
-
-                //                          AnaKatman     Ayarlar       Parametre
-                foreach (XmlNode Par in doc.ChildNodes[0].ChildNodes)
-                {
-                    BirParametre_ Yeni = new BirParametre_();
-                    Yeni.Parametre = Par.InnerText;
-                    if (string.IsNullOrEmpty(Parola) || !AltDallarıdaKarıştır) Yeni.Ayar = Par.Attributes["C"].Value;
-                    else Yeni.Ayar = Karmaşıklaştırma.Düzelt(Par.Attributes["C"].Value, Parola);
-                    Liste.Add(Yeni);
-                }
+                Liste_İki.Add(new Depo.Biri(Biri.Adı, Karmaşıklaştırma.Düzelt(Biri.İçeriği, Parola)));
             }
-            catch (Exception) { }
-            return Liste;
+            return Liste_İki;
         }
 
-        public bool ListeyiYaz(List<BirParametre_> Liste)
+        public bool ListeyiEkle(List<Depo.Biri> Liste)
         {
             try
             {
-                foreach (var eleman in Liste) if (!Yaz(eleman.Parametre, eleman.Ayar)) return false;
+                foreach (var eleman in Liste) if (!Yaz(eleman.Adı, eleman.İçeriği)) return false;
                 return true;
             }
             catch (Exception) { }
             return false;
         }
-        public bool ListeyiYaz_AltDal(ref string Xml, List<BirParametre_> Liste)
+        public bool ListeyiEkle_AltDal(ref string Xml, List<Depo.Biri> Liste)
         {
-            try
+            if (string.IsNullOrEmpty(Parola) || !AltDallarıdaKarıştır) return Depo.ListeyiEkle(ref Xml, Liste);
+
+            List<Depo.Biri> Liste_İki = new List<Depo.Biri>();
+            foreach (Depo.Biri Biri in Liste)
             {
-                foreach (var eleman in Liste) if (!Yaz_AltDal(ref Xml, eleman.Parametre, eleman.Ayar)) return false;
-                return true;
+                Liste_İki.Add(new Depo.Biri(Biri.Adı, Karmaşıklaştırma.Karıştır(Biri.İçeriği, Parola)));
             }
-            catch (Exception) { }
-            return false;
+            return Depo.ListeyiEkle(ref Xml, Liste_İki);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public int SıraNo(string Parametre)
+        public int SıraNo(string Adı)
         {
             try
             {
@@ -482,14 +608,14 @@ namespace ArgeMup.HazirKod
 
                 foreach (XmlNode Par in AyarlarDalı.ChildNodes)
                 {
-                    if (Par.InnerText == Parametre) return sırano;
+                    if (Par.InnerText == Adı) return sırano;
                     sırano++;
                 }
             }
             catch (Exception) { }
             return -1;
         }
-        public int SıraNo_AltDal(string Xml, string Parametre)
+        public int SıraNo_AltDal(string Xml, string Adı)
         {
             try
             {
@@ -500,7 +626,7 @@ namespace ArgeMup.HazirKod
                 //                          AnaKatman     Ayarlar       Parametre
                 foreach (XmlNode Par in doc.ChildNodes[0].ChildNodes)
                 {
-                    if (Par.InnerText == Parametre) return sırano;
+                    if (Par.InnerText == Adı) return sırano;
                     sırano++;
                 }
             }
@@ -558,7 +684,7 @@ namespace ArgeMup.HazirKod
             return false;
         }
 
-        public bool Sil(string Parametre)
+        public bool Sil(string Adı)
         {
             try
             {
@@ -566,7 +692,7 @@ namespace ArgeMup.HazirKod
 
                 for (int i = 0; i < AyarlarDalı.ChildNodes.Count; i++)
                 {
-                    if (AyarlarDalı.ChildNodes[i].InnerText == Parametre)
+                    if (AyarlarDalı.ChildNodes[i].InnerText == Adı)
                     {
                         //sil
                         Mutex_.WaitOne();
@@ -582,7 +708,7 @@ namespace ArgeMup.HazirKod
             catch (Exception) { }
             return false;
         }
-        public bool Sil_AltDal(ref string Xml, string Parametre)
+        public bool Sil_AltDal(ref string Xml, string Adı)
         {
             try
             {
@@ -597,7 +723,7 @@ namespace ArgeMup.HazirKod
                 //                      AnaKatman     Ayarlar       Parametre
                 for (int i = 0; i < doc.ChildNodes[0].ChildNodes.Count; i++)
                 {
-                    if (doc.ChildNodes[0].ChildNodes[i].InnerText == Parametre)
+                    if (doc.ChildNodes[0].ChildNodes[i].InnerText == Adı)
                     {
                         //sil
                         doc.ChildNodes[0].ChildNodes[i].ParentNode.RemoveChild(doc.ChildNodes[0].ChildNodes[i]);
