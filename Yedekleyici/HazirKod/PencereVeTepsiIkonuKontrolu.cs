@@ -26,6 +26,13 @@ namespace ArgeMup.HazirKod
         ulong İlerlemeDeğeri_ = 0, İlerlemeToplamDeğeri_ = 0;
         int şeffaflık;
 
+        struct TepsiİkonuBaloncukluUyarı_
+        {
+            public string Mesaj;
+            public ToolTipIcon İkon;
+            public int ZamanAşımı;
+            public int Sayac;
+        };
         struct TepsiİkonuMetni_
         {
             public int SayacKonum;
@@ -88,14 +95,27 @@ namespace ArgeMup.HazirKod
         {
             if (Tepsiİkonu == null) return false;
 
+            TepsiİkonuBaloncukluUyarı_ Yeni;
+
             if (Tepsiİkonu.Tag == null)
             {
                 Tepsiİkonu.ShowBalloonTip(ZamanAşımı, Tepsiİkonu.Text, Mesaj, İkon);
-                Tepsiİkonu.Tag = Mesaj;
+
+                Yeni = new TepsiİkonuBaloncukluUyarı_();
+                Yeni.ZamanAşımı = ZamanAşımı;
+                Yeni.Mesaj = Mesaj;
+                Yeni.İkon = İkon;
+                Yeni.Sayac = 1;
+                Tepsiİkonu.Tag = Yeni;
                 return true;
             }
-         
-            Tepsiİkonu.Tag = Tepsiİkonu.Tag as string + "\r\r" + Mesaj;
+
+            Yeni = (TepsiİkonuBaloncukluUyarı_)Tepsiİkonu.Tag;
+            Yeni.ZamanAşımı = ZamanAşımı;
+            Yeni.Mesaj += "\r\r" + Mesaj;
+            Yeni.İkon = İkon;
+            Yeni.Sayac++;
+            Tepsiİkonu.Tag = Yeni;
             return true;
         }
         public bool MetniTepsiİkonundaGöster(string Metin, Color Metin_Rengi = new Color(), Color ArkaPlan_Rengi = new Color())
@@ -233,10 +253,11 @@ namespace ArgeMup.HazirKod
         {
             if (Tepsiİkonu.Tag == null) return;
 
-            if (Tepsiİkonu.BalloonTipText != (string)Tepsiİkonu.Tag)
+            TepsiİkonuBaloncukluUyarı_ Yeni = (TepsiİkonuBaloncukluUyarı_)Tepsiİkonu.Tag;
+
+            if (Yeni.Sayac > 1)
             {
-                Tepsiİkonu.BalloonTipText = (string)Tepsiİkonu.Tag;
-                Tepsiİkonu.ShowBalloonTip(3000);
+                Tepsiİkonu.ShowBalloonTip(Yeni.ZamanAşımı, Tepsiİkonu.Text, Yeni.Mesaj, Yeni.İkon);
             }
 
             Tepsiİkonu.Tag = null;

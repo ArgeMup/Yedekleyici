@@ -13,7 +13,7 @@ namespace ArgeMup.HazirKod.Dönüştürme
 {
     public static class D_Metin
     {
-        public const string Sürüm = "V1.0";
+        public const string Sürüm = "V1.1";
 
         public static byte[] BaytDizisine(string Girdi)
         {
@@ -22,9 +22,9 @@ namespace ArgeMup.HazirKod.Dönüştürme
         }
         public static string BaytDizisinden(byte[] Girdi, int Boyut = int.MinValue)
         {
+            if (Girdi == null) return "";
             if (Boyut == int.MinValue) Boyut = Girdi.Length;
             if (Boyut > Girdi.Length) Boyut = Girdi.Length;
-            if (Girdi == null) return "";
 
             return Encoding.UTF8.GetString(Girdi, 0, Boyut).TrimEnd('\0');
         }
@@ -56,13 +56,13 @@ namespace ArgeMup.HazirKod.Dönüştürme
 
     public static class D_Akış
     {
-        public const string Sürüm = "V1.0";
+        public const string Sürüm = "V1.1";
 
         public static byte[] BaytDizisine(MemoryStream Girdi, int Boyut = int.MinValue)
         {
+            if (Girdi == null) return null;
             if (Boyut == int.MinValue) Boyut = (int)Girdi.Length;
             if (Boyut > Girdi.Length) Boyut = (int)Girdi.Length;
-            if (Girdi == null) return null;
 
             byte[] Çıktı = new byte[Boyut];
             Girdi.Read(Çıktı, 0, Boyut);
@@ -70,9 +70,9 @@ namespace ArgeMup.HazirKod.Dönüştürme
         }
         public static void BaytDizisinden(byte[] Girdi, ref MemoryStream Çıktı, int Boyut = int.MinValue)
         {
+            if (Girdi == null) return;
             if (Boyut == int.MinValue) Boyut = Girdi.Length;
             if (Boyut > Girdi.Length) Boyut = Girdi.Length;
-            if (Girdi == null) return;
 
             Çıktı.Write(Girdi, 0, Boyut);
         }

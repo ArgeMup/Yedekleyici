@@ -1201,7 +1201,7 @@
         private System.Windows.Forms.ToolStripMenuItem bekleSüreToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uygulamayıAçToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem programıKapatToolStripMenuItem;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        public System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Button button7;
         private System.Windows.Forms.Button button8;
         private System.Windows.Forms.Button button9;

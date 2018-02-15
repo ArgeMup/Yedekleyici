@@ -283,11 +283,15 @@ namespace Yedekleyici
                 else çalışıyor.Add(i);
             }
 
-            if (Nesneler.Count - GösterimSınırı > 0)
+            if (Nesneler.Count == 0) Durum = "";
+            else
             {
-                DetaylıDurum += "ve " + (Nesneler.Count - GösterimSınırı).ToString() + " adet daha";
+                if (Nesneler.Count - GösterimSınırı > 0)
+                {
+                    DetaylıDurum += "ve " + (Nesneler.Count - GösterimSınırı).ToString() + " adet daha";
+                }
+                Durum = Nesneler.Count.ToString() + " : " + Durum;
             }
-            Durum = Nesneler.Count.ToString() + " : " + Durum;
 
             while (bekliyor.Count + hata.Count > 0 && çalışıyor.Count < 5)
             {

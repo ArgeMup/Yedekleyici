@@ -19,6 +19,9 @@ namespace Yedekleyici
         static DahaCokKarmasiklastirma_ Aş = new ArgeMup.HazirKod.DahaCokKarmasiklastirma_();
         static UzunSurecekDosyalamaIslemleri UzSüDoİş = new UzunSurecekDosyalamaIslemleri();
         static string pak = Directory.GetCurrentDirectory() + "\\YedekleyiciDosyalari\\"; //programanaklasör
+        static string pak_Banka = pak + "Banka\\";
+        static string pak_UzDoİş = pak_Banka + "_"; //UzunSürecekDosyalamaİşlemleri
+        public static string pak_Gecici = pak_Banka + "Gecici\\";
         public PencereVeTepsiIkonuKontrolu_ PeTeİkKo;
         UygulamaOncedenCalistirildiMi_ UygulamaOncedenCalistirildiMi;
         public Ayarlar_ Ayarlar;
@@ -93,21 +96,30 @@ namespace Yedekleyici
             public int biten, hatalı, GenelHatalı;
         };
         static _TaKa TaKa = new _TaKa();
-        struct _SüBıİş
+        public struct SürükleBırakİşlemi_
         {
-            public List<string> SürükleBırakListesi;
-            public string şifre;
+            public string Kaynak;
             public string konum_sifreleme, konum_sifrecozme;
-            public ŞifrelemeYöntem yöntem_kararverilen, yöntem_seçilen;
+            public bool İsimlerideŞifrele;
+            public ŞifrelemeYöntem yöntem;
+        }
+        public struct _SüBıİş
+        {
+            public List<SürükleBırakİşlemi_> Liste;
+            public SürükleBırakİşlemi_ EtkinOlan;
+            public string şifre;
+            public string kaydedilen_konum_sifreleme, kaydedilen_konum_sifrecozme;
+            public ŞifrelemeYöntem kaydedilen_yöntem;
+            public bool kaydedilen_İsimlerideŞifrele;
+            public string kaydedilen_ipucu;
+
             public bool FareTuşunaBasılıyor;
             public int FareTuşunaBasılıyorX, FareTuşunaBasılıyorY;
             public int DosyaAdet_Toplam, DosyaAdet_İşlenen;
-            public bool İsimlerideŞifrele;
-            public string ipucu;
         };
-        static _SüBıİş SüBıİş = new _SüBıİş();
+        public static _SüBıİş SüBıİş = new _SüBıİş();
 
-        enum ŞifrelemeYöntem { KararVer = 0, Şifrele, Çöz };
+        public enum ŞifrelemeYöntem { KararVer = 0, Şifrele, Çöz, Kopyala };
         static TarihselKarşilaştiran Object_TarihselKarşilaştiran = new TarihselKarşilaştiran();
         static Thread Thread_TarihselKarşilaştiran;
         static Thread Thread_TaKa_SürükleBırakListesi;
@@ -284,7 +296,7 @@ namespace Yedekleyici
 
                         if (!File.Exists(Talep.Hedef + "\\" + Fazlalık))
                         {
-                            if (fileName.StartsWith(pak + "Banka\\_")) goto while_devam;
+                            if (fileName.StartsWith(pak_UzDoİş)) goto while_devam;
 
                             try
                             {
@@ -315,14 +327,14 @@ namespace Yedekleyici
                                     ortalama.Clear();
                                     Durdur = false;
 
-                                    if (!Path.GetFullPath(Path.GetDirectoryName(fileName)).StartsWith(pak + "Banka\\_"))
+                                    if (!Path.GetFullPath(Path.GetDirectoryName(fileName)).StartsWith(pak_UzDoİş))
                                     {
                                         if (!UzSüDoİş.VarMı(fileName, Talep.Hedef + "\\" + Fazlalık))
                                         {
                                             string temsilidosya = UzSüDoİş.KaynakDosyaGeciciKlasöreKopyalandıMı(fileName);
                                             if (temsilidosya == "")
                                             {
-                                                temsilidosya = UzSüDoİş.DosyaAdıOluştur(pak + "Banka\\_");
+                                                temsilidosya = UzSüDoİş.DosyaAdıOluştur(pak_UzDoİş);
                                                 if (!Argemup_Dosyalama_Kopyala(fileName, temsilidosya)) goto devam_hata_1;
                                             }
                                             UzSüDoİş.Ekle(fileName, Talep.Hedef + "\\" + Fazlalık, temsilidosya, Talep.şifrelemeYontemi.ToString() + Talep.Şifre);
@@ -403,14 +415,14 @@ namespace Yedekleyici
                                         ortalama.Clear();
                                         Durdur = false;
 
-                                        if (!Path.GetFullPath(Path.GetDirectoryName(fileName)).StartsWith(pak + "Banka\\_"))
+                                        if (!Path.GetFullPath(Path.GetDirectoryName(fileName)).StartsWith(pak_UzDoİş))
                                         {
                                             if (!UzSüDoİş.VarMı(fileName, Talep.Hedef + "\\" + Fazlalık))
                                             {
                                                 string temsilidosya = UzSüDoİş.KaynakDosyaGeciciKlasöreKopyalandıMı(fileName);
                                                 if (temsilidosya == "")
                                                 {
-                                                    temsilidosya = UzSüDoİş.DosyaAdıOluştur(pak + "Banka\\_");
+                                                    temsilidosya = UzSüDoİş.DosyaAdıOluştur(pak_UzDoİş);
                                                     if (!Argemup_Dosyalama_Kopyala(fileName, temsilidosya)) goto devam_hata_2;
                                                 }
                                                 UzSüDoİş.Ekle(fileName, Talep.Hedef + "\\" + Fazlalık, temsilidosya, Talep.şifrelemeYontemi.ToString() + Talep.Şifre);
@@ -536,66 +548,59 @@ namespace Yedekleyici
             }
             public void SürükleBırakKlasörSifreleme()
             {
-                ArgeMup.HazirKod.DahaCokKarmasiklastirma_._Yığın_Karıştır_Girdi_ YığınKarıştırGirdi_2 = new ArgeMup.HazirKod.DahaCokKarmasiklastirma_._Yığın_Karıştır_Girdi_(SüBıİş.ipucu, SüBıİş.İsimlerideŞifrele);
+                DahaCokKarmasiklastirma_._Yığın_Karıştır_Girdi_ YığınKarıştırGirdi_2 = new DahaCokKarmasiklastirma_._Yığın_Karıştır_Girdi_(SüBıİş.kaydedilen_ipucu, SüBıİş.EtkinOlan.İsimlerideŞifrele);
 
-                while (SüBıİş.SürükleBırakListesi.Count > 0)
+                while (SüBıİş.Liste.Count > 0)
                 {
                     try
                     {
-                        SüBıİş.yöntem_kararverilen = SüBıİş.yöntem_seçilen;
-                        string Fazlalık, HedefKlasör, HedefKlasör_, DosyaAdı, konum_sifrecozme, konum_sifreleme;
+                        SüBıİş.EtkinOlan = SüBıİş.Liste[0];
+                        YığınKarıştırGirdi_2.DosyaAdiniKarıştır = SüBıİş.EtkinOlan.İsimlerideŞifrele;
+                        string Fazlalık, HedefKlasör, HedefKlasör_, DosyaAdı;
                         string[] fileEntries;
-                        if (string.IsNullOrEmpty(SüBıİş.konum_sifrecozme)) SüBıİş.konum_sifrecozme = "";
-                        if (string.IsNullOrEmpty(SüBıİş.konum_sifreleme)) SüBıİş.konum_sifreleme = "";
-
-                        konum_sifrecozme = SüBıİş.konum_sifrecozme;
-                        Dene_Oluştur_düzeltme:
-                        if (!Directory.Exists(konum_sifrecozme))
+                        
+                        try
                         {
-                            try
+                            if (!Directory.Exists(SüBıİş.EtkinOlan.konum_sifrecozme) && !File.Exists(SüBıİş.EtkinOlan.konum_sifrecozme))
                             {
-                                Directory.CreateDirectory(konum_sifrecozme);
-                                Directory.Delete(konum_sifrecozme);
-                            }
-                            catch (Exception)
-                            {
-                                konum_sifrecozme = Path.GetDirectoryName(SüBıİş.SürükleBırakListesi[0]) + "\\Duzeltme\\";
-                                goto Dene_Oluştur_düzeltme;
+                                Directory.CreateDirectory(SüBıİş.EtkinOlan.konum_sifrecozme);
+                                Directory.Delete(SüBıİş.EtkinOlan.konum_sifrecozme);
                             }
                         }
-                        konum_sifrecozme += "\\";
-
-                        konum_sifreleme = SüBıİş.konum_sifreleme;
-                        Dene_Oluştur_karıştırma:
-                        if (!Directory.Exists(konum_sifreleme))
+                        catch (Exception)
                         {
-                            try
+                            SüBıİş.EtkinOlan.konum_sifrecozme = Path.GetDirectoryName(SüBıİş.EtkinOlan.Kaynak) + "\\Duzeltme\\";
+                        }
+                        SüBıİş.EtkinOlan.konum_sifrecozme = Path.GetDirectoryName(SüBıİş.EtkinOlan.konum_sifrecozme + "\\") + "\\";
+
+                        try
+                        {
+                            if (!Directory.Exists(SüBıİş.EtkinOlan.konum_sifreleme) && !File.Exists(SüBıİş.EtkinOlan.konum_sifreleme))
                             {
-                                Directory.CreateDirectory(konum_sifreleme);
-                                Directory.Delete(konum_sifreleme);
-                            }
-                            catch (Exception)
-                            {
-                                konum_sifreleme = Path.GetDirectoryName(SüBıİş.SürükleBırakListesi[0]) + "\\Karistirma\\";
-                                goto Dene_Oluştur_karıştırma;
+                                Directory.CreateDirectory(SüBıİş.EtkinOlan.konum_sifreleme);
+                                Directory.Delete(SüBıİş.EtkinOlan.konum_sifreleme);
                             }
                         }
-                        konum_sifreleme += "\\";
+                        catch (Exception)
+                        {
+                            SüBıİş.EtkinOlan.konum_sifreleme = Path.GetDirectoryName(SüBıİş.EtkinOlan.Kaynak) + "\\Karistirma\\";
+                        }
+                        SüBıİş.EtkinOlan.konum_sifreleme = Path.GetDirectoryName(SüBıİş.EtkinOlan.konum_sifreleme + "\\") + "\\";
 
                         bool Sadece1dosya = false;
                         string SüBıİş_SürükleBırakListesi_0_;
-                        if (File.Exists(SüBıİş.SürükleBırakListesi[0]))
+                        if (File.Exists(SüBıİş.EtkinOlan.Kaynak))
                         {
-                            fileEntries = SüBıİş.SürükleBırakListesi[0].Split('>');
+                            fileEntries = SüBıİş.EtkinOlan.Kaynak.Split('>');
                             HedefKlasör_ = "";
                             SüBıİş_SürükleBırakListesi_0_ = Path.GetDirectoryName(fileEntries[0]);
                             Sadece1dosya = true;
                         }
-                        else if (Directory.Exists(SüBıİş.SürükleBırakListesi[0]))
+                        else if (Directory.Exists(SüBıİş.EtkinOlan.Kaynak))
                         {
-                            fileEntries = Directory.GetFiles(SüBıİş.SürükleBırakListesi[0], "*", System.IO.SearchOption.AllDirectories);
-                            HedefKlasör_ = SüBıİş.SürükleBırakListesi[0].Substring(SüBıİş.SürükleBırakListesi[0].LastIndexOf('\\'));
-                            SüBıİş_SürükleBırakListesi_0_ = SüBıİş.SürükleBırakListesi[0];
+                            fileEntries = Directory.GetFiles(SüBıİş.EtkinOlan.Kaynak, "*", System.IO.SearchOption.AllDirectories);
+                            HedefKlasör_ = SüBıİş.EtkinOlan.Kaynak.Substring(SüBıİş.EtkinOlan.Kaynak.LastIndexOf('\\'));
+                            SüBıİş_SürükleBırakListesi_0_ = SüBıİş.EtkinOlan.Kaynak;
                         }
                         else throw new System.InvalidOperationException("HATALI BİLGİ KULLANILAMIYOR");
 
@@ -617,15 +622,15 @@ namespace Yedekleyici
                                 while (Fazlalık.EndsWith("\\")) Fazlalık = Fazlalık.Remove(Fazlalık.Count() - 1);
                                 HedefKlasör = HedefKlasör_ + "\\" + Fazlalık;
 
-                                switch (SüBıİş.yöntem_kararverilen)
+                                switch (SüBıİş.EtkinOlan.yöntem)
                                 {
                                     case (ŞifrelemeYöntem.KararVer):
                                     case (ŞifrelemeYöntem.Çöz):
-                                        if (!Aş.Düzelt(fileName, konum_sifrecozme + HedefKlasör + "\\" + DosyaAdı, SüBıİş.şifre))
+                                        if (!Aş.Düzelt(fileName, SüBıİş.EtkinOlan.konum_sifrecozme + HedefKlasör + "\\" + DosyaAdı, SüBıİş.şifre))
                                         {
-                                            if (SüBıİş.yöntem_kararverilen == ŞifrelemeYöntem.KararVer)
+                                            if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.KararVer)
                                             {
-                                                SüBıİş.yöntem_kararverilen = ŞifrelemeYöntem.Şifrele;
+                                                SüBıİş.EtkinOlan.yöntem = ŞifrelemeYöntem.Şifrele;
                                                 goto SürükleBırakKlasörSifreleme_YenidenDene;
                                             }
 
@@ -635,15 +640,24 @@ namespace Yedekleyici
                                         else
                                         {
                                             Talep.IslemormusBoyut += new FileInfo(fileName).Length;
-                                            SüBıİş.yöntem_kararverilen = ŞifrelemeYöntem.Çöz;
+                                            SüBıİş.EtkinOlan.yöntem= ŞifrelemeYöntem.Çöz;
                                         }
                                         break;
 
                                     case (ŞifrelemeYöntem.Şifrele):
-                                        if (!Aş.Karıştır(fileName, konum_sifreleme + HedefKlasör + "\\" + DosyaAdı, SüBıİş.şifre, YığınKarıştırGirdi_2))
+                                        if (!Aş.Karıştır(fileName, SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör + "\\" + DosyaAdı, SüBıİş.şifre, YığınKarıştırGirdi_2))
                                         {
                                             Liste_Hatalar.Add("HATA");
                                             Liste_Hatalar.Add(Aş.SonHatayıOku() + " " + fileName);
+                                        }
+                                        else Talep.IslemormusBoyut += new FileInfo(fileName).Length;
+                                        break;
+
+                                    case (ŞifrelemeYöntem.Kopyala):
+                                        if (!Argemup_Dosyalama_Kopyala(fileName, SüBıİş.EtkinOlan.konum_sifrecozme + HedefKlasör + "\\" + DosyaAdı))
+                                        {
+                                            Liste_Hatalar.Add("HATA");
+                                            Liste_Hatalar.Add("Kopyalanamadı " + fileName);
                                         }
                                         else Talep.IslemormusBoyut += new FileInfo(fileName).Length;
                                         break;
@@ -672,20 +686,20 @@ namespace Yedekleyici
                                 if (Fazlalık != "") HedefKlasör = HedefKlasör_ + "\\" + Fazlalık;
                                 else HedefKlasör = "";
 
-                                if (SüBıİş.yöntem_kararverilen == ŞifrelemeYöntem.Şifrele)
+                                if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Şifrele)
                                 {
-                                    if (!Directory.Exists(konum_sifreleme + HedefKlasör)) Directory.CreateDirectory(konum_sifreleme + HedefKlasör);
+                                    if (!Directory.Exists(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör)) Directory.CreateDirectory(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör);
                                 }
-                                else
+                                else //sifre çözme ve kopyalama
                                 {
-                                    if (!Directory.Exists(konum_sifrecozme + HedefKlasör)) Directory.CreateDirectory(konum_sifrecozme + HedefKlasör);
+                                    if (!Directory.Exists(SüBıİş.EtkinOlan.konum_sifrecozme + HedefKlasör)) Directory.CreateDirectory(SüBıİş.EtkinOlan.konum_sifrecozme + HedefKlasör);
                                 }
                                 if (Durdur) return;
                             }
 
                             string Kaynak;
                             //klasör isimlerinini işlenmesi
-                            if (SüBıİş.yöntem_kararverilen == ŞifrelemeYöntem.Şifrele && SüBıİş.İsimlerideŞifrele)
+                            if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Şifrele && SüBıİş.EtkinOlan.İsimlerideŞifrele)
                             {
                                 SüBıİş.DosyaAdet_Toplam = fileEntries.Length + 2000000;
 
@@ -697,33 +711,33 @@ namespace Yedekleyici
                                     if (Fazlalık != "") HedefKlasör = HedefKlasör_ + "\\" + Fazlalık;
                                     else HedefKlasör = "";
 
-                                    Kaynak = konum_sifreleme + HedefKlasör + "\\MupYedekleyiciKlasorAdiDosyasi.mup";
-                                    File.WriteAllText(Kaynak, Path.GetFileName(konum_sifreleme + HedefKlasör));
+                                    Kaynak = SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör + "\\MupYedekleyiciKlasorAdiDosyasi.mup";
+                                    File.WriteAllText(Kaynak, Path.GetFileName(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör));
                                     File.SetAttributes(Kaynak, FileAttributes.Hidden | FileAttributes.System);
                                     if (Aş.Karıştır((string)Kaynak, (string)Kaynak, SüBıİş.şifre, YığınKarıştırGirdi_2))
                                     {
                                         SilDosya(Kaynak);
-                                        DirectoryInfo hedef__ = Directory.GetParent(konum_sifreleme + HedefKlasör);
-                                        Directory.Move(konum_sifreleme + HedefKlasör, hedef__.FullName + "\\" + Path.GetRandomFileName().Replace(".", ""));
+                                        DirectoryInfo hedef__ = Directory.GetParent(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör);
+                                        Directory.Move(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör, hedef__.FullName + "\\" + Path.GetRandomFileName().Replace(".", ""));
                                     }
                                     else if (File.Exists(Kaynak)) SilDosya(Kaynak);
 
                                     if (Durdur) return;
                                 }
 
-                                Kaynak = konum_sifreleme + HedefKlasör_ + "\\MupYedekleyiciKlasorAdiDosyasi.mup";
-                                File.WriteAllText(Kaynak, Path.GetFileName(konum_sifreleme + HedefKlasör_));
+                                Kaynak = SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_ + "\\MupYedekleyiciKlasorAdiDosyasi.mup";
+                                File.WriteAllText(Kaynak, Path.GetFileName(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_));
                                 if (Aş.Karıştır((string)Kaynak, (string)Kaynak, SüBıİş.şifre, YığınKarıştırGirdi_2))
                                 {
                                     SilDosya(Kaynak);
-                                    DirectoryInfo hedef__ = Directory.GetParent(konum_sifreleme + HedefKlasör_);
-                                    Directory.Move(konum_sifreleme + HedefKlasör_, hedef__.FullName + "\\" + Path.GetRandomFileName().Replace(".", ""));
+                                    DirectoryInfo hedef__ = Directory.GetParent(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_);
+                                    Directory.Move(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_, hedef__.FullName + "\\" + Path.GetRandomFileName().Replace(".", ""));
                                 }
                                 else if (File.Exists(Kaynak)) SilDosya(Kaynak);
                             }
-                            else if (SüBıİş.yöntem_kararverilen == ŞifrelemeYöntem.Çöz)
+                            else if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Çöz)
                             {
-                                fileEntries = Directory.GetFiles(konum_sifrecozme, "MupYedekleyiciKlasorAdiDosyasi.mup", System.IO.SearchOption.AllDirectories);
+                                fileEntries = Directory.GetFiles(SüBıİş.EtkinOlan.konum_sifrecozme, "MupYedekleyiciKlasorAdiDosyasi.mup", System.IO.SearchOption.AllDirectories);
                                 SüBıİş.DosyaAdet_Toplam = fileEntries.Length + 3000000;
 
                                 for (int i = fileEntries.Count() - 1; i >= 0; i--)
@@ -753,15 +767,15 @@ namespace Yedekleyici
                         }
 
                         Liste_Hatalar.Add("Bilgi");
-                        Liste_Hatalar.Add("Sürükle Bırak Karıştırma Kalan " + Convert.ToString(SüBıİş.SürükleBırakListesi.Count - 1) + ", Tamamlanan " + SüBıİş_SürükleBırakListesi_0_);
+                        Liste_Hatalar.Add("Sürükle Bırak Karıştırma Kalan " + Convert.ToString(SüBıİş.Liste.Count - 1) + ", Tamamlanan " + SüBıİş_SürükleBırakListesi_0_);
                     }
                     catch (Exception ex)
                     {
                         Liste_Hatalar.Add("HATA");
-                        Liste_Hatalar.Add("Sürükle Bırak Karıştırma " + SüBıİş.SürükleBırakListesi[0] + " kuyruktan ATILDI >>> EXCEPTION " + ex.Message);
+                        Liste_Hatalar.Add("Sürükle Bırak Karıştırma " + SüBıİş.EtkinOlan.Kaynak + " kuyruktan ATILDI >>> EXCEPTION " + ex.Message);
                     }
 
-                    SüBıİş.SürükleBırakListesi.RemoveAt(0);
+                    SüBıİş.Liste.RemoveAt(0);
                     if (Durdur) return;
                 }
             }
@@ -865,8 +879,8 @@ namespace Yedekleyici
             {
                 try
                 {
-                    if (Directory.Exists(Talep.SilinecekKlasör)) SilKlasör_(Talep.SilinecekKlasör);
-                    if (Directory.Exists(Talep.SilinecekKlasör)) Directory.Delete(Talep.SilinecekKlasör, true);
+                    if (Directory.Exists(Talep.SilinecekKlasör.TrimEnd('\\'))) SilKlasör_(Talep.SilinecekKlasör);
+                    if (Directory.Exists(Talep.SilinecekKlasör.TrimEnd('\\'))) Directory.Delete(Talep.SilinecekKlasör, true);
                 }
                 catch (Exception)
                 {
@@ -1075,11 +1089,12 @@ namespace Yedekleyici
                 dataGridView1[0, 0].Value = "İşlenen";
 
                 comboBox1.SelectedIndex = 0;
-                SüBıİş.SürükleBırakListesi = new List<string>();
-                SüBıİş.yöntem_seçilen = (ŞifrelemeYöntem)comboBox1.SelectedIndex;
+                SüBıİş.Liste = new List<SürükleBırakİşlemi_>();
+                SüBıİş.EtkinOlan = new SürükleBırakİşlemi_() { yöntem = ŞifrelemeYöntem.KararVer };
+                SüBıİş.kaydedilen_yöntem = (ŞifrelemeYöntem)comboBox1.SelectedIndex;
                 SüBıİş.FareTuşunaBasılıyor = false;
 
-                SilDosya(pak + "Banka\\" + "Hatalar.csv");
+                SilDosya(pak_Banka + "Hatalar.csv");
 
                 SürekliYdeklemeZamanlama = DateTime.Now;
 
@@ -1096,7 +1111,7 @@ namespace Yedekleyici
                 flowLayoutPanel1.Left = 10;
 
                 bool sonuç = false;
-                string Yol = pak + "Banka\\" + Environment.MachineName.ToUpper() + "." + Environment.UserName.ToUpper() + "._mup_Ayarlar_mup_";
+                string Yol = pak_Banka + Environment.MachineName.ToUpper() + "." + Environment.UserName.ToUpper() + "._mup_Ayarlar_mup_";
                 string Parola = Convert.ToString(195324687) + Environment.MachineName.ToUpper() + "." + Environment.UserName.ToUpper();
                 Ayarlar = new Ayarlar_(out sonuç, Parola, Yol);
                 if (!sonuç)
@@ -1140,7 +1155,8 @@ namespace Yedekleyici
             timer1.Enabled = true;
             timer3.Enabled = true;
 
-            if (Directory.Exists(pak + "Banka\\_")) Directory.Delete(pak + "Banka\\_", true);
+            if (Directory.Exists(pak_UzDoİş)) SilKlasör(pak_UzDoİş);
+            if (Directory.Exists(pak_Gecici)) SilKlasör(pak_Gecici);
 
             Sağ_Menu_Durum.SelectedIndex = (int)checkBox3.CheckState;
         }
@@ -1188,28 +1204,80 @@ namespace Yedekleyici
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string file in files)
             {
-                if (File.Exists(file) || Directory.Exists(file))
+                SürükleBırakİşlemi_ yeni = new SürükleBırakİşlemi_()
                 {
-                    bool aynısıvar = false;
-                    int i = 0;
-                    for (; i < SüBıİş.SürükleBırakListesi.Count; i++)
-                    {
-                        if (SüBıİş.SürükleBırakListesi[i] == file)
-                        {
-                            aynısıvar = true;
-                            break;
-                        }
-                    }
+                    Kaynak = file,
+                    konum_sifrecozme = SüBıİş.kaydedilen_konum_sifrecozme,
+                    konum_sifreleme = SüBıİş.kaydedilen_konum_sifreleme,
+                    İsimlerideŞifrele = SüBıİş.kaydedilen_İsimlerideŞifrele,
+                    yöntem = SüBıİş.kaydedilen_yöntem
+                };
 
-                    if (!aynısıvar)
-                    {
-                        SüBıİş.SürükleBırakListesi.Add(file);
-                        GosterLog("Bilgi", "Sürükle Bırak Karıştırma Kuyruğa Eklendi " + file + " Sıra No " + Convert.ToString(SüBıİş.SürükleBırakListesi.Count));
-                    }
-                    else GosterLog("UYARI", "Sürükle Bırak Karıştırma ZATEN KUYRUKTA " + file + " Sıra No " + Convert.ToString(i + 1));
-                }
-                else GosterLog("UYARI", "UYGUN DEGİL " + file);
+                SürükleBırakİşlemleri_Başlat(yeni);
             }
+        }
+        private void dataGridView1_DragDrop(object sender, DragEventArgs e)
+        {
+            Form1_DragLeave(null, null);
+
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            string alinan;
+            foreach (string file in files)
+            {
+                if (File.Exists(file)) alinan = Path.GetDirectoryName(file);
+                else if (Directory.Exists(file)) alinan = file;
+                else alinan = "";
+
+                if (alinan != "")
+                {
+                    KlasorGezgini frm2 = new KlasorGezgini(this);
+                    frm2.Show();
+                    frm2.Baslangiçİşlemleri(alinan);
+                }
+            }
+        }
+        private void textBox_sü_bı_girdi_TextChanged(object sender, EventArgs e)
+        {
+            string sonuç = Aş.Düzelt(textBox_sü_bı_girdi.Text, textBox_sü_bı_şifre.Text);
+            if (sonuç == "") sonuç = Aş.Karıştır(textBox_sü_bı_girdi.Text, textBox_sü_bı_şifre.Text);
+            textBox_sü_bı_çıktı.Text = sonuç;
+
+            if (textBox_sü_bı_girdi.Text != "") textBox_sü_bı_çıktı2.Text = D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(textBox_sü_bı_girdi.Text)));
+
+            flowLayoutPanel1_MouseMove(null, null);
+        }
+        public void SürükleBırakİşlemleri_Başlat(SürükleBırakİşlemi_ Yeni)
+        {
+            if (SüBıİş.şifre == "")
+            {
+                PeTeİkKo.MetniBaloncuktaGöster("Parola doldurulmadan işlem yapılamaz.", ToolTipIcon.Error);
+                flowLayoutPanel1.Visible = true;
+                flowLayoutPanel1.Location = new Point(0, 0);
+                textBox7.Focus();
+                return;
+            }
+
+            if (File.Exists(Yeni.Kaynak) || Directory.Exists(Yeni.Kaynak))
+            {
+                bool aynısıvar = false;
+                int i = 0;
+                for (; i < SüBıİş.Liste.Count; i++)
+                {
+                    if (SüBıİş.Liste[i].Kaynak == Yeni.Kaynak)
+                    {
+                        aynısıvar = true;
+                        break;
+                    }
+                }
+
+                if (!aynısıvar)
+                {
+                    SüBıİş.Liste.Add(Yeni);
+                    GosterLog("Bilgi", "Sürükle Bırak Karıştırma Kuyruğa Eklendi " + Yeni.Kaynak + " Sıra No " + Convert.ToString(SüBıİş.Liste.Count));
+                }
+                else GosterLog("UYARI", "Sürükle Bırak Karıştırma ZATEN KUYRUKTA " + Yeni.Kaynak + " Sıra No " + Convert.ToString(i + 1));
+            }
+            else GosterLog("UYARI", "UYGUN DEGİL " + Yeni.Kaynak);
         }
 
         static public bool YazLog(string Tip, string mesaj)
@@ -1217,7 +1285,7 @@ namespace Yedekleyici
             try
             {
                 DateTime saveNow = DateTime.Now;
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(pak + "Banka\\" + "Hatalar.csv", true))
+                using (StreamWriter file = new StreamWriter(pak_Banka + "Hatalar.csv", true))
                 {
                     Liste_Hatalar.Add(Tip);
                     Liste_Hatalar.Add(mesaj);
@@ -1269,30 +1337,29 @@ namespace Yedekleyici
             string okunan = Ayarlar.Oku("Sürükle Bırak İşlemleri");
             if (okunan != "")
             {
-                SüBıİş.şifre = Ayarlar.Oku_AltDal(okunan, "şifre");
-                if (SüBıİş.şifre != "") textBox7.Text = ">>>>> Kullanıcının Parolası";
-                else textBox7.Text = "";
+                SüBıİş.şifre = "";
+                textBox7.Text = "";
 
-                SüBıİş.konum_sifrecozme = Ayarlar.Oku_AltDal(okunan, "düzeltme konumu");
-                if (SüBıİş.konum_sifrecozme == "") textBox6.Text = ">>>>> Kaynak Konumu + \"\\Duzeltme\"";
-                else textBox6.Text = SüBıİş.konum_sifrecozme;
+                SüBıİş.kaydedilen_konum_sifrecozme = Ayarlar.Oku_AltDal(okunan, "düzeltme konumu");
+                if (SüBıİş.kaydedilen_konum_sifrecozme == "") textBox6.Text = ">>>>> Kaynak Konumu + \"\\Duzeltme\"";
+                else textBox6.Text = SüBıİş.kaydedilen_konum_sifrecozme;
 
-                SüBıİş.konum_sifreleme = Ayarlar.Oku_AltDal(okunan, "karıştırma konumu");
-                if (SüBıİş.konum_sifreleme == "") textBox4.Text = ">>>>> Kaynak Konumu + \"\\Karistirma\"";
-                else textBox4.Text = SüBıİş.konum_sifreleme;
+                SüBıİş.kaydedilen_konum_sifreleme = Ayarlar.Oku_AltDal(okunan, "karıştırma konumu");
+                if (SüBıİş.kaydedilen_konum_sifreleme == "") textBox4.Text = ">>>>> Kaynak Konumu + \"\\Karistirma\"";
+                else textBox4.Text = SüBıİş.kaydedilen_konum_sifreleme;
 
-                SüBıİş.yöntem_seçilen = (ŞifrelemeYöntem)Convert.ToInt32(Ayarlar.Oku_AltDal(okunan, "yöntem"));
-                comboBox1.SelectedIndex = (int)SüBıİş.yöntem_seçilen;
+                SüBıİş.kaydedilen_yöntem = (ŞifrelemeYöntem)Convert.ToInt32(Ayarlar.Oku_AltDal(okunan, "yöntem"));
+                comboBox1.SelectedIndex = (int)SüBıİş.kaydedilen_yöntem;
 
                 checkBox4.Checked = true;
                 if (Ayarlar.Oku_AltDal(okunan, "isimleride şifrele") == "Hayır") checkBox4.Checked = false;
-                SüBıİş.İsimlerideŞifrele = checkBox4.Checked;
+                SüBıİş.kaydedilen_İsimlerideŞifrele = checkBox4.Checked;
 
                 textBox8.Text = Ayarlar.Oku_AltDal(okunan, "ipucu");
                 if (string.IsNullOrEmpty(textBox8.Text)) textBox8.Text = "İpucu";
                 else textBox8.Text = textBox8.Text.Replace(";", ".,");
-                if (textBox8.Text != "İpucu") SüBıİş.ipucu = textBox8.Text;
-                else SüBıİş.ipucu = "";
+                if (textBox8.Text != "İpucu") SüBıİş.kaydedilen_ipucu = textBox8.Text;
+                else SüBıİş.kaydedilen_ipucu = "";
             }
             else button13_Click(null, null); 
         }
@@ -1309,12 +1376,11 @@ namespace Yedekleyici
             Ayarlar.ListeyiEkle(TaleplerDosyası);
 
             string okunan = "";
-            Ayarlar.Yaz_AltDal(ref okunan, "şifre", SüBıİş.şifre);
-            Ayarlar.Yaz_AltDal(ref okunan, "düzeltme konumu", SüBıİş.konum_sifrecozme);
-            Ayarlar.Yaz_AltDal(ref okunan, "karıştırma konumu", SüBıİş.konum_sifreleme);
-            Ayarlar.Yaz_AltDal(ref okunan, "yöntem", Convert.ToString((Int32)(SüBıİş.yöntem_seçilen)));
-            Ayarlar.Yaz_AltDal(ref okunan, "ipucu", SüBıİş.ipucu);
-            Ayarlar.Yaz_AltDal(ref okunan, "isimleride şifrele", SüBıİş.İsimlerideŞifrele.ToString());
+            Ayarlar.Yaz_AltDal(ref okunan, "düzeltme konumu", SüBıİş.kaydedilen_konum_sifrecozme);
+            Ayarlar.Yaz_AltDal(ref okunan, "karıştırma konumu", SüBıİş.kaydedilen_konum_sifreleme);
+            Ayarlar.Yaz_AltDal(ref okunan, "yöntem", Convert.ToString((Int32)(SüBıİş.kaydedilen_yöntem)));
+            Ayarlar.Yaz_AltDal(ref okunan, "ipucu", SüBıİş.kaydedilen_ipucu);
+            Ayarlar.Yaz_AltDal(ref okunan, "isimleride şifrele", SüBıİş.kaydedilen_İsimlerideŞifrele.ToString());
             Ayarlar.Yaz("Sürükle Bırak İşlemleri", okunan);
         }
         public bool GosterTalepBilgileri(int no)
@@ -1373,7 +1439,7 @@ namespace Yedekleyici
             Talep.HedefKlasörSayisi = Convert.ToInt16(Ayarlar.Oku_AltDal(okunan, "farklı klasör sayısı"));
             if (Talep.HedefKlasörSayisi > 1) Talep.Sil = false;
             Talep.şifrelemeYontemi = Convert.ToInt16(Ayarlar.Oku_AltDal(okunan, "şifreleme yöntemi"));
-            Talep.Şifre = Ayarlar.Oku_AltDal(okunan, "şifre"); ;
+            Talep.Şifre = Ayarlar.Oku_AltDal(okunan, "şifre");
             if (Ayarlar.Oku_AltDal(okunan, "etkin mi") == "Evet") return true;
             else return false;     
         }
@@ -1651,7 +1717,7 @@ namespace Yedekleyici
                                 {
                                     if (kom.Count() == 7 || (kom.Count() > 7 && kom[7] == ""))
                                     {
-                                        while (!string.IsNullOrEmpty((string)dataGridView1[6, 0].Value)) { Thread.Sleep(100); Application.DoEvents(); if (Durdur) return; }
+                                        while (!string.IsNullOrEmpty(UzSüDoİş.DurumuOku())) { Thread.Sleep(100); Application.DoEvents(); if (Durdur) return; }
                                         
                                         GosterLog("Bilgi", Talep.Tanım + " Uygulama kapatılıyor.");
                                         System.Threading.Thread.Sleep(1000);
@@ -1860,6 +1926,7 @@ namespace Yedekleyici
                             {
                                 if (KarsilastirKlasör(Talep.Hedef, Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye))
                                 {
+                                    Talep.YedeklenenDosyaSayısı = 0;
                                     SilKlasör(Talep.Hedef);
                                     GosterLog("Bilgi", Talep.Tanım + " işleminde son üretilen ile bir önce üretilen klasörler özdeş, son üretilen silindi - " + Talep.Kaynak + " -> " + Talep.Hedef);
                                 }
@@ -2008,7 +2075,7 @@ namespace Yedekleyici
                 }
             }
 
-            if (SüBıİş.SürükleBırakListesi.Count > 0)
+            if (SüBıİş.Liste.Count > 0)
             {
                 groupBox2.Enabled = false;
 
@@ -2020,10 +2087,11 @@ namespace Yedekleyici
                     Thread_TaKa_SürükleBırakListesi.Start();
                 }
 
-                if (SüBıİş.yöntem_kararverilen == ŞifrelemeYöntem.Çöz) label6.Text = "Düzeltme ";
-                else if (SüBıİş.yöntem_kararverilen == ŞifrelemeYöntem.Şifrele) label6.Text = "Karıştırma ";
+                if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Çöz) label6.Text = "Düzeltme ";
+                else if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Şifrele) label6.Text = "Karıştırma ";
+                else if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Kopyala) label6.Text = "Kopyalama ";
                 else label6.Text = "..... ";
-                try { label6.Text += Convert.ToString(SüBıİş.DosyaAdet_İşlenen) + " / " + Convert.ToString(SüBıİş.DosyaAdet_Toplam) + " / " + Convert.ToString(SüBıİş.SürükleBırakListesi.Count + " " + SüBıİş.SürükleBırakListesi[0]); } catch (Exception)  { }         
+                try { label6.Text += Convert.ToString(SüBıİş.DosyaAdet_İşlenen) + " / " + Convert.ToString(SüBıİş.DosyaAdet_Toplam) + " / " + Convert.ToString(SüBıİş.Liste.Count + " " + SüBıİş.Liste[0].Kaynak); } catch (Exception)  { }         
             }
             else { label6.Text = "Boşta"; groupBox2.Enabled = true; }
 
@@ -2085,6 +2153,12 @@ namespace Yedekleyici
         }
         private void button6_Click(object sender, EventArgs e)
         {
+            if (textBox3.Text == "" || textBox2.Text == "") { MessageBox.Show("Tanım ve Hedef boş olamaz."); return; }
+
+            string yol = textBox1.Text;
+            if (yol.EndsWith("\\")) yol.TrimEnd('\\');
+            if (!Directory.Exists(yol)) { MessageBox.Show("Kaynak ulaşılabilir değil."); return; }
+
             YazTalep("Evet");
             TazeleChecedBox1();
             GosterTalepBilgileri(0);
@@ -2107,7 +2181,7 @@ namespace Yedekleyici
             checkBox3.Checked = false;
             UzSüDoİş.ListeyiTemizle();
             PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
-            if (SüBıİş.SürükleBırakListesi.Count > 0) Thread.Sleep(2000);
+            if (SüBıİş.Liste.Count > 0) Thread.Sleep(2000);
             
             while (DoSaBu.Calistir || FaDo.Calistir || TaKa.Calistir || TaFaA.Calistir) { Durdur = true; Application.DoEvents(); }
             
@@ -2136,7 +2210,7 @@ namespace Yedekleyici
                 while (Thread_TaKa_SürükleBırakListesi.IsAlive) { Thread_TaKa_SürükleBırakListesi.Abort(); Application.DoEvents(); }
             }
 
-            SüBıİş.SürükleBırakListesi.Clear();     
+            SüBıİş.Liste.Clear();     
             Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
             button2.Enabled = true;
             Durdur = false;
@@ -2420,60 +2494,39 @@ namespace Yedekleyici
             }
         }
 
-        private void textBox_sü_bı_girdi_TextChanged(object sender, EventArgs e)
-        {
-            string sonuç = Aş.Düzelt(textBox_sü_bı_girdi.Text, textBox_sü_bı_şifre.Text);
-            if (sonuç == "") sonuç = Aş.Karıştır(textBox_sü_bı_girdi.Text, textBox_sü_bı_şifre.Text);
-            textBox_sü_bı_çıktı.Text = sonuç;
-
-            if (textBox_sü_bı_girdi.Text != "") textBox_sü_bı_çıktı2.Text = D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(textBox_sü_bı_girdi.Text)));
-
-            flowLayoutPanel1_MouseMove(null, null);
-        }
-
         private void button13_Click(object sender, EventArgs e)
         {
             //ipucu
             if (string.IsNullOrEmpty(textBox8.Text)) textBox8.Text = "İpucu";
             else textBox8.Text = textBox8.Text.Replace(";", ".,");
-            if (textBox8.Text != "İpucu") SüBıİş.ipucu = textBox8.Text;
-            else SüBıİş.ipucu = "";
+            if (textBox8.Text != "İpucu") SüBıİş.kaydedilen_ipucu = textBox8.Text;
+            else SüBıİş.kaydedilen_ipucu = "";
 
             //şifre
-            if (textBox7.Text != "" && textBox7.Text != ">>>>> Kullanıcının Parolası") { SüBıİş.şifre = D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(textBox7.Text), 128)); textBox7.Text = ">>>>> Kullanıcının Şifresi"; }
-            else SüBıİş.şifre = "";
+            if (textBox7.Text == "")
+            {
+                SüBıİş.şifre = "";
+                PeTeİkKo.MetniBaloncuktaGöster("Parola doldurulmadan işlem yapılamaz.", ToolTipIcon.Error);
+                textBox7.Focus();
+                return;
+            }  
+            else if (textBox7.Text != ">>>>> Kullanıcının Parolası")
+            {
+                SüBıİş.şifre = D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(textBox7.Text), 128));
+                textBox7.Text = ">>>>> Kullanıcının Şifresi";
+                PeTeİkKo.MetniBaloncuktaGöster("Parola kaydedilmediğinden unutulursa geri dönülemez.", ToolTipIcon.Info);
+            }    
 
             if (string.IsNullOrEmpty(textBox4.Text)) textBox4.Text = ">>>>> Kaynak Konumu + \"\\Karistirma\"";
             if (string.IsNullOrEmpty(textBox6.Text)) textBox6.Text = ">>>>> Kaynak Konumu + \"\\Duzeltme\"";
             
-            SüBıİş.konum_sifrecozme = textBox6.Text;
-            SüBıİş.konum_sifreleme = textBox4.Text;
-            SüBıİş.yöntem_seçilen = (ŞifrelemeYöntem)comboBox1.SelectedIndex;
+            SüBıİş.kaydedilen_konum_sifrecozme = textBox6.Text;
+            SüBıİş.kaydedilen_konum_sifreleme = textBox4.Text;
+            SüBıİş.kaydedilen_yöntem = (ŞifrelemeYöntem)comboBox1.SelectedIndex;
 
-            SüBıİş.İsimlerideŞifrele = checkBox4.Checked;
+            SüBıİş.kaydedilen_İsimlerideŞifrele = checkBox4.Checked;
             ListeyiTaleplerDosyasınaYaz();
         }
-
-        private void dataGridView1_DragDrop(object sender, DragEventArgs e)
-        {
-            Form1_DragLeave(null, null);
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            string alinan;
-            foreach (string file in files)
-            {
-                if (File.Exists(file)) alinan = Path.GetDirectoryName(file);
-                else if (Directory.Exists(file)) alinan = file;
-                else alinan = "";
-
-                if (alinan != "")
-                {
-                    KlasorGezgini frm2 = new KlasorGezgini(this);
-                    frm2.Show();
-                    frm2.Baslangiçİşlemleri(alinan);
-                }
-            }
-        } 
 
         private void flowLayoutPanel1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -2485,7 +2538,7 @@ namespace Yedekleyici
         {
             SüBıİş.FareTuşunaBasılıyor = false;
         }
-        private void flowLayoutPanel1_MouseMove(object sender, MouseEventArgs e)
+        public void flowLayoutPanel1_MouseMove(object sender, MouseEventArgs e)
         {
             if (SüBıİş.FareTuşunaBasılıyor)
             {

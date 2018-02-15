@@ -30,10 +30,11 @@
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.Liste = new System.Windows.Forms.DataGridView();
-            this.button1 = new System.Windows.Forms.Button();
             this.Durum = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.Filtre = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Yol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Arama = new System.Windows.Forms.TextBox();
+            this.TümKlasörler = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.Liste)).BeginInit();
             this.SuspendLayout();
             // 
@@ -41,6 +42,9 @@
             // 
             this.Liste.AllowUserToAddRows = false;
             this.Liste.AllowUserToDeleteRows = false;
+            this.Liste.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.Liste.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.Liste.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
@@ -56,26 +60,16 @@
             this.Durum,
             this.Filtre,
             this.Yol});
-            this.Liste.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Liste.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
-            this.Liste.Location = new System.Drawing.Point(0, 0);
+            this.Liste.Location = new System.Drawing.Point(0, 23);
             this.Liste.MultiSelect = false;
             this.Liste.Name = "Liste";
             this.Liste.RowHeadersVisible = false;
             this.Liste.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.Liste.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.Liste.Size = new System.Drawing.Size(323, 169);
+            this.Liste.Size = new System.Drawing.Size(335, 128);
             this.Liste.TabIndex = 0;
             this.Liste.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Liste_DataError);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(197, 35);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
             // 
             // Durum
             // 
@@ -103,13 +97,37 @@
             this.Yol.ToolTipText = "Kendi ve alt klasörlerini kapsar";
             this.Yol.Width = 47;
             // 
+            // Arama
+            // 
+            this.Arama.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Arama.BackColor = System.Drawing.Color.White;
+            this.Arama.Location = new System.Drawing.Point(0, 1);
+            this.Arama.Name = "Arama";
+            this.Arama.Size = new System.Drawing.Size(179, 20);
+            this.Arama.TabIndex = 1;
+            this.Arama.TextChanged += new System.EventHandler(this.Arama_TextChanged);
+            // 
+            // TümKlasörler
+            // 
+            this.TümKlasörler.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.TümKlasörler.AutoSize = true;
+            this.TümKlasörler.Location = new System.Drawing.Point(185, 4);
+            this.TümKlasörler.Name = "TümKlasörler";
+            this.TümKlasörler.Size = new System.Drawing.Size(150, 17);
+            this.TümKlasörler.TabIndex = 2;
+            this.TümKlasörler.Text = "Alt klasörlerle birlikte listele";
+            this.TümKlasörler.UseVisualStyleBackColor = true;
+            this.TümKlasörler.CheckedChanged += new System.EventHandler(this.TümKlasörler_CheckedChanged);
+            // 
             // KaynakSecici_
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(323, 169);
+            this.ClientSize = new System.Drawing.Size(335, 153);
+            this.Controls.Add(this.TümKlasörler);
+            this.Controls.Add(this.Arama);
             this.Controls.Add(this.Liste);
-            this.Controls.Add(this.button1);
             this.Name = "KaynakSecici_";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -119,15 +137,17 @@
             this.Load += new System.EventHandler(this.KaynakSecici_Load);
             ((System.ComponentModel.ISupportInitialize)(this.Liste)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
         private System.Windows.Forms.DataGridView Liste;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.DataGridViewComboBoxColumn Durum;
         private System.Windows.Forms.DataGridViewTextBoxColumn Filtre;
         private System.Windows.Forms.DataGridViewTextBoxColumn Yol;
+        private System.Windows.Forms.TextBox Arama;
+        private System.Windows.Forms.CheckBox TümKlasörler;
     }
 }
