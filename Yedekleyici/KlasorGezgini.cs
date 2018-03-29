@@ -50,7 +50,7 @@ namespace Yedekleyici
         }
         private void KlasorGezgini_FormClosed(object sender, FormClosedEventArgs e)
         {
-            PeTeİkKo.Dispose();
+            durdur = true;
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -117,75 +117,71 @@ namespace Yedekleyici
             string Parola = AnaEkran.SüBıİş.şifre;
             DahaCokKarmasiklastirma_ DaÇoKa = new DahaCokKarmasiklastirma_();
 
-            try
+            string[] fileEntries = Listele.Dosya(yol, "*", SearchOption.TopDirectoryOnly);
+            foreach (string fileName in fileEntries)
             {
-                string[] fileEntries = Directory.GetFiles(yol, "*", SearchOption.TopDirectoryOnly);
-                foreach (string fileName in fileEntries)
+                if (!durdur)
                 {
-                    if (!durdur)
-                    {
-                        FileAttributes fileAttributes = File.GetAttributes(fileName);
-                        decimal gizli = 0;
-                        if (fileAttributes.HasFlag(FileAttributes.Hidden)) gizli = 1;
-                        long ll = 0; try { ll = new System.IO.FileInfo(fileName).Length; } catch (Exception) { }
+                    FileAttributes fileAttributes = File.GetAttributes(fileName);
+                    decimal gizli = 0;
+                    if (fileAttributes.HasFlag(FileAttributes.Hidden)) gizli = 1;
+                    long ll = 0; try { ll = new System.IO.FileInfo(fileName).Length; } catch (Exception) { }
 
-                        string çözümlenmişad;
-                        if (DaÇoKa.Düzelt(fileName, null, Parola, new DahaCokKarmasiklastirma_._Yığın_Düzelt_Girdi_(), true))
+                    string çözümlenmişad;
+                    if (DaÇoKa.Düzelt(fileName, null, Parola, new DahaCokKarmasiklastirma_._Yığın_Düzelt_Girdi_(), true))
+                    {
+                        SüBı.GenelDurum_İçeriği_Şifrelenmiş = true;
+                        if (!string.IsNullOrEmpty(DaÇoKa.Düzelt_ÇıktısınıOku().AsılDosyaAdı) &&
+                            Path.GetFileName(fileName) != DaÇoKa.Düzelt_ÇıktısınıOku().AsılDosyaAdı)
                         {
-                            SüBı.GenelDurum_İçeriği_Şifrelenmiş = true;
-                            if (!string.IsNullOrEmpty(DaÇoKa.Düzelt_ÇıktısınıOku().AsılDosyaAdı) && 
-                                Path.GetFileName(fileName) != DaÇoKa.Düzelt_ÇıktısınıOku().AsılDosyaAdı)
-                            {
-                                çözümlenmişad = Path.GetDirectoryName(fileName) + "\\" + DaÇoKa.Düzelt_ÇıktısınıOku().AsılDosyaAdı;
-                            }
-                            else çözümlenmişad = fileName;
+                            çözümlenmişad = Path.GetDirectoryName(fileName) + "\\" + DaÇoKa.Düzelt_ÇıktısınıOku().AsılDosyaAdı;
                         }
                         else çözümlenmişad = fileName;
-
-                        if (!çözümlenmişad.Contains("MupYedekleyiciKlasorAdiDosyasi.mup")) Ekle("", çözümlenmişad, ll, 0, gizli, fileName);
-                        Application.DoEvents();
                     }
+                    else çözümlenmişad = fileName;
+
+                    if (!çözümlenmişad.Contains("MupYedekleyiciKlasorAdiDosyasi.mup")) Ekle("", çözümlenmişad, ll, 0, gizli, fileName);
+                    Application.DoEvents();
                 }
+            }
 
-                string[] subdirectoryEntries = Directory.GetDirectories(yol);
-                foreach (string subdirectory in subdirectoryEntries)
+            string[] subdirectoryEntries = Listele.Klasör(yol);
+            foreach (string subdirectory in subdirectoryEntries)
+            {
+                if (!durdur)
                 {
-                    if (!durdur)
+                    DosyaSayisi = 0;
+                    KlasörSayisi = 0;
+                    DosyaBoyutu = 0;
+
+                    Application.DoEvents();
+
+                    Ekle("*", subdirectory, DosyaBoyutu, KlasörSayisi, DosyaSayisi, subdirectory);
+                    if (toolStripComboBox1.SelectedIndex == 0) HedefBilgileriniTopla(subdirectory); //adet, adet, MB
+                    else { DosyaBoyutu = 0; KlasörSayisi = 0; DosyaSayisi = 0; }
+
+                    Değiştir("*", subdirectory, DosyaBoyutu, KlasörSayisi, DosyaSayisi, subdirectory);
+
+                    fileEntries = Listele.Dosya(subdirectory);
+                    foreach (string fileName in fileEntries)
                     {
-                        DosyaSayisi = 0;
-                        KlasörSayisi = 0;
-                        DosyaBoyutu = 0;
-
-                        Application.DoEvents();
-
-                        Ekle("*", subdirectory, DosyaBoyutu, KlasörSayisi, DosyaSayisi, subdirectory);
-                        if (toolStripComboBox1.SelectedIndex == 0) HedefBilgileriniTopla(subdirectory); //adet, adet, MB
-                        else { DosyaBoyutu = 0; KlasörSayisi = 0; DosyaSayisi = 0; }
-
-                        Değiştir("*", subdirectory, DosyaBoyutu, KlasörSayisi, DosyaSayisi, subdirectory);
-
-                        fileEntries = Directory.GetFiles(subdirectory);
-                        foreach (string fileName in fileEntries)
+                        if (!durdur)
                         {
-                            if (!durdur)
+                            if (DaÇoKa.Düzelt(fileName, null, Parola, new DahaCokKarmasiklastirma_._Yığın_Düzelt_Girdi_(), true))
                             {
-                                if (DaÇoKa.Düzelt(fileName, null, Parola, new DahaCokKarmasiklastirma_._Yığın_Düzelt_Girdi_(), true))
+                                if (DaÇoKa.Düzelt_ÇıktısınıOku().AsılDosyaAdı == "MupYedekleyiciKlasorAdiDosyasi.mup")
                                 {
-                                    if (DaÇoKa.Düzelt_ÇıktısınıOku().AsılDosyaAdı == "MupYedekleyiciKlasorAdiDosyasi.mup")
-                                    {
-                                        string st = Directory.GetParent(subdirectory).FullName + "\\" + DaÇoKa.Düzelt(D_HexMetin.BaytDizisinden(File.ReadAllBytes(fileName)), Parola);
-                                        Değiştir("*", st, DosyaBoyutu, KlasörSayisi, DosyaSayisi, subdirectory);
-                                        break;
-                                    }
+                                    string st = Directory.GetParent(subdirectory).FullName + "\\" + DaÇoKa.Düzelt(D_HexMetin.BaytDizisinden(File.ReadAllBytes(fileName)), Parola);
+                                    Değiştir("*", st, DosyaBoyutu, KlasörSayisi, DosyaSayisi, subdirectory);
+                                    break;
                                 }
                             }
                         }
                     }
                 }
-
-                PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
             }
-            catch (Exception) { }
+
+            PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
 
             çalışıyor = false;
             linkLabel1.Enabled = true;
@@ -197,7 +193,7 @@ namespace Yedekleyici
         {
             try
             {
-                string[] fileEntries = Directory.GetFiles(hedef);
+                string[] fileEntries = Listele.Dosya(hedef);
                 foreach (string fileName in fileEntries)
                 {
                     DosyaSayisi++;
@@ -212,7 +208,7 @@ namespace Yedekleyici
                     Değiştir("*", fileName, DosyaBoyutu, KlasörSayisi, DosyaSayisi);
                 }
 
-                string[] subdirectoryEntries = Directory.GetDirectories(hedef);
+                string[] subdirectoryEntries = Listele.Klasör(hedef);
                 foreach (string subdirectory in subdirectoryEntries)
                 {
                     HedefBilgileriniTopla(subdirectory);
@@ -234,6 +230,8 @@ namespace Yedekleyici
 
         private void Ekle(string bas, string b1, decimal b2, decimal b3, decimal b4, string ipucu)
         {
+            if (dataGridView1.RowCount < 1 || dataGridView1.ColumnCount < 4) return;
+
             if (b1.Length != 3) b1 = b1.Remove(0, linkLabel1.Text.Length);
             if (b1.Substring(0, 1) == "\\") b1 = b1.Remove(0, 1);
             b1 = bas + b1;
@@ -273,6 +271,8 @@ namespace Yedekleyici
         }
         private void Değiştir(string bas, string b1, decimal b2, decimal b3, decimal b4, string ipucu = "")
         {
+            if (dataGridView1.RowCount < 1 || dataGridView1.ColumnCount < 4) return;
+
             b1 = b1.Remove(0, linkLabel1.Text.Length);
             if (b1.Substring(0, 1) == "\\") b1 = b1.Remove(0, 1);
             b1 = bas + b1;
@@ -427,7 +427,7 @@ namespace Yedekleyici
                         if (Filtrelenmiş_kısaltma == Filtrelenmiş_kaynak) SüBı.Adı_Şifrelenmiş = false;
                         else SüBı.Adı_Şifrelenmiş = true;
 
-                        AraListe = Directory.GetFiles(SüBı.Kaynak);
+                        AraListe = Listele.Dosya(SüBı.Kaynak);
                     }
 
                     SüBı.İçeriği_Şifrelenmiş = false;
@@ -496,7 +496,7 @@ namespace Yedekleyici
 
             Text = "Kopyalanıyor";
             if (File.Exists(SüBı.Hedef + "_")) File.Delete(SüBı.Hedef + "_");
-            if (Directory.Exists(SüBı.Hedef + "_")) _form1.SilKlasör(SüBı.Hedef + "_");
+            if (Directory.Exists(SüBı.Hedef + "_")) AnaEkran.SilKlasör(SüBı.Hedef + "_");
             Directory.Move(SüBı.Hedef, SüBı.Hedef + "_");
             if (SüBı.DosyaMı) File.Move(SüBı.Hedef + "_\\" + Path.GetFileName(SüBı.Hedef), SüBı.Hedef);
             else Directory.Move(SüBı.Hedef + "_\\" + SüBı.Hedef.Substring(SüBı.Hedef.LastIndexOf('\\') + 1), SüBı.Hedef);
@@ -579,7 +579,6 @@ namespace Yedekleyici
             }
             else _form1.Form2ToForm1(2, linkLabel1.Text); 
         }
-
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
             if (dataGridView1.SelectedRows.Count == 0) return;

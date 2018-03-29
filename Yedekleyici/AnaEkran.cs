@@ -24,6 +24,7 @@ namespace Yedekleyici
         public static string pak_Gecici = pak_Banka + "Gecici\\";
         public PencereVeTepsiIkonuKontrolu_ PeTeİkKo;
         UygulamaOncedenCalistirildiMi_ UygulamaOncedenCalistirildiMi;
+        DosyaSistemiIzleyici_ DosyaSistemiIzleyici = new DosyaSistemiIzleyici_();
         public Ayarlar_ Ayarlar;
         List<Depo.Biri> TaleplerDosyası;
 
@@ -50,32 +51,35 @@ namespace Yedekleyici
         enum Yapilacak_İşler { Bekleme = 0, Hazirlik, TalepArttır, TalepBul, Sayma, tarihsel_karşilaştir, crc_karşilaştir, yedekle, fazla_dosyaları_sil, DahaBekle};
         static Yapilacak_İşler Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
 
-        struct _Talep{
-            public int ToplamDosyaSayısı;
-            public int ToplamKlasörSayısı;
-            public int SonTalepNo;
-            public int YedeklenenDosyaSayısı;
-            public int şifrelemeYontemi;
-
+        struct _Talep
+        {
             public string Tanım;
             public string Hedef;
             public string OrjinalHedef;
             public string Kaynak;
             public string KaynakSecici_TamListe;
-            public bool Sil;
-            public int Süre;
-            public int HedefKlasörSayisi;
             public string SonYedekTarihi;
-            public string SilinecekKlasör;
-            public string Şifre;
-            public bool UzunSürecekDosyalamaİşlemlerindeArkaplandaÇalıştır;
+
+            public int Süre;
+            public bool Pzt, Sa, Çrş, Per, Cu, Cts, Paz;
+            public DateTime Başlangıç, Bitiş;
+            public int FarklıKlasörSayisi;
+            public bool FazlaDosyalarıSil;
+            public bool ArkaPlandaÇalıştır;
+            public int şifrelemeYontemi;
+            public string Parola;
 
             public string BirdenFazlaKlasörİleÇalışma_EnYeniÜye;
             public List<string> BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler;
 
+            public int ToplamDosyaSayısı;
+            public int ToplamKlasörSayısı;
+            public int SonTalepNo;
+            public int YedeklenenDosyaSayısı;
             public int SayacOtoYedek;
+            public string SilinecekKlasör;
 
-            public Decimal ToplamBoyut, IslemormusBoyut;
+            public decimal ToplamBoyut, IslemormusBoyut;
 
             public Kaynakça_ Kaynakça;
         };
@@ -170,7 +174,7 @@ namespace Yedekleyici
                 string[] fileEntries;
                 try
                 {
-                    fileEntries = Directory.GetFiles(targetDirectory);
+                    fileEntries = Listele.Dosya(targetDirectory); 
                     foreach (string fileName in fileEntries)
                     {
                         if (Durdur) return;
@@ -181,7 +185,7 @@ namespace Yedekleyici
                         catch (Exception) { }
                     }
 
-                    string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
+                    string[] subdirectoryEntries = Listele.Klasör(targetDirectory);
                     foreach (string subdirectory in subdirectoryEntries)
                     {
                         if (Durdur) return;
@@ -220,13 +224,13 @@ namespace Yedekleyici
 
                 Sndekiİlerleme_Bayt = (ToplamBoyut - İşlenenBoyut) / Sndekiİlerleme_Bayt; //sn sürecek
                 ortalama.Add(Sndekiİlerleme_Bayt); 
-                IslemGorenDosya += " " + D_Süre.Saniye.Metne(ortalama.Sum(item => item) / ortalama.Count);
+                IslemGorenDosya += " " + D_Süre.Metne.Saniyeden(Convert.ToUInt64(ortalama.Sum(item => item) / ortalama.Count));
                 if (ortalama.Count > 25) ortalama.RemoveAt(0);
                 Sndekiİlerleme_Bayt /= 60; //dk sürecek
 
                 if (Konum_DosyaİşlemiUzunSürecek == 0)
                 {
-                    if (Sndekiİlerleme_Bayt > 1 && Talep.UzunSürecekDosyalamaİşlemlerindeArkaplandaÇalıştır)
+                    if (Sndekiİlerleme_Bayt > 1 && Talep.ArkaPlandaÇalıştır)
                     {
                         Konum_DosyaİşlemiUzunSürecek = 1;
                         Aş.AcilDur();
@@ -279,7 +283,7 @@ namespace Yedekleyici
                 string[] fileEntries;
                 try
                 {
-                    fileEntries = Directory.GetFiles(targetDirectory);
+                    fileEntries = Listele.Dosya(targetDirectory);
                     for (int i = 0; i < fileEntries.Count(); i++)
                     {
                         if (Durdur) return;
@@ -310,11 +314,11 @@ namespace Yedekleyici
                                         break;
 
                                     case (1)://şifrele
-                                        sonuc = Aş.Karıştır(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Şifre, YığınKarıştırGirdi);
+                                        sonuc = Aş.Karıştır(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Parola, YığınKarıştırGirdi);
                                         break;
 
                                     case (2)://çöz
-                                        sonuc = Aş.Düzelt(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Şifre, YığınDüzeltGirdi);
+                                        sonuc = Aş.Düzelt(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Parola, YığınDüzeltGirdi);
                                         break;
                                 }
 
@@ -337,7 +341,7 @@ namespace Yedekleyici
                                                 temsilidosya = UzSüDoİş.DosyaAdıOluştur(pak_UzDoİş);
                                                 if (!Argemup_Dosyalama_Kopyala(fileName, temsilidosya)) goto devam_hata_1;
                                             }
-                                            UzSüDoİş.Ekle(fileName, Talep.Hedef + "\\" + Fazlalık, temsilidosya, Talep.şifrelemeYontemi.ToString() + Talep.Şifre);
+                                            UzSüDoİş.Ekle(fileName, Talep.Hedef + "\\" + Fazlalık, temsilidosya, Talep.şifrelemeYontemi.ToString() + Talep.Parola);
                                             YazLog("Bilgi", "Uzun surecek dosyalama islemi listeye eklendi. " + Talep.Hedef + "\\" + Fazlalık);
                                         }
                                         else YazLog("Bilgi", "Uzun surecek dosyalama islemi listede olduğu için atlandı. " + Talep.Hedef + "\\" + Fazlalık);
@@ -386,6 +390,7 @@ namespace Yedekleyici
                                 try
                                 {
                                     if (File.Exists(Talep.Hedef + "\\" + Fazlalık + "_mup_")) SilDosya(Talep.Hedef + "\\" + Fazlalık + "_mup_");
+                                    İzinAl.Dosya(Talep.Hedef + "\\" + Fazlalık);
                                     File.Move(Talep.Hedef + "\\" + Fazlalık, Talep.Hedef + "\\" + Fazlalık + "_mup_");
 
                                     OncekiIslenenBoyut = 0;
@@ -398,11 +403,11 @@ namespace Yedekleyici
                                             break;
 
                                         case (1)://şifrele
-                                            sonuc = Aş.Karıştır(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Şifre, YığınKarıştırGirdi);
+                                            sonuc = Aş.Karıştır(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Parola, YığınKarıştırGirdi);
                                             break;
 
                                         case (2)://çöz
-                                            sonuc = Aş.Düzelt(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Şifre, YığınDüzeltGirdi);
+                                            sonuc = Aş.Düzelt(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Parola, YığınDüzeltGirdi);
                                             break;
                                     }
 
@@ -425,7 +430,7 @@ namespace Yedekleyici
                                                     temsilidosya = UzSüDoİş.DosyaAdıOluştur(pak_UzDoİş);
                                                     if (!Argemup_Dosyalama_Kopyala(fileName, temsilidosya)) goto devam_hata_2;
                                                 }
-                                                UzSüDoİş.Ekle(fileName, Talep.Hedef + "\\" + Fazlalık, temsilidosya, Talep.şifrelemeYontemi.ToString() + Talep.Şifre);
+                                                UzSüDoİş.Ekle(fileName, Talep.Hedef + "\\" + Fazlalık, temsilidosya, Talep.şifrelemeYontemi.ToString() + Talep.Parola);
                                                 YazLog("Bilgi", "Uzun surecek dosyalama islemi listeye eklendi. " + Talep.Hedef + "\\" + Fazlalık);
                                             }
                                             else YazLog("Bilgi", "Uzun surecek dosyalama islemi listede olduğu için atlandı. " + Talep.Hedef + "\\" + Fazlalık);
@@ -443,6 +448,7 @@ namespace Yedekleyici
                                         YazLog("HATA", ek + " " + fileName + " ----->>>>>> " + Talep.Hedef + "\\" + Fazlalık);
 
                                         if (File.Exists(Talep.Hedef + "\\" + Fazlalık)) SilDosya(Talep.Hedef + "\\" + Fazlalık);
+                                        İzinAl.Dosya(Talep.Hedef + "\\" + Fazlalık + "_mup_");
                                         File.Move(Talep.Hedef + "\\" + Fazlalık + "_mup_", Talep.Hedef + "\\" + Fazlalık);
                                     }
                                     else
@@ -469,7 +475,7 @@ namespace Yedekleyici
                         TaKa.biten++;
                     }
 
-                    string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
+                    string[] subdirectoryEntries = Listele.Klasör(targetDirectory);
                     foreach (string subdirectory in subdirectoryEntries)
                     {
                         if (Durdur) return;
@@ -598,7 +604,7 @@ namespace Yedekleyici
                         }
                         else if (Directory.Exists(SüBıİş.EtkinOlan.Kaynak))
                         {
-                            fileEntries = Directory.GetFiles(SüBıİş.EtkinOlan.Kaynak, "*", System.IO.SearchOption.AllDirectories);
+                            fileEntries = Listele.Dosya(SüBıİş.EtkinOlan.Kaynak, "*", System.IO.SearchOption.AllDirectories);
                             HedefKlasör_ = SüBıİş.EtkinOlan.Kaynak.Substring(SüBıİş.EtkinOlan.Kaynak.LastIndexOf('\\'));
                             SüBıİş_SürükleBırakListesi_0_ = SüBıİş.EtkinOlan.Kaynak;
                         }
@@ -674,7 +680,7 @@ namespace Yedekleyici
 
                         if (!Sadece1dosya)
                         {
-                            fileEntries = Directory.GetDirectories(SüBıİş_SürükleBırakListesi_0_, "*", System.IO.SearchOption.AllDirectories);
+                            fileEntries = Listele.Klasör(SüBıİş_SürükleBırakListesi_0_, "*", System.IO.SearchOption.AllDirectories);
                             SüBıİş.DosyaAdet_Toplam = fileEntries.Length + 1000000;
 
                             //eksik klasörlerin oluşturulması
@@ -718,6 +724,7 @@ namespace Yedekleyici
                                     {
                                         SilDosya(Kaynak);
                                         DirectoryInfo hedef__ = Directory.GetParent(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör);
+                                        İzinAl.Klasör(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör);
                                         Directory.Move(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör, hedef__.FullName + "\\" + Path.GetRandomFileName().Replace(".", ""));
                                     }
                                     else if (File.Exists(Kaynak)) SilDosya(Kaynak);
@@ -731,13 +738,14 @@ namespace Yedekleyici
                                 {
                                     SilDosya(Kaynak);
                                     DirectoryInfo hedef__ = Directory.GetParent(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_);
+                                    İzinAl.Klasör(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_);
                                     Directory.Move(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_, hedef__.FullName + "\\" + Path.GetRandomFileName().Replace(".", ""));
                                 }
                                 else if (File.Exists(Kaynak)) SilDosya(Kaynak);
                             }
                             else if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Çöz)
                             {
-                                fileEntries = Directory.GetFiles(SüBıİş.EtkinOlan.konum_sifrecozme, "MupYedekleyiciKlasorAdiDosyasi.mup", System.IO.SearchOption.AllDirectories);
+                                fileEntries = Listele.Dosya(SüBıİş.EtkinOlan.konum_sifrecozme, "MupYedekleyiciKlasorAdiDosyasi.mup", System.IO.SearchOption.AllDirectories);
                                 SüBıİş.DosyaAdet_Toplam = fileEntries.Length + 3000000;
 
                                 for (int i = fileEntries.Count() - 1; i >= 0; i--)
@@ -799,7 +807,7 @@ namespace Yedekleyici
                 string[] fileEntries;
                 try
                 {
-                    fileEntries = Directory.GetFiles(targetDirectory);
+                    fileEntries = Listele.Dosya(targetDirectory);
                     foreach (string fileName in fileEntries)
                     {
                         if (Durdur) return;
@@ -841,7 +849,7 @@ namespace Yedekleyici
                         FaDo.Toplam++;
                     }
 
-                    string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
+                    string[] subdirectoryEntries = Listele.Klasör(targetDirectory);
                     foreach (string subdirectory in subdirectoryEntries)
                     {
                         if (Durdur) return;
@@ -854,10 +862,7 @@ namespace Yedekleyici
                         {
                             try
                             {
-                                DirectorySecurity fSecurity = Directory.GetAccessControl(Talep.Hedef + "\\" + Fazlalık);
-                                string acc = System.Security.Principal.WindowsIdentity.GetCurrent().Name; //@"DomainName\AccountName"
-                                fSecurity.AddAccessRule(new FileSystemAccessRule(@acc, FileSystemRights.FullControl, AccessControlType.Allow));
-                                Directory.SetAccessControl(Talep.Hedef + "\\" + Fazlalık, fSecurity);
+                                İzinAl.Klasör(Talep.Hedef + "\\" + Fazlalık);
                                 Directory.Delete(Talep.Hedef + "\\" + Fazlalık, true);
                             }
                             catch (Exception ex)
@@ -880,7 +885,11 @@ namespace Yedekleyici
                 try
                 {
                     if (Directory.Exists(Talep.SilinecekKlasör.TrimEnd('\\'))) SilKlasör_(Talep.SilinecekKlasör);
-                    if (Directory.Exists(Talep.SilinecekKlasör.TrimEnd('\\'))) Directory.Delete(Talep.SilinecekKlasör, true);
+                    if (Directory.Exists(Talep.SilinecekKlasör.TrimEnd('\\')))
+                    {
+                        İzinAl.Klasör(Talep.SilinecekKlasör);
+                        Directory.Delete(Talep.SilinecekKlasör, true);
+                    }
                 }
                 catch (Exception)
                 {
@@ -895,7 +904,7 @@ namespace Yedekleyici
                 string[] fileEntries;
                 try
                 {
-                    fileEntries = Directory.GetFiles(yol);
+                    fileEntries = Listele.Dosya(yol);
                     foreach (string fileName in fileEntries)
                     {
                         if (Durdur) return;
@@ -909,7 +918,7 @@ namespace Yedekleyici
 
                     }
 
-                    string[] subdirectoryEntries = Directory.GetDirectories(yol);
+                    string[] subdirectoryEntries = Listele.Klasör(yol);
                     foreach (string subdirectory in subdirectoryEntries)
                     {
                         if (Durdur) return;
@@ -917,10 +926,7 @@ namespace Yedekleyici
                         try
                         {
                             SilKlasör_(subdirectory);
-                            DirectorySecurity fSecurity = Directory.GetAccessControl(subdirectory);
-                            string acc = System.Security.Principal.WindowsIdentity.GetCurrent().Name; //@"DomainName\AccountName"
-                            fSecurity.AddAccessRule(new FileSystemAccessRule(@acc, FileSystemRights.FullControl, AccessControlType.Allow));
-                            Directory.SetAccessControl(subdirectory, fSecurity);
+                            İzinAl.Klasör(subdirectory);
                             Directory.Delete(subdirectory, true);
                         }
                         catch (Exception ex)
@@ -968,7 +974,7 @@ namespace Yedekleyici
                 string[] fileEntries;
                 try
                 {
-                    fileEntries = Directory.GetFiles(A);
+                    fileEntries = Listele.Dosya(A);
                     foreach (string fileName in fileEntries)
                     {
                         if (Durdur) return false;
@@ -996,7 +1002,7 @@ namespace Yedekleyici
                         }
                     }
 
-                    string[] subdirectoryEntries = Directory.GetDirectories(A);
+                    string[] subdirectoryEntries = Listele.Klasör(A);
                     foreach (string subdirectory in subdirectoryEntries)
                     {
                         if (Durdur) return false;
@@ -1113,7 +1119,7 @@ namespace Yedekleyici
                 bool sonuç = false;
                 string Yol = pak_Banka + Environment.MachineName.ToUpper() + "." + Environment.UserName.ToUpper() + "._mup_Ayarlar_mup_";
                 string Parola = Convert.ToString(195324687) + Environment.MachineName.ToUpper() + "." + Environment.UserName.ToUpper();
-                Ayarlar = new Ayarlar_(out sonuç, Parola, Yol);
+                Ayarlar = new ArgeMup.HazirKod.Ayarlar_(out sonuç, Parola, Yol);
                 if (!sonuç)
                 {
                     DialogResult cevap = MessageBox.Show("Ayarlarınızın okunmaya çalışıldığı dosya, bütünlük kontrolünü geçememiş olması sebebiyle okunamamaktadır.\r\rYeni bir ayarlar dosyası ürettirmek ister misiniz?\r\r" + Yol, "HATA", MessageBoxButtons.YesNo, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
@@ -1128,7 +1134,6 @@ namespace Yedekleyici
                     else MessageBox.Show("Yapacağınız değişiklikler kaydedilemeyecektir.\r\r" + Yol, "UYARI", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
 
-
                 PeTeİkKo = new PencereVeTepsiIkonuKontrolu_(this, Ayarlar, false, "", Location.X, Location.Y, Width, Height);
                 PeTeİkKo.TepsiİkonunuBaşlat();
                 PeTeİkKo.Tepsiİkonu.ContextMenuStrip = contextMenuStrip1;
@@ -1142,6 +1147,8 @@ namespace Yedekleyici
             {
                 UygulamaOncedenCalistirildiMi.DiğerUygulamayıÖneGetir();
                 PeTeİkKo.MetniBaloncuktaGöster(ProgAdVer + " uygulaması aynı yoldan çalışan başka bir örneği bulunduğundan kapatılacaktır.\r\r" + Application.ExecutablePath, ToolTipIcon.Info, 10000);
+                Hide();
+                Thread.Sleep(5000);
                 Application.Exit();
                 return;
             }
@@ -1167,8 +1174,6 @@ namespace Yedekleyici
             ListeyiTaleplerDosyasınaYaz();
 
             button2_Click(null, null);
-
-            PeTeİkKo.Dispose();
         }
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
@@ -1390,27 +1395,12 @@ namespace Yedekleyici
 
             string okunan = TaleplerDosyası[no].İçeriği;
             label14.Text = "Son Yedek " + Ayarlar.Oku_AltDal(okunan, "son yedek anı");
-            textBox3.Text = Ayarlar.Oku_AltDal(okunan, "tanım");
+            textBox3.Text = TaleplerDosyası[no].Adı .Remove(0, "Talep_".Length);
             textBox1.Text = Ayarlar.Oku_AltDal(okunan, "kaynak");
             textBox1.Tag = Ayarlar.Oku_AltDal(okunan, "kaynak secici tam liste");
             textBox2.Text = Ayarlar.Oku_AltDal(okunan, "hedef");
-            numericUpDown1.Value = Convert.ToInt32(Ayarlar.Oku_AltDal(okunan, "dk da çalıştır"));
-            if (Ayarlar.Oku_AltDal(okunan, "fazla dosyaları sil") == "Evet") checkBox1.Checked = true;
-            else checkBox1.Checked = false;
-            numericUpDown2.Value = Convert.ToInt32(Ayarlar.Oku_AltDal(okunan, "farklı klasör sayısı"));
-            if (Ayarlar.Oku_AltDal(okunan, "uzun sürecek dosyalama işlemi") == "Evet") checkBox5.Checked = true;
-            else checkBox5.Checked = false;
-
-            switch (Convert.ToInt16(Ayarlar.Oku_AltDal(okunan, "şifreleme yöntemi")))
-            {
-                case (0): radioButton_sifrelemyok.Checked = true; break;
-                case (1): radioButton_Sifrele.Checked = true; break;
-                case (2): radioButton_Coz.Checked = true; break;
-            }
-
-            textBox_Sifre.Text = "";
-            if (Ayarlar.Oku_AltDal(okunan, "şifre") != "") textBox_Sifre.Text = "Kullanıcının Parolası";
-
+            Zamanlama.Tag = okunan;
+            
             if (Ayarlar.Oku_AltDal(okunan, "etkin mi") == "Evet") return true;
             else return false;
         }
@@ -1421,7 +1411,7 @@ namespace Yedekleyici
 
             string okunan = TaleplerDosyası[no].İçeriği;
             Talep.SonYedekTarihi = Ayarlar.Oku_AltDal(okunan, "son yedek anı");
-            Talep.Tanım = Ayarlar.Oku_AltDal(okunan, "tanım");
+            Talep.Tanım = TaleplerDosyası[no].Adı.Remove(0, "Talep_".Length);
 
             Talep.Kaynak = Ayarlar.Oku_AltDal(okunan, "kaynak");
             if (!Talep.Kaynak.EndsWith("\\")) Talep.Kaynak += "\\";
@@ -1431,15 +1421,27 @@ namespace Yedekleyici
             Talep.Hedef = Ayarlar.Oku_AltDal(okunan, "hedef");
             if (!Talep.Hedef.EndsWith("\\")) Talep.Hedef += "\\";
 
-            Talep.Süre = Convert.ToInt32(Ayarlar.Oku_AltDal(okunan, "dk da çalıştır"));
-            if (Ayarlar.Oku_AltDal(okunan, "uzun sürecek dosyalama işlemi") == "Evet") Talep.UzunSürecekDosyalamaİşlemlerindeArkaplandaÇalıştır = true;
-            else Talep.UzunSürecekDosyalamaİşlemlerindeArkaplandaÇalıştır = false;
-            if (Ayarlar.Oku_AltDal(okunan, "fazla dosyaları sil") == "Evet") Talep.Sil = true;
-            else Talep.Sil = false;
-            Talep.HedefKlasörSayisi = Convert.ToInt16(Ayarlar.Oku_AltDal(okunan, "farklı klasör sayısı"));
-            if (Talep.HedefKlasörSayisi > 1) Talep.Sil = false;
-            Talep.şifrelemeYontemi = Convert.ToInt16(Ayarlar.Oku_AltDal(okunan, "şifreleme yöntemi"));
-            Talep.Şifre = Ayarlar.Oku_AltDal(okunan, "şifre");
+            Talep.Süre = Convert.ToInt32(Ayarlar.Oku_AltDal(okunan, "Süre_Arka", "15"));
+            Talep.Pzt = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Pzt", bool.TrueString));
+            Talep.Sa = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Sa", bool.TrueString));
+            Talep.Çrş = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Çrş", bool.TrueString));
+            Talep.Per = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Per", bool.TrueString));
+            Talep.Cu = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Cu", bool.TrueString));
+            Talep.Cts = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Cts", bool.TrueString));
+            Talep.Paz = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Paz", bool.TrueString));
+            Talep.Başlangıç = DateTime.Parse(Ayarlar.Oku_AltDal(okunan, "Başlangıç", (new DateTime(1938, 11, 10, 0, 0, 0)).ToString()));
+            Talep.Bitiş = DateTime.Parse(Ayarlar.Oku_AltDal(okunan, "Bitiş", (new DateTime(1938, 11, 10, 23, 59, 59)).ToString()));
+            Talep.FarklıKlasörSayisi = Convert.ToInt16(Ayarlar.Oku_AltDal(okunan, "FarklıKlasörSayısı", "1"));
+            Talep.FazlaDosyalarıSil = bool.Parse(Ayarlar.Oku_AltDal(okunan, "FazlaDosyalarıSil", bool.FalseString));
+            Talep.ArkaPlandaÇalıştır = bool.Parse(Ayarlar.Oku_AltDal(okunan, "ArkaPlandaÇalıştır", bool.TrueString));
+            Talep.Parola = Ayarlar.Oku_AltDal(okunan, "Parola");
+
+            Talep.şifrelemeYontemi = 0;
+            if (Ayarlar.Oku_AltDal(okunan, "Karıştır", bool.FalseString) == bool.TrueString) Talep.şifrelemeYontemi = 1;
+            else if (Ayarlar.Oku_AltDal(okunan, "Düzelt", bool.FalseString) == bool.TrueString) Talep.şifrelemeYontemi = 2;
+
+            if (Talep.FarklıKlasörSayisi > 1) Talep.FazlaDosyalarıSil = false;
+
             if (Ayarlar.Oku_AltDal(okunan, "etkin mi") == "Evet") return true;
             else return false;     
         }
@@ -1476,36 +1478,49 @@ namespace Yedekleyici
         {
             try
             {
-                string yazılan = "", dd = "Hayir";
-                Ayarlar.Yaz_AltDal(ref yazılan, "son yedek anı", DateTime.Now.ToString());
-                Ayarlar.Yaz_AltDal(ref yazılan, "tanım", textBox3.Text);
+                string yazılan = "";            
                 Ayarlar.Yaz_AltDal(ref yazılan, "kaynak", textBox1.Text);
-                Ayarlar.Yaz_AltDal(ref yazılan, "kaynak secici tam liste", (string)textBox1.Tag);
                 Ayarlar.Yaz_AltDal(ref yazılan, "hedef", textBox2.Text);
-                Ayarlar.Yaz_AltDal(ref yazılan, "dk da çalıştır", Convert.ToString(numericUpDown1.Value));
+                Ayarlar.Yaz_AltDal(ref yazılan, "son yedek anı", DateTime.Now.AddMinutes((Convert.ToDouble(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Süre_Arka", "15")) + 1) * -1).ToString());
+                Ayarlar.Yaz_AltDal(ref yazılan, "kaynak secici tam liste", (string)textBox1.Tag);
 
-                if (checkBox1.Checked) dd = "Evet";
-                Ayarlar.Yaz_AltDal(ref yazılan, "fazla dosyaları sil", dd);
+                Ayarlar.Yaz_AltDal(ref yazılan, "Süre_Arka", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Süre_Arka", "15"));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Pzt", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Pzt", bool.TrueString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Sa", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Sa", bool.TrueString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Çrş", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Çrş", bool.TrueString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Per", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Per", bool.TrueString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Cu", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Cu", bool.TrueString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Cts", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Cts", bool.TrueString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Paz", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Paz", bool.TrueString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Başlangıç", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Başlangıç", (new DateTime(1938, 11, 10, 0, 0, 0)).ToString()));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Bitiş", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Bitiş", (new DateTime(1938, 11, 10, 23, 59, 59)).ToString()));
+                Ayarlar.Yaz_AltDal(ref yazılan, "FarklıKlasörSayısı", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "FarklıKlasörSayısı", "1"));
+                Ayarlar.Yaz_AltDal(ref yazılan, "FazlaDosyalarıSil", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "FazlaDosyalarıSil", bool.FalseString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "ArkaPlandaÇalıştır", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "ArkaPlandaÇalıştır", bool.TrueString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "SadeceKopyala", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "SadeceKopyala", bool.TrueString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Karıştır", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Karıştır", bool.FalseString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Düzelt", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Düzelt", bool.FalseString));
+                Ayarlar.Yaz_AltDal(ref yazılan, "Parola", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Parola", ""));
 
-                dd = "Hayir";
-                if (checkBox5.Checked) dd = "Evet";
-                Ayarlar.Yaz_AltDal(ref yazılan, "uzun sürecek dosyalama işlemi", dd);
+                Ayarlar.Yaz_AltDal(ref yazılan, "etkin mi", TalepDurumu); 
+                Depo.Biri yeni = new Depo.Biri("Talep_" + textBox3.Text, yazılan);
 
-                Ayarlar.Yaz_AltDal(ref yazılan, "farklı klasör sayısı", Convert.ToString(numericUpDown2.Value));
+                if (EkleDeğiştir.Text == "Ekle") TaleplerDosyası.Add(yeni);
+                else
+                {
+                    for (int i = 0; i < TaleplerDosyası.Count; i++)
+                    {
+                        if (TaleplerDosyası[i].Adı .Remove(0, "Talep_".Length) == textBox3.Text)
+                        {
+                            TaleplerDosyası.RemoveAt(i);
+                            TaleplerDosyası.Insert(i, yeni);
+                        } 
+                    }
+                }
 
-                if (radioButton_sifrelemyok.Checked) dd = "0";
-                else if (radioButton_Sifrele.Checked) dd = "1";
-                else if (radioButton_Coz.Checked) dd = "2";
-                Ayarlar.Yaz_AltDal(ref yazılan, "şifreleme yöntemi", dd);
-
-                if (textBox_Sifre.Text == "") Ayarlar.Yaz_AltDal(ref yazılan, "şifre", "");
-                else Ayarlar.Yaz_AltDal(ref yazılan, "şifre", D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(textBox_Sifre.Text), 128)));
-                Ayarlar.Yaz_AltDal(ref yazılan, "etkin mi", TalepDurumu);
-  
-                Depo.Biri yeni = new Depo.Biri("Talep_" + Path.GetRandomFileName(), yazılan);
-                TaleplerDosyası.Add(yeni);
                 ListeyiTaleplerDosyasınaYaz();
 
+                EkleDeğiştir.Text = "Değiştir";
                 return true;
             }
             catch (Exception ex)
@@ -1519,12 +1534,9 @@ namespace Yedekleyici
         {
             try
             {
-                if (!File.Exists(ad)) return true; 
+                if (!File.Exists(ad)) return true;
+                if (!İzinAl.Dosya(ad)) return false;
 
-                FileSecurity fSecurity = File.GetAccessControl(ad);
-                string acc = System.Security.Principal.WindowsIdentity.GetCurrent().Name; //@"DomainName\AccountName"
-                fSecurity.AddAccessRule(new FileSystemAccessRule(@acc, FileSystemRights.FullControl, AccessControlType.Allow));
-                File.SetAccessControl(ad, fSecurity);
                 File.SetAttributes(ad, FileAttributes.Normal);
                 File.Delete(ad);
                 return true;
@@ -1533,7 +1545,7 @@ namespace Yedekleyici
 
             return false;
         }
-        public void SilKlasör(string yol)
+        static public void SilKlasör(string yol)
         {
             Yapilacak_İşler yedek = Yapilacak_İşler_Sayaç;
             Yapilacak_İşler_Sayaç = Yapilacak_İşler.DahaBekle;
@@ -1634,7 +1646,7 @@ namespace Yedekleyici
                     PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
 
                     button1.Enabled = true;
-                    button6.Enabled = true;
+                    groupBox1.Enabled = true;
                     break;
 
                 case (Yapilacak_İşler.Hazirlik):
@@ -1654,7 +1666,7 @@ namespace Yedekleyici
 
                 case (Yapilacak_İşler.TalepBul):
                     button1.Enabled = false;
-                    button6.Enabled = false;
+                    groupBox1.Enabled = false;
 
                     label5.Text = "...";
                     label4.Text = "Adım " + Convert.ToString(Talep.SonTalepNo+1) + " " + Talep.Tanım;
@@ -1774,19 +1786,25 @@ namespace Yedekleyici
                         {
                             if (!Directory.Exists(Talep.Kaynak)) throw new Exception();
                             Directory.CreateDirectory(Talep.Hedef);
+
+                            if (!DosyaSistemiIzleyici.DeğişiklikVarMı(Talep.Tanım, Talep.Kaynak, Talep.Hedef)) throw new Exception("DosyaSistemiIzleyici");
+                            else DosyaSistemiIzleyici.Durdur(Talep.Tanım, Talep.Kaynak, Talep.Hedef);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepArttır;
                             timer1.Enabled = true;
 
-                            label5.Text = "Kaynak/Hedef Kullanılamıyor";
+                            DegiştirTalep(Talep.SonTalepNo, 1, Convert.ToString(DateTime.Now));
+
+                            if (ex.Message == "DosyaSistemiIzleyici") label5.Text = "Kaynak = Hedef";
+                            else label5.Text = "Kaynak/Hedef Kullanılamıyor";
                             return;
                         }
 
-                        Talep.Kaynakça = KaynakSecici_.Aç(Talep.KaynakSecici_TamListe);
+                        Talep.Kaynakça = KaynakSecici_.Aç(Talep.Kaynak, Talep.KaynakSecici_TamListe, true);
 
-                        if (Talep.HedefKlasörSayisi > 1)
+                        if (Talep.FarklıKlasörSayisi > 1)
                         {
                             Talep.OrjinalHedef = Talep.Hedef;
                             string tarih = DateTime.Now.ToString("dd_MM_yyyy HH-mm-ss");
@@ -1794,7 +1812,7 @@ namespace Yedekleyici
                             Talep.Hedef += tarih + "\\";
 
                             FaDo.biten = 0;
-                            string[] subdirectoryEntries = Directory.GetDirectories(Talep.OrjinalHedef);
+                            string[] subdirectoryEntries = Listele.Klasör(Talep.OrjinalHedef);
                             if (subdirectoryEntries.Count() > 0)
                             {
                                 //sıralama
@@ -1833,7 +1851,7 @@ namespace Yedekleyici
                                     if (Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler == null) Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler = new List<string>();
                                     Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler.Clear();
 
-                                    for (int i = 0; i < Tarihler.Count - Talep.HedefKlasörSayisi; i++)
+                                    for (int i = 0; i < Tarihler.Count - Talep.FarklıKlasörSayisi; i++)
                                     {
                                         //Fazlalık eskileri silme
                                         string son_ornek = Tarihler[i].ToString();
@@ -1913,7 +1931,7 @@ namespace Yedekleyici
                         try
                         { progressBar1.Value = TaKa.biten; } catch (Exception) { progressBar1.Value = progressBar1.Maximum-1; }
                         
-                        if (Talep.Sil)
+                        if (Talep.FazlaDosyalarıSil)
                         {
                             FaDo.Calistir = true;
                             Thread_FazlaDosyalarıSilen = new Thread(Object_FazlaDosyalarıSilen.FazlaDosyalarıSil);
@@ -1922,7 +1940,7 @@ namespace Yedekleyici
                         }
                         else
                         {
-                            if (Talep.HedefKlasörSayisi > 1)
+                            if (Talep.FarklıKlasörSayisi > 1)
                             {
                                 if (KarsilastirKlasör(Talep.Hedef, Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye))
                                 {
@@ -1930,11 +1948,14 @@ namespace Yedekleyici
                                     SilKlasör(Talep.Hedef);
                                     GosterLog("Bilgi", Talep.Tanım + " işleminde son üretilen ile bir önce üretilen klasörler özdeş, son üretilen silindi - " + Talep.Kaynak + " -> " + Talep.Hedef);
                                 }
-                                
-                                foreach (string yol in Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler)
+
+                                if (Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler != null)
                                 {
-                                    SilKlasör(yol);
-                                    Application.DoEvents();
+                                    foreach (string yol in Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler)
+                                    {
+                                        SilKlasör(yol);
+                                        Application.DoEvents();
+                                    }
                                 }
                             }
 
@@ -1955,6 +1976,8 @@ namespace Yedekleyici
                             if (Talep.YedeklenenDosyaSayısı > 0) PeTeİkKo.MetniBaloncuktaGöster(Talep.Tanım + " " + Convert.ToString(Talep.YedeklenenDosyaSayısı) + " / " + Convert.ToString(Talep.ToplamDosyaSayısı), ToolTipIcon.Info, 500);
 
                             PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
+
+                            DosyaSistemiIzleyici.DeğişiklikVarMı(Talep.Tanım, Talep.Kaynak, Talep.OrjinalHedef);
                         }
                     }
                     else
@@ -2016,6 +2039,8 @@ namespace Yedekleyici
                         if (Talep.YedeklenenDosyaSayısı > 0) PeTeİkKo.MetniBaloncuktaGöster(Talep.Tanım + " " + Convert.ToString(Talep.YedeklenenDosyaSayısı) + " / " + Convert.ToString(Talep.ToplamDosyaSayısı),  ToolTipIcon.Info, 500);
 
                         PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
+
+                        DosyaSistemiIzleyici.DeğişiklikVarMı(Talep.Tanım, Talep.Kaynak, Talep.OrjinalHedef);
                     }
                     else
                     {
@@ -2115,6 +2140,32 @@ namespace Yedekleyici
                 return;
             }
 
+            DateTime dates_simdi = new DateTime();
+            dates_simdi = DateTime.Now;
+  
+            bool Devam = false;
+            if      (dates_simdi.DayOfWeek == DayOfWeek.Monday && Talep.Pzt) Devam = true;
+            else if (dates_simdi.DayOfWeek == DayOfWeek.Tuesday && Talep.Sa) Devam = true;
+            else if (dates_simdi.DayOfWeek == DayOfWeek.Wednesday && Talep.Çrş) Devam = true;
+            else if (dates_simdi.DayOfWeek == DayOfWeek.Thursday && Talep.Per) Devam = true;
+            else if (dates_simdi.DayOfWeek == DayOfWeek.Friday && Talep.Cu) Devam = true;
+            else if (dates_simdi.DayOfWeek == DayOfWeek.Saturday && Talep.Cts) Devam = true;
+            else if (dates_simdi.DayOfWeek == DayOfWeek.Sunday && Talep.Paz) Devam = true;
+            if (!Devam)
+            {
+                label5.Text = "Bugün Durgun";
+                return;
+            }
+
+            int şimdi = dates_simdi.Hour * 60 + dates_simdi.Minute;
+            int başla = Talep.Başlangıç.Hour * 60 + Talep.Başlangıç.Minute;
+            int bitir = Talep.Bitiş.Hour * 60 + Talep.Bitiş.Minute;
+            if (şimdi < başla || şimdi > bitir)
+            {
+                label5.Text = "Bu Saatte Durgun";
+                return;
+            }
+
             Talep.SonYedekTarihi = Talep.SonYedekTarihi.Replace(".", " ");
             Talep.SonYedekTarihi = Talep.SonYedekTarihi.Replace(":", " ");
             string[] ta1 = Talep.SonYedekTarihi.Split(' ');
@@ -2124,19 +2175,17 @@ namespace Yedekleyici
                 ta1 = Talep.SonYedekTarihi.Split(' ');
             }
 
-            System.DateTime dates_simdi = new System.DateTime();
-            dates_simdi = DateTime.Now;
-            System.DateTime date_talep = new System.DateTime(Convert.ToInt16(ta1[2]), Convert.ToInt16(ta1[1]), Convert.ToInt16(ta1[0]), Convert.ToInt16(ta1[3]), Convert.ToInt16(ta1[4]), Convert.ToInt16(ta1[5]));
-
+            DateTime date_talep = new DateTime(Convert.ToInt16(ta1[2]), Convert.ToInt16(ta1[1]), Convert.ToInt16(ta1[0]), Convert.ToInt16(ta1[3]), Convert.ToInt16(ta1[4]), Convert.ToInt16(ta1[5]));
             TimeSpan difference = dates_simdi - date_talep;
-            if (difference.TotalMinutes >= Talep.Süre)
+            if (difference.TotalMinutes < Talep.Süre)
             {
-                Yapilacak_İşler_Sayaç = Yapilacak_İşler.Hazirlik;
-                Talep.SonTalepNo = Talep.SayacOtoYedek;
-
-                label5.Text = "Çalışıyor";
+                label5.Text = D_Süre.Metne.Saniyeden(Convert.ToUInt64(Talep.Süre - difference.TotalMinutes) * 60) + " var.";
+                return;
             }
-            else label5.Text = "Çalışmaya " + Convert.ToString(Math.Round(Talep.Süre - difference.TotalMinutes,2)) + " dk. var.";
+
+            Yapilacak_İşler_Sayaç = Yapilacak_İşler.Hazirlik;
+            Talep.SonTalepNo = Talep.SayacOtoYedek;
+            label5.Text = "Çalışıyor";
         }
         
         private void button4_Click(object sender, EventArgs e)
@@ -2153,25 +2202,17 @@ namespace Yedekleyici
         }
         private void button6_Click(object sender, EventArgs e)
         {
-            if (textBox3.Text == "" || textBox2.Text == "") { MessageBox.Show("Tanım ve Hedef boş olamaz."); return; }
+            if (textBox3.Text == "" || textBox2.Text == "") { MessageBox.Show("Tanım veya Hedef boş olamaz."); return; }
 
-            string yol = textBox1.Text;
-            if (yol.EndsWith("\\")) yol.TrimEnd('\\');
-            if (!Directory.Exists(yol)) { MessageBox.Show("Kaynak ulaşılabilir değil."); return; }
+            if (!textBox3.Text.StartsWith(">>>>>Komut>"))
+            {
+                textBox1.Text = textBox1.Text.Trim().TrimEnd('\\');
+                if (!Directory.Exists(textBox1.Text)) { MessageBox.Show("Kaynak ulaşılabilir değil."); return; }
+            }
 
             YazTalep("Evet");
             TazeleChecedBox1();
             GosterTalepBilgileri(0);
-        }
-        private void numericUpDown2_ValueChanged(object sender, EventArgs e)
-        {
-            if (numericUpDown2.Value > 1)   checkBox1.Enabled = false;
-            else                            checkBox1.Enabled = true;
-        }
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox1.Checked)  numericUpDown2.Enabled = false;
-            else                    numericUpDown2.Enabled = true;
         }
         private void button2_Click(object sender, EventArgs e)
         {
@@ -2249,33 +2290,17 @@ namespace Yedekleyici
         {
             if (checkedListBox1_iptalEt) e.NewValue = e.CurrentValue;
         }
-        private void radioButton_sifrelemyok_CheckedChanged(object sender, EventArgs e)
-        {
-            textBox_Sifre.Text = "";
-        }
         private void bekleSüreToolStripMenuItem_Click(object sender, EventArgs e)
         {
             textBox3.Text = ">>>>>Komut>Bekle>BURAYAsüreyiYAZINIZ";
             textBox1.Text = "Örnek Kullanım >>>>>Komut>Bekle>30";
             textBox2.Text = "Dakika olarak giriş yapılır, belirtilen süre kadar programı dondurur";
-
-            numericUpDown1.Value = numericUpDown1.Minimum;
-            numericUpDown2.Value = numericUpDown2.Minimum;
-            checkBox1.Checked = false;
-            radioButton_sifrelemyok.Checked = true;
-            textBox_Sifre.Text = "";
         }
         private void uygulamayıAçToolStripMenuItem_Click(object sender, EventArgs e)
         {
             textBox3.Text = ">>>>>Komut>Calistir>kısayol>parametreler>boşVEYAverb>BoşVeyaNormalMaximizedMinimizedHidden>8oşVeyaDontUseShellExecute>";
             textBox1.Text = "Örnek Kullanım >>>>>Komut>Çalistir>C:\\a.exe>+p-s>runas>Normal>> >>>>>Komut>Çalistir>chrome>wwww.argemup.com>>Maximized";
             textBox2.Text = "Belirtilen uygulamayı ilgili seçenekler ile çalıştırır";
-
-            numericUpDown1.Value = numericUpDown1.Minimum;
-            numericUpDown2.Value = numericUpDown2.Minimum;
-            checkBox1.Checked = false;
-            radioButton_sifrelemyok.Checked = true;
-            textBox_Sifre.Text = "";
         }
         private void programıKapatToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2287,12 +2312,6 @@ namespace Yedekleyici
             textBox5.AppendText(Environment.NewLine);
             foreach (var proc in processes) textBox5.AppendText("Seçilebilir " + proc.ProcessName + Environment.NewLine);
             textBox5.ScrollToCaret();
-
-            numericUpDown1.Value = numericUpDown1.Minimum;
-            numericUpDown2.Value = numericUpDown2.Minimum;
-            checkBox1.Checked = false;
-            radioButton_sifrelemyok.Checked = true;
-            textBox_Sifre.Text = "";
         }
 
         public void TazeleChecedBox1()
@@ -2307,8 +2326,8 @@ namespace Yedekleyici
                 {
                     string okunan = TaleplerDosyası[i].İçeriği;
                    
-                    if (Ayarlar.Oku_AltDal(okunan, "etkin mi") == "Evet") checkedListBox1.Items.Add(Convert.ToString(checkedListBox1.Items.Count + 1) + " : " + Ayarlar.Oku_AltDal(okunan, "tanım"), true);
-                    else checkedListBox1.Items.Add(Convert.ToString(checkedListBox1.Items.Count + 1) + " : " + Ayarlar.Oku_AltDal(okunan, "tanım"), false);
+                    if (Ayarlar.Oku_AltDal(okunan, "etkin mi") == "Evet") checkedListBox1.Items.Add(Convert.ToString(checkedListBox1.Items.Count + 1) + " : " + TaleplerDosyası[i].Adı.Remove(0, "Talep_".Length), true);
+                    else checkedListBox1.Items.Add(Convert.ToString(checkedListBox1.Items.Count + 1) + " : " + TaleplerDosyası[i].Adı.Remove(0, "Talep_".Length), false);
                 }
                 if (TaleplerDosyası.Count > 0) checkedListBox1.SelectedIndex = yedek;
             }
@@ -2415,6 +2434,8 @@ namespace Yedekleyici
                 progressBar1.MarqueeAnimationSpeed = 0;
             }
             Sağ_Menu_Durum.SelectedIndex = (int)checkBox3.CheckState;
+
+            EkleDeğiştir.Enabled = !checkBox3.Checked;
         }
 
         private void textBox1_DragDrop(object sender, DragEventArgs e)
@@ -2560,6 +2581,9 @@ namespace Yedekleyici
 
         void KaynakSecici_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            textBox1.Text = textBox1.Text.Trim().TrimEnd('\\');
+            if (!Directory.Exists(textBox1.Text)) { MessageBox.Show("Kaynak ulaşılabilir değil."); return; }
+
             KaynakSecici_ KaynakSecici = new KaynakSecici_(this);
             KaynakSecici.TamListe = (string)textBox1.Tag;
             KaynakSecici.ÖnYüzüDoldur(textBox1.Text);
@@ -2611,6 +2635,67 @@ namespace Yedekleyici
             }
 
             return true;
+        }
+
+        private void Zamanlama_Click(object sender, EventArgs e)
+        {
+            checkBox3.Checked = false;
+
+            AyarlarEkranı_ AyarlarEkranı = new AyarlarEkranı_(this);
+            AyarlarEkranı.Süre_Arka.Value = Convert.ToInt32(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Süre_Arka", "15"));
+            AyarlarEkranı.Pzt.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Pzt", bool.TrueString));
+            AyarlarEkranı.Sa.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Sa", bool.TrueString));
+            AyarlarEkranı.Çrş.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Çrş", bool.TrueString));
+            AyarlarEkranı.Per.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Per", bool.TrueString));
+            AyarlarEkranı.Cu.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Cu", bool.TrueString));
+            AyarlarEkranı.Cts.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Cts", bool.TrueString));
+            AyarlarEkranı.Paz.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Paz", bool.TrueString));
+            AyarlarEkranı.Başlangıç.Value = DateTime.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Başlangıç", (new DateTime(1938, 11, 10, 0, 0, 0)).ToString()));
+            AyarlarEkranı.Bitiş.Value = DateTime.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Bitiş", (new DateTime(1938, 11, 10, 23, 59, 59)).ToString()));
+            AyarlarEkranı.FarklıKlasörSayısı.Value = Convert.ToInt32(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "FarklıKlasörSayısı", "1"));
+            AyarlarEkranı.FazlaDosyalarıSil.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "FazlaDosyalarıSil", bool.FalseString));
+            AyarlarEkranı.ArkaPlandaÇalıştır.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "ArkaPlandaÇalıştır", bool.TrueString));
+            AyarlarEkranı.SadeceKopyala.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "SadeceKopyala", bool.TrueString));
+            AyarlarEkranı.Karıştır.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Karıştır", bool.FalseString));
+            AyarlarEkranı.Düzelt.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Düzelt", bool.FalseString));
+            AyarlarEkranı.Parola.Text = string.IsNullOrEmpty(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Parola")) ? "" : "TEKRAR YAZINIZ";
+
+            AyarlarEkranı.ShowDialog();
+
+            string yazılan = "";
+            Ayarlar.Yaz_AltDal(ref yazılan, "Süre_Arka", AyarlarEkranı.Süre_Arka.Value.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Pzt", AyarlarEkranı.Pzt.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Sa", AyarlarEkranı.Sa.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Çrş", AyarlarEkranı.Çrş.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Per", AyarlarEkranı.Per.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Cu", AyarlarEkranı.Cu.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Cts", AyarlarEkranı.Cts.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Paz", AyarlarEkranı.Paz.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Başlangıç", AyarlarEkranı.Başlangıç.Value.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Bitiş", AyarlarEkranı.Bitiş.Value.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "FarklıKlasörSayısı", AyarlarEkranı.FarklıKlasörSayısı.Value.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "FazlaDosyalarıSil", AyarlarEkranı.FazlaDosyalarıSil.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "ArkaPlandaÇalıştır", AyarlarEkranı.ArkaPlandaÇalıştır.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "SadeceKopyala", AyarlarEkranı.SadeceKopyala.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Karıştır", AyarlarEkranı.Karıştır.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Düzelt", AyarlarEkranı.Düzelt.Checked.ToString());
+            Ayarlar.Yaz_AltDal(ref yazılan, "Parola", string.IsNullOrEmpty(AyarlarEkranı.Parola.Text) ? "" : D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(AyarlarEkranı.Parola.Text), 128)));
+
+            Zamanlama.Tag = yazılan;
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            foreach (var biri in TaleplerDosyası)
+            {
+                if (biri.Adı.Remove(0, "Talep_".Length) == textBox3.Text)
+                {
+                    EkleDeğiştir.Text = "Değiştir";
+                    return;
+                }
+            }
+
+            EkleDeğiştir.Text = "Ekle";
         }
     }
 }

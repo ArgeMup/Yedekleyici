@@ -12,7 +12,7 @@ namespace ArgeMup.HazirKod
 {
     public static class Depo
     {
-        public const string Sürüm = "V1.0";
+        public const string Sürüm = "V1.1";
         #region Değişkenler
         public struct Biri
         {
@@ -143,23 +143,26 @@ namespace ArgeMup.HazirKod
 
                 return true;
             }
-            catch (Exception)
-            {
-                return false;
-            }
+            catch (Exception) { }
+            return false;
         }
         public static bool SınıfDeğişkenleri_Yaz(ref string Xml, object Sınıf)
         {
-            foreach (FieldInfo field in Sınıf.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+            try
             {
-                string AltDal = "";
-                if (!Yaz(ref AltDal, "Tip", field.FieldType.ToString())) return false;
-                if (!Yaz(ref AltDal, "Bilgi", D_HexMetin.BaytDizisinden(D_Nesne.BaytDizisine(field.GetValue(Sınıf))))) return false;
+                foreach (FieldInfo field in Sınıf.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    string AltDal = "";
+                    if (!Yaz(ref AltDal, "Tip", field.FieldType.ToString())) return false;
+                    if (!Yaz(ref AltDal, "Bilgi", D_HexMetin.BaytDizisinden(D_Nesne.BaytDizisine(field.GetValue(Sınıf))))) return false;
+                
+                    if (!Yaz(ref Xml, field.Name, AltDal)) return false;
+                }
 
-                if (!Yaz(ref Xml, field.Name, AltDal)) return false;
+                return true;
             }
-
-            return true;
+            catch (Exception) { }
+            return false;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

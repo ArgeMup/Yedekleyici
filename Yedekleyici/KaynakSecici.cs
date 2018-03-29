@@ -39,8 +39,19 @@ namespace Yedekleyici
                 if ((string)Liste[0, i].Value != "Yedekle")
                 {
                     Kaynakça_.BirFiltre_ Yeni = new Kaynakça_.BirFiltre_();
-                    if ((string)Liste[2, i].Value == "Kök") Yeni.Yol = KaynakYoluAsılKopyası.ToLower();
-                    else Yeni.Yol = (KaynakYoluAsılKopyası + Liste[2, i].Value).ToLower();
+                    if ((string)Liste[2, i].Value == "Kök")
+                    {
+                        if ((string)Liste[0, i].Value == "Atla")
+                        {
+                            Liste[0, i].Selected = true;
+                            Liste.BackgroundColor = System.Drawing.Color.Red;
+                            MessageBox.Show("Kök klasör Atla olarak seçilemez");
+                            e.Cancel = true;
+                            return;
+                        }
+                        Yeni.Yol = "";// KaynakYoluAsılKopyası.ToLower();
+                    }
+                    else Yeni.Yol = (/*KaynakYoluAsılKopyası + */(string)Liste[2, i].Value).ToLower();
 
                     if (((string)Liste[0, i].Value).Contains("Soyadlarını"))
                     {
@@ -50,6 +61,8 @@ namespace Yedekleyici
                         if (string.IsNullOrEmpty((string)Liste[1, i].Value))
                         {
                             Liste[0, i].Selected = true;
+                            Liste.BackgroundColor = System.Drawing.Color.Red;
+                            MessageBox.Show("Soyadı girişi uygun değil (nokta)(soyadı)(boşluk)(nokta)(soyadı) .mup .bin");
                             e.Cancel = true;
                             return;
                         }
@@ -61,8 +74,9 @@ namespace Yedekleyici
                             Yeni.Soyadları[iii] = Yeni.Soyadları[iii].Trim();
                             if (Yeni.Soyadları[iii][0] != '.')
                             {
-                                Liste.BackgroundColor = System.Drawing.Color.Red;
                                 Liste[0, i].Selected = true;
+                                Liste.BackgroundColor = System.Drawing.Color.Red;
+                                MessageBox.Show("Soyadı girişi uygun değil (nokta)(soyadı)(boşluk)(nokta)(soyadı) .mup .bin");
                                 e.Cancel = true;
                                 return;
                             }
@@ -88,13 +102,11 @@ namespace Yedekleyici
             Kaynakça.Filreler = K1.ToArray();
 
             Depo.SınıfDeğişkenleri_Yaz(ref TamListe, Kaynakça);
-
-            PeTeİkKo.Dispose();
         }
 
         public void ÖnYüzüDoldur(string KaynakYolu, bool AltKlasörlerleBirlikte = false)
         {
-            Kaynakça_ Kaynakça = Aç(TamListe);
+            Kaynakça_ Kaynakça = Aç(KaynakYolu, TamListe);
             Arama.BackColor = System.Drawing.Color.GreenYellow;
 
             TekrarDene:
@@ -103,7 +115,7 @@ namespace Yedekleyici
                 KaynakYolu = KaynakYolu.TrimEnd('\\');
                 KaynakYolu = Path.GetFullPath(KaynakYolu);
                 KaynakYoluAsılKopyası = KaynakYolu;
-                string[] KlasörListesi = Directory.GetDirectories(KaynakYolu, "*", AltKlasörlerleBirlikte ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                string[] KlasörListesi = Listele.Klasör(KaynakYolu, "*", AltKlasörlerleBirlikte ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
                 Text = "Kaynak Seçici " + KlasörListesi.Length.ToString() + " " + KaynakYolu;
 
                 int EkranGüncelleme = Environment.TickCount + 250;
@@ -129,7 +141,7 @@ namespace Yedekleyici
                 {
                     Kaynakça_.BirFiltre_ Biri = Kaynakça.Filreler[i];
 
-                    if (KaynakYolu == Biri.Yol)
+                    if (KaynakYolu == Biri.Yol.ToLower())
                     {
                         if (Biri.Tip == Kaynakça_.Tip_.Atla) Liste[0, 0].Value = "Atla";
                         else if (Biri.Tip == Kaynakça_.Tip_.SoyadlarınıYedekle) Liste[0, 0].Value = "Soyadlarını yedekle";
@@ -159,7 +171,7 @@ namespace Yedekleyici
                     {
                         Kaynakça_.BirFiltre_ Biri = Kaynakça.Filreler[ii];
                  
-                        if (KlasörListesi[i - 1].ToLower() == Biri.Yol)
+                        if (KlasörListesi[i - 1].ToLower() == Biri.Yol.ToLower())
                         {
                             if (Biri.Tip == Kaynakça_.Tip_.Atla) Liste[0, i].Value = "Atla";
                             else if (Biri.Tip == Kaynakça_.Tip_.SoyadlarınıYedekle) Liste[0, i].Value = "Soyadlarını yedekle";
@@ -227,11 +239,19 @@ namespace Yedekleyici
 
             Arama.BackColor = System.Drawing.Color.White;
         }
-        public static Kaynakça_ Aç(string KaydedilmişBilgi)
+        public static Kaynakça_ Aç(string Kök, string KaydedilmişBilgi, bool KüçükHarfKullan = false)
         {
             Kaynakça_ Kaynakça = new Kaynakça_();
             Depo.SınıfDeğişkenleri_Oku(KaydedilmişBilgi, Kaynakça);
             if (Kaynakça.Filreler == null) Kaynakça.Filreler = new Kaynakça_.BirFiltre_[0];
+            Kök = Kök.TrimEnd('\\');
+
+            for (int i = 0; i < Kaynakça.Filreler.Length; i++)
+            {
+                Kaynakça.Filreler[i].Yol = Kök + Kaynakça.Filreler[i].Yol;
+                if (KüçükHarfKullan) Kaynakça.Filreler[i].Yol = (Kaynakça.Filreler[i].Yol).ToLower();
+            } 
+            
             return Kaynakça;
         }
 
@@ -271,6 +291,7 @@ namespace Yedekleyici
             Arama.Text = "";
             Arama.Tag = 0;
 
+            KaynakSecici_FormClosing(null, null);
             ÖnYüzüDoldur(KaynakYoluAsılKopyası, TümKlasörler.Checked);
         }
     }

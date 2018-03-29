@@ -43,28 +43,18 @@
             this.programıKapatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.checkBox5 = new System.Windows.Forms.CheckBox();
-            this.textBox_Sifre = new System.Windows.Forms.TextBox();
-            this.radioButton_Coz = new System.Windows.Forms.RadioButton();
-            this.radioButton_sifrelemyok = new System.Windows.Forms.RadioButton();
-            this.radioButton_Sifrele = new System.Windows.Forms.RadioButton();
+            this.Zamanlama = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.LinkLabel();
             this.button3 = new System.Windows.Forms.Button();
-            this.button6 = new System.Windows.Forms.Button();
+            this.EkleDeğiştir = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label16 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.button7 = new System.Windows.Forms.Button();
             this.button8 = new System.Windows.Forms.Button();
@@ -116,11 +106,8 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.label3 = new System.Windows.Forms.LinkLabel();
             this.contextMenuStrip2.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -137,7 +124,7 @@
             this.checkedListBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.checkedListBox1.FormattingEnabled = true;
             this.checkedListBox1.HorizontalScrollbar = true;
-            this.checkedListBox1.Location = new System.Drawing.Point(9, 288);
+            this.checkedListBox1.Location = new System.Drawing.Point(10, 239);
             this.checkedListBox1.Name = "checkedListBox1";
             this.checkedListBox1.Size = new System.Drawing.Size(416, 58);
             this.checkedListBox1.TabIndex = 0;
@@ -235,129 +222,75 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.Zamanlama);
             this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.checkBox5);
-            this.groupBox1.Controls.Add(this.textBox_Sifre);
-            this.groupBox1.Controls.Add(this.radioButton_Coz);
-            this.groupBox1.Controls.Add(this.radioButton_sifrelemyok);
-            this.groupBox1.Controls.Add(this.radioButton_Sifrele);
             this.groupBox1.Controls.Add(this.button3);
-            this.groupBox1.Controls.Add(this.button6);
+            this.groupBox1.Controls.Add(this.EkleDeğiştir);
             this.groupBox1.Controls.Add(this.button5);
             this.groupBox1.Controls.Add(this.button4);
-            this.groupBox1.Controls.Add(this.numericUpDown2);
-            this.groupBox1.Controls.Add(this.numericUpDown1);
-            this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.Controls.Add(this.label14);
-            this.groupBox1.Controls.Add(this.label11);
-            this.groupBox1.Controls.Add(this.label16);
-            this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.textBox2);
             this.groupBox1.Controls.Add(this.textBox3);
             this.groupBox1.Controls.Add(this.textBox1);
-            this.groupBox1.Controls.Add(this.label12);
             this.groupBox1.Location = new System.Drawing.Point(9, 109);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(416, 179);
+            this.groupBox1.Size = new System.Drawing.Size(416, 128);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Adım Özellikleri";
             this.groupBox1.Visible = false;
             // 
-            // checkBox5
+            // Zamanlama
             // 
-            this.checkBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkBox5.AutoSize = true;
-            this.checkBox5.Checked = true;
-            this.checkBox5.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox5.Location = new System.Drawing.Point(292, 154);
-            this.checkBox5.Margin = new System.Windows.Forms.Padding(2);
-            this.checkBox5.Name = "checkBox5";
-            this.checkBox5.Size = new System.Drawing.Size(68, 17);
-            this.checkBox5.TabIndex = 10;
-            this.checkBox5.Text = "Arkaplan";
-            this.toolTip1.SetToolTip(this.checkBox5, "Uzun sürecek (1dk) dosyalama işlemlerini arkaplanda çalıştır.");
-            this.checkBox5.UseVisualStyleBackColor = true;
+            this.Zamanlama.Location = new System.Drawing.Point(9, 101);
+            this.Zamanlama.Name = "Zamanlama";
+            this.Zamanlama.Size = new System.Drawing.Size(154, 23);
+            this.Zamanlama.TabIndex = 12;
+            this.Zamanlama.Text = "Zamanlama ve Diğer Ayarlar";
+            this.Zamanlama.UseVisualStyleBackColor = true;
+            this.Zamanlama.Click += new System.EventHandler(this.Zamanlama_Click);
             // 
-            // textBox_Sifre
+            // label3
             // 
-            this.textBox_Sifre.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_Sifre.Location = new System.Drawing.Point(181, 150);
-            this.textBox_Sifre.Name = "textBox_Sifre";
-            this.textBox_Sifre.Size = new System.Drawing.Size(110, 20);
-            this.textBox_Sifre.TabIndex = 9;
-            // 
-            // radioButton_Coz
-            // 
-            this.radioButton_Coz.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.radioButton_Coz.AutoSize = true;
-            this.radioButton_Coz.Location = new System.Drawing.Point(125, 153);
-            this.radioButton_Coz.Name = "radioButton_Coz";
-            this.radioButton_Coz.Size = new System.Drawing.Size(55, 17);
-            this.radioButton_Coz.TabIndex = 8;
-            this.radioButton_Coz.Text = "Düzelt";
-            this.toolTip1.SetToolTip(this.radioButton_Coz, "Dosyaları Düzelt");
-            this.radioButton_Coz.UseVisualStyleBackColor = true;
-            this.radioButton_Coz.CheckedChanged += new System.EventHandler(this.radioButton_sifrelemyok_CheckedChanged);
-            // 
-            // radioButton_sifrelemyok
-            // 
-            this.radioButton_sifrelemyok.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.radioButton_sifrelemyok.AutoSize = true;
-            this.radioButton_sifrelemyok.Checked = true;
-            this.radioButton_sifrelemyok.Location = new System.Drawing.Point(8, 153);
-            this.radioButton_sifrelemyok.Name = "radioButton_sifrelemyok";
-            this.radioButton_sifrelemyok.Size = new System.Drawing.Size(58, 17);
-            this.radioButton_sifrelemyok.TabIndex = 8;
-            this.radioButton_sifrelemyok.TabStop = true;
-            this.radioButton_sifrelemyok.Text = "Normal";
-            this.toolTip1.SetToolTip(this.radioButton_sifrelemyok, "Dosyalara ek işlem uygulama");
-            this.radioButton_sifrelemyok.UseVisualStyleBackColor = true;
-            this.radioButton_sifrelemyok.CheckedChanged += new System.EventHandler(this.radioButton_sifrelemyok_CheckedChanged);
-            // 
-            // radioButton_Sifrele
-            // 
-            this.radioButton_Sifrele.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.radioButton_Sifrele.AutoSize = true;
-            this.radioButton_Sifrele.Location = new System.Drawing.Point(67, 153);
-            this.radioButton_Sifrele.Name = "radioButton_Sifrele";
-            this.radioButton_Sifrele.Size = new System.Drawing.Size(56, 17);
-            this.radioButton_Sifrele.TabIndex = 8;
-            this.radioButton_Sifrele.Text = "Karıştır";
-            this.toolTip1.SetToolTip(this.radioButton_Sifrele, "Dosyaları Karıştır");
-            this.radioButton_Sifrele.UseVisualStyleBackColor = true;
-            this.radioButton_Sifrele.CheckedChanged += new System.EventHandler(this.radioButton_sifrelemyok_CheckedChanged);
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 52);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(43, 13);
+            this.label3.TabIndex = 11;
+            this.label3.TabStop = true;
+            this.label3.Text = "Kaynak";
+            this.label3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.KaynakSecici_LinkClicked);
             // 
             // button3
             // 
-            this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button3.Location = new System.Drawing.Point(392, 47);
             this.button3.Margin = new System.Windows.Forms.Padding(2);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(18, 44);
+            this.button3.Size = new System.Drawing.Size(18, 48);
             this.button3.TabIndex = 7;
             this.button3.Text = "Aç";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
-            // button6
+            // EkleDeğiştir
             // 
-            this.button6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button6.Location = new System.Drawing.Point(365, 150);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(44, 22);
-            this.button6.TabIndex = 5;
-            this.button6.Text = "Ekle";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
+            this.EkleDeğiştir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.EkleDeğiştir.Enabled = false;
+            this.EkleDeğiştir.Location = new System.Drawing.Point(351, 101);
+            this.EkleDeğiştir.Name = "EkleDeğiştir";
+            this.EkleDeğiştir.Size = new System.Drawing.Size(59, 23);
+            this.EkleDeğiştir.TabIndex = 5;
+            this.EkleDeğiştir.Text = "Değiştir";
+            this.EkleDeğiştir.UseVisualStyleBackColor = true;
+            this.EkleDeğiştir.Click += new System.EventHandler(this.button6_Click);
             // 
             // button5
             // 
-            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button5.Location = new System.Drawing.Point(362, 72);
+            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button5.Location = new System.Drawing.Point(363, 75);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(24, 20);
             this.button5.TabIndex = 4;
@@ -367,8 +300,8 @@
             // 
             // button4
             // 
-            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button4.Location = new System.Drawing.Point(362, 47);
+            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button4.Location = new System.Drawing.Point(363, 49);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(24, 20);
             this.button4.TabIndex = 4;
@@ -376,69 +309,8 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // numericUpDown2
-            // 
-            this.numericUpDown2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.numericUpDown2.Location = new System.Drawing.Point(52, 124);
-            this.numericUpDown2.Maximum = new decimal(new int[] {
-            50000,
-            0,
-            0,
-            0});
-            this.numericUpDown2.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(63, 20);
-            this.numericUpDown2.TabIndex = 3;
-            this.numericUpDown2.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDown2.ValueChanged += new System.EventHandler(this.numericUpDown2_ValueChanged);
-            // 
-            // numericUpDown1
-            // 
-            this.numericUpDown1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.numericUpDown1.Location = new System.Drawing.Point(52, 101);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
-            65500,
-            0,
-            0,
-            0});
-            this.numericUpDown1.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(63, 20);
-            this.numericUpDown1.TabIndex = 3;
-            this.numericUpDown1.Value = new decimal(new int[] {
-            60,
-            0,
-            0,
-            0});
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(233, 103);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(177, 17);
-            this.checkBox1.TabIndex = 2;
-            this.checkBox1.Text = "Hedefteki Fazla Dosyalarıda SİL";
-            this.checkBox1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
             // label2
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(6, 79);
             this.label2.Name = "label2";
@@ -448,7 +320,6 @@
             // 
             // label10
             // 
-            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(6, 24);
             this.label10.Name = "label10";
@@ -458,49 +329,19 @@
             // 
             // label14
             // 
-            this.label14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(244, 128);
+            this.label14.Location = new System.Drawing.Point(182, 106);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(154, 13);
             this.label14.TabIndex = 1;
             this.label14.Text = "Son Yedek 01/01/01 01:01:01";
             this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // label11
-            // 
-            this.label11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(6, 128);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(32, 13);
-            this.label11.TabIndex = 1;
-            this.label11.Text = "Adımı";
-            // 
-            // label16
-            // 
-            this.label16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(121, 103);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(101, 13);
-            this.label16.TabIndex = 1;
-            this.label16.Text = "Dakikada Bir Çalıştır";
-            // 
-            // label1
-            // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 103);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(32, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Adımı";
-            // 
             // textBox2
             // 
             this.textBox2.AllowDrop = true;
-            this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox2.Location = new System.Drawing.Point(52, 75);
             this.textBox2.Name = "textBox2";
@@ -511,17 +352,18 @@
             // 
             // textBox3
             // 
-            this.textBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox3.Location = new System.Drawing.Point(52, 20);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(357, 20);
             this.textBox3.TabIndex = 0;
+            this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             // 
             // textBox1
             // 
             this.textBox1.AllowDrop = true;
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox1.Location = new System.Drawing.Point(52, 49);
             this.textBox1.Name = "textBox1";
@@ -529,16 +371,6 @@
             this.textBox1.TabIndex = 0;
             this.textBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.textBox1_DragDrop);
             this.textBox1.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
-            // 
-            // label12
-            // 
-            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(122, 128);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(134, 13);
-            this.label12.TabIndex = 1;
-            this.label12.Text = "Farlı Klasör Olarak Yedekle";
             // 
             // flowLayoutPanel1
             // 
@@ -554,7 +386,7 @@
             this.flowLayoutPanel1.Controls.Add(this.button12);
             this.flowLayoutPanel1.Controls.Add(this.label6);
             this.flowLayoutPanel1.Controls.Add(this.groupBox2);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(313, 289);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(315, 239);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(2);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(84, 85);
@@ -898,12 +730,12 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.textBox5.Location = new System.Drawing.Point(232, 288);
+            this.textBox5.Location = new System.Drawing.Point(232, 238);
             this.textBox5.Multiline = true;
             this.textBox5.Name = "textBox5";
             this.textBox5.ReadOnly = true;
             this.textBox5.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox5.Size = new System.Drawing.Size(76, 86);
+            this.textBox5.Size = new System.Drawing.Size(76, 77);
             this.textBox5.TabIndex = 0;
             this.textBox5.WordWrap = false;
             this.textBox5.MouseClick += new System.Windows.Forms.MouseEventHandler(this.flowLayoutPanel1_MouseMove);
@@ -1100,23 +932,12 @@
             this.label5.TabIndex = 1;
             this.label5.Text = "...";
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 52);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(43, 13);
-            this.label3.TabIndex = 11;
-            this.label3.TabStop = true;
-            this.label3.Text = "Kaynak";
-            this.label3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.KaynakSecici_LinkClicked);
-            // 
             // AnaEkran
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(438, 378);
+            this.ClientSize = new System.Drawing.Size(438, 330);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.textBox5);
@@ -1137,8 +958,6 @@
             this.contextMenuStrip2.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -1156,9 +975,7 @@
 
         private System.Windows.Forms.CheckedListBox checkedListBox1;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button1;
@@ -1166,17 +983,12 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button4;
         public System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button EkleDeğiştir;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.NumericUpDown numericUpDown2;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Timer timer3;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.TextBox textBox5;
@@ -1186,9 +998,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
-        private System.Windows.Forms.TextBox textBox_Sifre;
-        private System.Windows.Forms.RadioButton radioButton_Coz;
-        private System.Windows.Forms.RadioButton radioButton_Sifrele;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip2;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem7;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
@@ -1196,7 +1005,6 @@
         private System.Windows.Forms.ToolStripMenuItem eminMisinToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sonKararınMıToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem silToolStripMenuItem;
-        private System.Windows.Forms.RadioButton radioButton_sifrelemyok;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem6;
         private System.Windows.Forms.ToolStripMenuItem bekleSüreToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uygulamayıAçToolStripMenuItem;
@@ -1230,7 +1038,6 @@
         private System.Windows.Forms.TextBox textBox_sü_bı_şifre;
         private System.Windows.Forms.Button button13;
         private System.Windows.Forms.TextBox textBox_sü_bı_çıktı2;
-        private System.Windows.Forms.CheckBox checkBox5;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Dosya;
         private System.Windows.Forms.DataGridViewTextBoxColumn Kaynak;
@@ -1241,6 +1048,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Arkaplan;
         private System.Windows.Forms.ToolStripComboBox Sağ_Menu_Durum;
         private System.Windows.Forms.LinkLabel label3;
+        private System.Windows.Forms.Button Zamanlama;
     }
 }
 

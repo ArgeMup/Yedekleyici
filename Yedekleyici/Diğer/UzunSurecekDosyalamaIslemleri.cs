@@ -210,7 +210,7 @@ namespace Yedekleyici
         {
             if (Nesneler.Count == 0 && Directory.Exists(Kaynak))
             {
-                string[] fileEntries = Directory.GetFiles(Kaynak);
+                string[] fileEntries = Listele.Dosya(Kaynak);
                 foreach (string fileName in fileEntries) AnaEkran.SilDosya(fileName);
             }
 

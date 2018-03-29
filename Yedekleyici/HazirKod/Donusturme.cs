@@ -168,63 +168,96 @@ namespace ArgeMup.HazirKod.Dönüştürme
 
     public static class D_Süre
     {
-        public const string Sürüm = "V1.0";
+        public const string Sürüm = "V1.1";
 
-        public static class Saniye
+        public static class Metne
         {
-            public const string Sürüm = "V1.0";
-
-            public static string Metne(double süre)
+            public static string Saniyeden(UInt64 Saniye)
             {
-                if (süre < 59) return süre.ToString("0") + "sn";
-                süre /= 60;//dakika
+                decimal sn = Saniye, dk = 0, sa = 0, gün = 0, ay = 0, yıl = 0;
 
-                if (süre < 60) return süre.ToString("0.#") + "dk";
-                süre /= 60;//saat
+                while (sn >= 60)
+                {
+                    dk++;
+                    sn -= 60;
+                }
 
-                return süre.ToString("0.##") + "sa";
+                while (dk >= 60)
+                {
+                    sa++;
+                    dk -= 60;
+                }
+
+                while (sa >= 24)
+                {
+                    gün++;
+                    sa -= 24;
+                }
+
+                while (gün >= 30)
+                {
+                    ay++;
+                    gün -= 30;
+                }
+
+                while (ay >= 12)
+                {
+                    yıl++;
+                    ay -= 12;
+                }
+
+                string Çıktı = "";
+                if (yıl > 0) Çıktı = Çıktı.Trim() +       yıl + " yıl ";
+                if (ay > 0)  Çıktı = Çıktı.Trim() + " " + ay  + " ay ";
+                if (gün > 0) Çıktı = Çıktı.Trim() + " " + gün + " gün ";
+                if (sa > 0)  Çıktı = Çıktı.Trim() + " " + sa  + " sa. ";
+                if (dk > 0)  Çıktı = Çıktı.Trim() + " " + dk  + " dk. ";
+                if (sn > 0)  Çıktı = Çıktı.Trim() + " " + sn  + " sn. ";
+
+                if (Çıktı == "") Çıktı = "1 dk. dan az";
+                return Çıktı.Trim();
             }
         }
     }
 	
-	#if !UUNNIITTYY
-    public static class D_Parmakİzi
-    {
-        public const string Sürüm = "V1.0";
+//#if !UUNNIITTYY
+ //   public static class D_Parmakİzi
+ //   {
+ //       public const string Sürüm = "V1.0";
 
-        public static string Metne()
-        {
-            /* 
-             * Kullanılacak ise  
-             * Solution Explorer -> Proje -> References -> Add Reference
-             * Assemblies -> Framework -> System.Management
-             */
+ //       public static string Metne()
+ //       {
+ //           /* 
+ //            * Kullanılacak ise  
+ //            * Solution Explorer -> Proje -> References -> Add Reference
+ //            * Assemblies -> Framework -> System.Management
+ //            */
 
-            string Çıktı = "";
-            System.Management.ManagementClass mc = new System.Management.ManagementClass("Win32_DiskDrive");
-            System.Management.ManagementObjectCollection moc = mc.GetInstances();
-            foreach (System.Management.ManagementBaseObject mo in moc)
-            {
-                var gecici = mo["InterfaceType"];
-                if (gecici == null || gecici.ToString() == "USB") continue;
+ //           string Çıktı = "";
+ //           System.Management.ManagementClass mc = new System.Management.ManagementClass("Win32_DiskDrive");
+ //           System.Management.ManagementObjectCollection moc = mc.GetInstances();
+ //           foreach (System.Management.ManagementBaseObject mo in moc)
+ //           {
+ //               var gecici = mo["InterfaceType"];
+ //               if (gecici == null || gecici.ToString() == "USB") continue;
 
-                gecici = mo["Model"];
-                if (gecici != null) Çıktı += gecici.ToString() + ", ";
+ //               gecici = mo["Model"];
+ //               if (gecici != null) Çıktı += gecici.ToString() + ", ";
 
-                gecici = mo["SerialNumber"];
-                if (gecici != null) Çıktı += gecici.ToString() + ", ";
+ //               gecici = mo["SerialNumber"];
+ //               if (gecici != null) Çıktı += gecici.ToString() + ", ";
 
-                gecici = mo["Signature"];
-                if (gecici != null) Çıktı += gecici.ToString();
+ //               gecici = mo["Signature"];
+ //               if (gecici != null) Çıktı += gecici.ToString();
 
-                if (Çıktı != "") break;
-            }
+ //               if (Çıktı != "") break;
+ //           }
 
-            moc.Dispose();
-            mc.Dispose();
+ //           moc.Dispose();
+ //           mc.Dispose();
 
-            return Çıktı;
-        }
-    }
-	#endif
+ //           return Çıktı;
+ //       }
+ //   }
+ //#endif
 }

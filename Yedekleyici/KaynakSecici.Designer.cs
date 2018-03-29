@@ -128,6 +128,8 @@
             this.Controls.Add(this.TümKlasörler);
             this.Controls.Add(this.Arama);
             this.Controls.Add(this.Liste);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "KaynakSecici_";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
