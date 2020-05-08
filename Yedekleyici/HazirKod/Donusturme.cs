@@ -153,25 +153,46 @@ namespace ArgeMup.HazirKod.Dönüştürme
 
     public static class D_DosyaBoyutu
     {
-        public const string Sürüm = "V1.0";
+        public const string Sürüm = "V1.1";
 
-        public static string Metne(decimal d)
+        public static string Metne(decimal d, int NoktadanSonrakiKarakterSayısı = 2)
         {
             string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
             if (d < 1) return "0B";
 
             int place = Convert.ToInt32(Math.Floor(Math.Log((Double)d, 1024)));
-            double num = Math.Round((Double)d / Math.Pow(1024, place), 1);
-            return (num).ToString() + suf[place];
+            double num = Math.Round((Double)d / Math.Pow(1024, place), NoktadanSonrakiKarakterSayısı);
+            return (num).ToString() + " " + suf[place];
         }
     }
 
     public static class D_Süre
     {
-        public const string Sürüm = "V1.1";
+        public const string Sürüm = "V1.2";
 
         public static class Metne
         {
+            public static string Saatten(int Saat)
+            {
+                TimeSpan bbb = new TimeSpan(Saat, 0, 0);
+
+                int gün = bbb.Days;
+                int yıl = gün / 365;
+                gün -= yıl * 365;
+
+                int ay = gün / 30;
+                gün -= ay * 30;
+
+                string Çıktı = "";
+                if (yıl > 0) Çıktı = Çıktı.Trim() + yıl + " yıl ";
+                if (ay > 0) Çıktı = Çıktı.Trim() + " " + ay + " ay ";
+                if (gün > 0) Çıktı = Çıktı.Trim() + " " + gün + " gün ";
+                if (bbb.Hours > 0) Çıktı = Çıktı.Trim() + " " + bbb.Hours + " sa. ";
+                if (bbb.Minutes > 0) Çıktı = Çıktı.Trim() + " " + bbb.Minutes + " dk. ";
+
+                if (Çıktı == "") Çıktı = "1 dk. dan az";
+                return Çıktı.Trim();
+            }
             public static string Saniyeden(UInt64 Saniye)
             {
                 decimal sn = Saniye, dk = 0, sa = 0, gün = 0, ay = 0, yıl = 0;
@@ -214,7 +235,59 @@ namespace ArgeMup.HazirKod.Dönüştürme
                 if (dk > 0)  Çıktı = Çıktı.Trim() + " " + dk  + " dk. ";
                 if (sn > 0)  Çıktı = Çıktı.Trim() + " " + sn  + " sn. ";
 
-                if (Çıktı == "") Çıktı = "1 dk. dan az";
+                if (Çıktı == "") Çıktı = "1 sn. den az";
+                return Çıktı.Trim();
+            }
+            public static string MiliSaniyeden(UInt64 MiliSaniye)
+            {
+                decimal msn = MiliSaniye, sn = 0, dk = 0, sa = 0, gün = 0, ay = 0, yıl = 0;
+
+                while (msn >= 1000)
+                {
+                    sn++;
+                    msn -= 1000;
+                }
+
+                while (sn >= 60)
+                {
+                    dk++;
+                    sn -= 60;
+                }
+
+                while (dk >= 60)
+                {
+                    sa++;
+                    dk -= 60;
+                }
+
+                while (sa >= 24)
+                {
+                    gün++;
+                    sa -= 24;
+                }
+
+                while (gün >= 30)
+                {
+                    ay++;
+                    gün -= 30;
+                }
+
+                while (ay >= 12)
+                {
+                    yıl++;
+                    ay -= 12;
+                }
+
+                string Çıktı = "";
+                if (yıl > 0) Çıktı = Çıktı.Trim() + yıl + " yıl ";
+                if (ay > 0) Çıktı = Çıktı.Trim() + " " + ay + " ay ";
+                if (gün > 0) Çıktı = Çıktı.Trim() + " " + gün + " gün ";
+                if (sa > 0) Çıktı = Çıktı.Trim() + " " + sa + " sa. ";
+                if (dk > 0) Çıktı = Çıktı.Trim() + " " + dk + " dk. ";
+                if (sn > 0) Çıktı = Çıktı.Trim() + " " + sn + " sn. ";
+                if (msn > 0) Çıktı = Çıktı.Trim() + " " + msn + " msn. ";
+
+                if (Çıktı == "") Çıktı = "1 msn. den az";
                 return Çıktı.Trim();
             }
         }

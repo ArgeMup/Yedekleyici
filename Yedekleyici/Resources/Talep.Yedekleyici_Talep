@@ -1,0 +1,45 @@
+# isareti ilgili satırın yorum satırı olarak görülmesine sebep olur
+# isareti parametrenin saginda da olabilir
+#	
+# Tanim "İsim"					# Uygulama içerisinde hangi isimle görüntüleneceği
+# Tanim;Deneme	
+#		
+# Kaynak "Yol" <MetinBilgi>			# İsleme girecek olan dosyaların yolu
+# Kaynak;C:\Kaynak\Yedekler		
+#		
+# Hedef "Yol" <MetinBilgi>			# Kaynak klasördeki dosyaları HedefKlasör e yedekler
+# Hedef;C:\Hedef\Yedekler		
+# 
+# TamKopya "Evet" veya "Hayir" <MetinBilgi>	# Hedefte olup kaynakta olmayan fazla dosyaları hedeften siler 
+# TamKopya;Evet  
+#
+# Dosyalari;Kopyala <MetinBilgi>		# Normal yedekleme işlemi
+# Dosyalari;Karistir				# Dosyayı kopyalamadan önce şifreler
+# Dosyalari;Duzelt				# Şifrelenmiş dosyaların şifrelerini açar, ilk haline getirir
+# Dosyalari;Sikistir				# Kaynak\ dizindeki herşeyi tek dosya olarak sıkıştırır(Hedef\Kaynak.zip). Hedef\ içinde Kaynak.zip dosyası varsa silinir. TamKopya özelliği kullanılamaz.
+# Dosyalari;Ac					# Kaynak\ dizindeki tüm *.zip dosyalarını tek tek açar. Kaynak\Ornek.zip -> Hedef\Ornek\ içerisine gibi. Hedef\Ornek\ içindeki herşey silinir. TamKopya özelliği kullanılamaz. Ayrıca, soyadı zip olmayan dosyaları da kopyalar. 
+# Dosyalari;Sil					# Sadece belirtilen klasörü siler. Kaynak ile Hedef birbirinin aynısı olmalı.
+# Dosyalari;SikistirKaristir
+# Dosyalari;DuzeltAc
+#
+# ParolaSablonu "Sablonun Tanımı" <MetinBilgi>	# Ayarlar sekmesindeki Paralo Şablonu Tanımı
+# ParolaSablonu;DenemeParolaSablonu
+#
+# Versiyonla "1-65000"<Farklı sürüm adedi - 1 Durgun> "0-4250000"<Dosya boyutu MB - 0 Durgun> 	
+# Versiyonla;3;100 <SayıBilgi>			# Hedef içindeki toplam versiyon sayısı 3 den büyük ise en eski versiyonu siler
+#						# Veya hedef klasörün tümünün boyutunun 100 MB dan fazla olması durumunda en eski versiyonu siler
+#						# Ve yedekler. 	
+#
+# CpuYuzdesi "0-100" <SayıBilgi>		# İşlemci yuzdesi belirtilen değerin üzerinde ise yedekleme işlemi bekletilir
+# CpuYuzdesi;15					# İşlemci genel çalışma oranı %15 den fazla olduğunda uyu
+#
+# HddYuzdesi "0-100" <SayıBilgi>		# Sabit disk yuzdesi belirtilen değerin üzerinde ise yedekleme işlemi bekletilir
+# HddYuzdesi;55					# Sabit disk genel çalışma oranı %55 den fazla olduğunda uyu
+#
+# Dosya Atlama Listesi detayları ".Yedekleyici_DosyaAtlamaListesi" içerisinde
+#
+# AtlaKlasor;İz <MetinBilgi>
+# AtlaKlasor;Klasor1
+#
+# AtlaDosya;İz <MetinBilgi>
+# AtlaDosya;aaa.bbb

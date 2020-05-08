@@ -1,0 +1,75 @@
+# işareti ilgili satırın yorum satırı olarak görülmesine sebep olur
+# isareti parametrenin saginda da olabilir
+#
+# Bu dosya herhangi ".Yedekleyici_Talep" dosyasının ek uzantısıdır.
+# İstege bağlıdır.
+# ".Yedekleyici_Talep" dosyasının içindeki Kaynak parametresi ile belirtilen yolda ise işleme alınır
+# Uygulama öncelikle ".Yedekleyici_Talep" içinde varsa, atlama listesini oluşturur.
+# Sonra ".Yedekleyici_DosyaAtlamaListesi" mevcut ise atlama listesine ekleme yapar.
+#
+# Kullanılabilen Anahtarlar
+#
+# TamKopya "Evet" veya "Hayir" <MetinBilgi>	# Hedefte olup kaynakta olmayan fazla dosyaları hedeften siler 
+# TamKopya;Evet  
+#
+# Dosyalari;Kopyala <MetinBilgi>		# Normal yedekleme işlemi
+# Dosyalari;Karistir				# Dosyayı kopyalamadan önce şifreler
+# Dosyalari;Duzelt				# Şifrelenmiş dosyaların şifrelerini açar, ilk haline getirir
+# Dosyalari;Sikistir				# Kaynak\ dizindeki herşeyi tek dosya olarak sıkıştırır(Hedef\Kaynak.zip). Hedef\ içinde Kaynak.zip dosyası varsa silinir. TamKopya özelliği kullanılamaz.
+# Dosyalari;Ac					# Kaynak\ dizindeki tüm *.zip dosyalarını tek tek açar. Kaynak\Ornek.zip -> Hedef\Ornek\ içerisine gibi. Hedef\Ornek\ içindeki herşey silinir. TamKopya özelliği kullanılamaz. Ayrıca, soyadı zip olmayan dosyaları da kopyalar. 
+# Dosyalari;Sil					# Sadece belirtilen klasörü siler. Kaynak ile Hedef birbirinin aynısı olmalı.
+#
+# ParolaSablonu "Sablonun Tanımı" <MetinBilgi>	# Ayarlar sekmesindeki Paralo Şablonu Tanımı
+# ParolaSablonu;DenemeParolaSablonu
+#
+# Versiyonla "1-65000"<Farklı sürüm adedi - 1 Durgun> "0-4250000"<Dosya boyutu MB - 0 Durgun> 	
+# Versiyonla;3;100 <SayıBilgi>			# Hedef içindeki toplam versiyon sayısı 3 den büyük ise en eski versiyonu siler
+#						# Veya hedef klasörün tümünün boyutunun 100 MB dan fazla olması durumunda en eski versiyonu siler
+#						# Ve yedekler. 	
+#
+# CpuYuzdesi "0-100" <SayıBilgi>		# İşlemci yuzdesi belirtilen değerin üzerinde ise yedekleme işlemi bekletilir
+# CpuYuzdesi;15					# İşlemci genel çalışma oranı %15 den fazla olduğunda uyu
+#
+# HddYuzdesi "0-100" <SayıBilgi>		# Sabit disk yuzdesi belirtilen değerin üzerinde ise yedekleme işlemi bekletilir
+# HddYuzdesi;55					# Sabit disk genel çalışma oranı %55 den fazla olduğunda uyu
+#
+# AtlaKlasor;İz <MetinBilgi>
+# AtlaKlasor;Klasor1
+#	
+# AtlaDosya;İz <MetinBilgi>
+# AtlaDosya;aaa.bbb
+#                    
+# Dosya / Klasör Görmezden Gelme Listesi
+# Klasor ADI, Dosya ADI ve Dosya SOYADI için
+# Büyük / Küçük harf duyarlı
+# *AD	AD ile biten
+# AD*	AD ile başlayan
+# *		Tum AD lar
+# AD	Sadece AD
+#
+#						# Sadece belirtilen kıstaslardaki klasörler atlanır
+# AtlaKlasor;Klasor1				# Kaynak\Klasor1 klasörünü atla
+# AtlaKlasor;*sor1				# Kaynak\ kök dizinindeki sor1 ile biten klasörleri atla
+# AtlaKlasor;Kla*				# Kaynak\ kök dizinindeki Kla ile başlayan klasörleri atla
+# AtlaKlasor;Klasor1\Klasor2			# Kaynak\Klasor1 içindeki Klasor2 yi atla
+# AtlaKlasor;Klasor1\*sor2			# Kaynak\Klasor1 içindeki sor2 ile biten klasörleri atla
+# AtlaKlasor;Klasor1\Kla*			# Kaynak\Klasor1 içindeki Kla ile başlayan klasörleri atla
+# AtlaKlasor;*\Kla*				# Kaynak\ kök dizinindeki 1.seviye tüm klasörlerin içindeki Kla ile başlayan klasörleri atla
+# AtlaKlasor;Klasor1\*\Kla*			# Kaynak\Klasor1 içindeki 1.seviye tüm klasörlerin içindeki Kla ile başlayan klasörleri atla
+# AtlaKlasor;*sor1\Kla*
+# AtlaKlasor;Kla*\*sor2
+#
+#						# Belirtilen kıstaslardaki tüm dosyalar (tüm klasörlerdeki) atlanır
+# AtlaDosya;aaa.bbb 				# Ad ve soyadı aaa.bbb olan tüm dosyaları atla
+# AtlaDosya;aa*.bbb				# Adı aa ile baslayan ve soyadı bbb olan dosyaları atla
+# AtlaDosya;*aa.bb*				# Adı aa ile biten ve soyadı bb ile başlayan dosyaları atla 
+# AtlaDosya;*.bbb				# Soyadı bbb olan dosyaları atla	
+# AtlaDosya;aaa.*				# Adı aaa olan dosyaları atla
+#
+#						# Sadece belirtilen kıstaslardaki klasörler içindeki
+#						# Belirtilen kıstaslardaki tüm dosyalar atlanır
+# AtlaDosya;Klasor1\aaa.bbb			# Kaynak\Klasor1 içindeki Adı aaa ve soyadı bbb olan dosyayı atla 
+# AtlaDosya;*\aa*\*aa.bb*			# Kaynak\ kök dizinindeki 
+#						# 1. seviye tüm klasörler içerisindeki 
+#						# Adı aa ile başlayan tüm klasörlerin içlerindeki 
+#						# Adı aa ile biten ve soyadı bb ile başlayan tüm dosyaları atla

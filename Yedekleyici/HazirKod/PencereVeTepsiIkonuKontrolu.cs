@@ -6,13 +6,12 @@ using ArgeMup.HazirKod.Dönüştürme;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace ArgeMup.HazirKod
 {
     public class PencereVeTepsiIkonuKontrolu_ : IDisposable
     {
-        public const string Sürüm = "V1.10";
+        public const string Sürüm = "V1.11";
 
         #region Değişkenler
         public NotifyIcon Tepsiİkonu = null;
@@ -55,13 +54,22 @@ namespace ArgeMup.HazirKod
             Pencere.Shown += Pencere_Shown;
             Pencere.FormClosed += Pencere_FormClosed;
 
-            if (ŞeffafBaşlangıç) { şeffaflık = 0; Pencere.Opacity = 0; }
+            if (ŞeffafBaşlangıç)
+            {
+                if (Pencere.Opacity > 0)
+                {
+                    MessageBox.Show("PencereVeTepsiIkonuKontrolu_ nun Şeffaf Başlangıcı uygulayabilmesi için " + Pencere.Text + " formunun OPACITY özelliğini 0(sıfır) yapınız");
+                    Application.Exit();
+                }
+
+                şeffaflık = 0;
+            }
             else şeffaflık = 1;
 
             bool sonuç;
-            if (Ayarlar__ == null) Ayarlar = new Ayarlar_(out sonuç, "","", false, 0, 0);
+            if (Ayarlar__ == null) Ayarlar = new Ayarlar_(out sonuç, "", "", false, 0, 0);
             else Ayarlar = Ayarlar__;
-           
+
             if (Genişlik == -1) Genişlik = Screen.PrimaryScreen.WorkingArea.Width;
             if (Yükseklik == -1) Yükseklik = Screen.PrimaryScreen.WorkingArea.Height;
 
@@ -73,7 +81,7 @@ namespace ArgeMup.HazirKod
             Pencere.Location = new Point(Convert.ToInt32(Ayarlar.Oku(TakmaAdı + "_PencereKonumu_X", X.ToString())), Convert.ToInt32(Ayarlar.Oku(TakmaAdı + "_PencereKonumu_Y", Y.ToString())));
             Pencere.Width = Convert.ToInt32(Ayarlar.Oku(TakmaAdı + "_PencereBoyutu_Genişlik", Genişlik.ToString()));
             Pencere.Height = Convert.ToInt32(Ayarlar.Oku(TakmaAdı + "_PencereBoyutu_Yükseklik", Yükseklik.ToString()));
-            
+
             if (Pencere.WindowState == FormWindowState.Normal && !Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(new Rectangle(Pencere.Left, Pencere.Top, Pencere.Width, Pencere.Height))))
             {
                 Pencere.Left = X; Pencere.Top = Y; Pencere.Width = Genişlik; Pencere.Height = Yükseklik;

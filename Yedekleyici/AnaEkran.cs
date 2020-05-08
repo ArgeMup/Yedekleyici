@@ -1,13 +1,11 @@
-﻿// Copyright ArgeMup GNU GENERAL PUBLIC LICENSE Version 3 <http://www.gnu.org/licenses/> <https://github.com/ArgeMup/Yedekleyici>
+﻿// Copyright ArgeMup GNU GENERAL PUBLIC LICENSE Version 3 <http://www.gnu.org/licenses/> <https://github.com/ArgeMup>
 
 using System;
-using System.Threading;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using System.IO;
-using System.Security.AccessControl;
 using ArgeMup.HazirKod;
 using ArgeMup.HazirKod.Dönüştürme;
 
@@ -15,1216 +13,538 @@ namespace Yedekleyici
 {
     public partial class AnaEkran : Form
     {
-        #region Tanımlamalar
-        static DahaCokKarmasiklastirma_ Aş = new ArgeMup.HazirKod.DahaCokKarmasiklastirma_();
-        static UzunSurecekDosyalamaIslemleri UzSüDoİş = new UzunSurecekDosyalamaIslemleri();
-        static string pak = Directory.GetCurrentDirectory() + "\\YedekleyiciDosyalari\\"; //programanaklasör
-        static string pak_Banka = pak + "Banka\\";
-        static string pak_UzDoİş = pak_Banka + "_"; //UzunSürecekDosyalamaİşlemleri
-        public static string pak_Gecici = pak_Banka + "Gecici\\";
-        public PencereVeTepsiIkonuKontrolu_ PeTeİkKo;
-        UygulamaOncedenCalistirildiMi_ UygulamaOncedenCalistirildiMi;
-        DosyaSistemiIzleyici_ DosyaSistemiIzleyici = new DosyaSistemiIzleyici_();
-        public Ayarlar_ Ayarlar;
-        List<Depo.Biri> TaleplerDosyası;
-
-        public DateTime SürekliYdeklemeZamanlama = new DateTime();
-        bool checkedListBox1_iptalEt = true;
-        static public bool Durdur;
-        public void Form2ToForm1(int tür, string bilgi)
-        {
-            switch (tür)
-            { 
-                case (1):
-                    textBox1.Text = bilgi;
-                    break;
-
-                case (2):
-                    textBox2.Text = bilgi;
-                    break;
-            }
-        }
-
-        string ProgAdVer;
-        static string IslemGorenDosya = "";
-
-        enum Yapilacak_İşler { Bekleme = 0, Hazirlik, TalepArttır, TalepBul, Sayma, tarihsel_karşilaştir, crc_karşilaştir, yedekle, fazla_dosyaları_sil, DahaBekle};
-        static Yapilacak_İşler Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-
-        struct _Talep
-        {
-            public string Tanım;
-            public string Hedef;
-            public string OrjinalHedef;
-            public string Kaynak;
-            public string KaynakSecici_TamListe;
-            public string SonYedekTarihi;
-
-            public int Süre;
-            public bool Pzt, Sa, Çrş, Per, Cu, Cts, Paz;
-            public DateTime Başlangıç, Bitiş;
-            public int FarklıKlasörSayisi;
-            public bool FazlaDosyalarıSil;
-            public bool ArkaPlandaÇalıştır;
-            public int şifrelemeYontemi;
-            public string Parola;
-
-            public string BirdenFazlaKlasörİleÇalışma_EnYeniÜye;
-            public List<string> BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler;
-
-            public int ToplamDosyaSayısı;
-            public int ToplamKlasörSayısı;
-            public int SonTalepNo;
-            public int YedeklenenDosyaSayısı;
-            public int SayacOtoYedek;
-            public string SilinecekKlasör;
-
-            public decimal ToplamBoyut, IslemormusBoyut;
-
-            public Kaynakça_ Kaynakça;
-        };
-        static _Talep Talep = new _Talep();
-
-        struct _DoSaBu
-        {
-            public bool Calistir;
-        };
-        static _DoSaBu DoSaBu = new _DoSaBu();
-        static DosyaSayisiniBulan Object_DosyaSayisiniBulan = new DosyaSayisiniBulan(); 
-        static Thread Thread_DosyaSayisiniBulan;
-
-        struct _TaKa
-        {
-            public bool Calistir;
-            public bool checkbox3;
-            public int biten, hatalı, GenelHatalı;
-        };
-        static _TaKa TaKa = new _TaKa();
-        public struct SürükleBırakİşlemi_
-        {
-            public string Kaynak;
-            public string konum_sifreleme, konum_sifrecozme;
-            public bool İsimlerideŞifrele;
-            public ŞifrelemeYöntem yöntem;
-        }
-        public struct _SüBıİş
-        {
-            public List<SürükleBırakİşlemi_> Liste;
-            public SürükleBırakİşlemi_ EtkinOlan;
-            public string şifre;
-            public string kaydedilen_konum_sifreleme, kaydedilen_konum_sifrecozme;
-            public ŞifrelemeYöntem kaydedilen_yöntem;
-            public bool kaydedilen_İsimlerideŞifrele;
-            public string kaydedilen_ipucu;
-
-            public bool FareTuşunaBasılıyor;
-            public int FareTuşunaBasılıyorX, FareTuşunaBasılıyorY;
-            public int DosyaAdet_Toplam, DosyaAdet_İşlenen;
-        };
-        public static _SüBıİş SüBıİş = new _SüBıİş();
-
-        public enum ŞifrelemeYöntem { KararVer = 0, Şifrele, Çöz, Kopyala };
-        static TarihselKarşilaştiran Object_TarihselKarşilaştiran = new TarihselKarşilaştiran();
-        static Thread Thread_TarihselKarşilaştiran;
-        static Thread Thread_TaKa_SürükleBırakListesi;
-
-        struct _FaDo
-        {
-            public bool Calistir;
-            public int biten;
-            public int Toplam;
-        };
-        static _FaDo FaDo = new _FaDo();
-        static FazlaDosyalarıSilen Object_FazlaDosyalarıSilen = new FazlaDosyalarıSilen();
-        static Thread Thread_FazlaDosyalarıSilen;
-
-        struct _TaFaA
-        {
-            public bool Calistir;
-            public bool KlasörlerAynı;
-            public string A, B;
-        };
-        static _TaFaA TaFaA = new _TaFaA();
-        static TarihselFarkArayan Object_TarihselFarkArayan = new TarihselFarkArayan();
-        static Thread Thread_TarihselFarkArayan;
-
-        static public List<string> GeUyKa_Uygulama = new List<string>();
-        static GereksizUygulamaKapatan Object_GereksizUygulamaKapatan = new GereksizUygulamaKapatan();
-        static Thread Thread_GereksizUygulamaKapatan;
-
-        static List<string> Liste_Hatalar = new List<string>();
-        #endregion
-
-        #region Görevler
-        public class DosyaSayisiniBulan
-        {
-            public void DosyaSayisiniBul()
-            {
-                Durdur = false;
-                Talep.ToplamDosyaSayısı = 0;
-                Talep.ToplamKlasörSayısı = 0;
-                Talep.IslemormusBoyut = 0;
-                Talep.ToplamBoyut = 0;
-
-                if (Directory.Exists(Talep.Kaynak)) ProcessDirectory(Talep.Kaynak);
-                DoSaBu.Calistir = false;
-            }
-            public static void ProcessDirectory(string targetDirectory)
-            {
-                string[] fileEntries;
-                try
-                {
-                    fileEntries = Listele.Dosya(targetDirectory); 
-                    foreach (string fileName in fileEntries)
-                    {
-                        if (Durdur) return;
-                        if (!KaynakSecici_YedeklensinMi_Dosya(fileName)) continue;
-
-                        Talep.ToplamDosyaSayısı++;
-                        try { Talep.ToplamBoyut += new System.IO.FileInfo(fileName).Length; }
-                        catch (Exception) { }
-                    }
-
-                    string[] subdirectoryEntries = Listele.Klasör(targetDirectory);
-                    foreach (string subdirectory in subdirectoryEntries)
-                    {
-                        if (Durdur) return;
-                        if (!KaynakSecici_YedeklensinMi_Klasör(subdirectory)) continue;
-
-                        Talep.ToplamKlasörSayısı++;
-                        ProcessDirectory(subdirectory);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Liste_Hatalar.Add("HATA");
-                    Liste_Hatalar.Add(ex.Message + " " + targetDirectory);
-                }
-            }
-        }
-        public class TarihselKarşilaştiran
-        {
-            static long OncekiIslenenBoyut;
-            static DateTime OncekiIslemAnı;
-            static int Konum_DosyaİşlemiUzunSürecek; //-1:iptal 0:uzun sürecek ise işlemi durdur 1:durduruldu uzun sürecek işlemler klasörüne kopyala 
-            static List<double> ortalama = new List<double>();
-            static string Hata;
-
-            static public DahaCokKarmasiklastirma_._Yığın_Karıştır_Girdi_ YığınKarıştırGirdi = new DahaCokKarmasiklastirma_._Yığın_Karıştır_Girdi_("", false, YüzdeDeğeriniDeğerlendir_Sifrele);
-            static public DahaCokKarmasiklastirma_._Yığın_Düzelt_Girdi_ YığınDüzeltGirdi = new DahaCokKarmasiklastirma_._Yığın_Düzelt_Girdi_(YüzdeDeğeriniDeğerlendir_SifresiniCoz);
-            static public int YüzdeDeğeriniDeğerlendir_Sifrele(string Adı, long İşlenenBoyut, long ToplamBoyut)
-            {
-                if (Durdur) Aş.AcilDur();
-                IslemGorenDosya = "Karıştırma %" + ((double)(İşlenenBoyut * 100) / (double)ToplamBoyut).ToString("0.##");
-
-                double Sndekiİlerleme_Bayt = İşlenenBoyut - OncekiIslenenBoyut;
-                Talep.IslemormusBoyut += (decimal)Sndekiİlerleme_Bayt;
-                TimeSpan difference = DateTime.Now - OncekiIslemAnı;
-                Sndekiİlerleme_Bayt /= difference.TotalSeconds;
-
-                Sndekiİlerleme_Bayt = (ToplamBoyut - İşlenenBoyut) / Sndekiİlerleme_Bayt; //sn sürecek
-                ortalama.Add(Sndekiİlerleme_Bayt); 
-                IslemGorenDosya += " " + D_Süre.Metne.Saniyeden(Convert.ToUInt64(ortalama.Sum(item => item) / ortalama.Count));
-                if (ortalama.Count > 25) ortalama.RemoveAt(0);
-                Sndekiİlerleme_Bayt /= 60; //dk sürecek
-
-                if (Konum_DosyaİşlemiUzunSürecek == 0)
-                {
-                    if (Sndekiİlerleme_Bayt > 1 && Talep.ArkaPlandaÇalıştır)
-                    {
-                        Konum_DosyaİşlemiUzunSürecek = 1;
-                        Aş.AcilDur();
-                        Durdur = true;
-                    }
-                }
-                else if (Konum_DosyaİşlemiUzunSürecek > 0) { IslemGorenDosya += " *" + Konum_DosyaİşlemiUzunSürecek.ToString(); }
-
-                IslemGorenDosya += ">" + Adı;
-                OncekiIslenenBoyut = İşlenenBoyut;
-                OncekiIslemAnı = DateTime.Now;
-                return 1000;
-            }
-            static public int YüzdeDeğeriniDeğerlendir_SifresiniCoz(string Adı, long İşlenenBoyut, long ToplamBoyut)
-            {
-                int sonuc = YüzdeDeğeriniDeğerlendir_Sifrele(Adı, İşlenenBoyut, ToplamBoyut);
-                IslemGorenDosya = IslemGorenDosya.Remove(0, "Karıştırma".Length);
-                IslemGorenDosya = "Düzeltme" + IslemGorenDosya;
-                return sonuc;
-            }
-
-            public void TarihselKarşilaştir()
-            {
-                while (TaKa.Calistir)
-                {
-                    TaKa.GenelHatalı += TaKa.hatalı;
-                    TaKa.biten = 0;
-                    TaKa.hatalı = 0;
-                    Talep.YedeklenenDosyaSayısı = 0;
-
-                    try
-                    {
-                        if (!Directory.Exists(Talep.Kaynak)) throw new DirectoryNotFoundException();
-                        if (!Directory.Exists(Talep.Hedef)) Directory.CreateDirectory(Talep.Hedef);
-
-                        if (Directory.Exists(Talep.Kaynak)) ProcessDirectory(Talep.Kaynak);
-                        else Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepArttır;
-                    }
-                    catch (Exception ex)
-                    {
-                        //olmayan hedef atlanıyor
-                        if (Convert.ToString(ex).Contains("System.IO.DirectoryNotFoundException") && TaKa.checkbox3) Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-                    }
-
-                    TaKa.Calistir = false;
-                }
-            }
-            public static void ProcessDirectory(string targetDirectory)
-            {
-                string[] fileEntries;
-                try
-                {
-                    fileEntries = Listele.Dosya(targetDirectory);
-                    for (int i = 0; i < fileEntries.Count(); i++)
-                    {
-                        if (Durdur) return;
-                        if (!KaynakSecici_YedeklensinMi_Dosya(fileEntries[i])) continue;
-
-                        string fileName = fileEntries[i];
-                        string Fazlalık = fileName.Remove(0, Talep.Kaynak.Length);
-                        IslemGorenDosya = Talep.Hedef + "\\" + Fazlalık;
-
-                        bool sonuc = false;
-                        decimal Onceki_IslemormusBoyut = Talep.IslemormusBoyut;
-                        Konum_DosyaİşlemiUzunSürecek = 0;
-                        if (Path.GetPathRoot(Talep.Kaynak).ToUpper() == Path.GetPathRoot(Talep.Hedef).ToUpper() || Path.GetPathRoot(Talep.Hedef).ToUpper() == Path.GetPathRoot(pak).ToUpper()) Konum_DosyaİşlemiUzunSürecek = -1; //aynı disk te olduğundan uzun sürecek işlemlere eklemeye gerek yok 
-
-                        if (!File.Exists(Talep.Hedef + "\\" + Fazlalık))
-                        {
-                            if (fileName.StartsWith(pak_UzDoİş)) goto while_devam;
-
-                            try
-                            {
-                                OncekiIslenenBoyut = 0;
-                                OncekiIslemAnı = DateTime.Now;
-                                ortalama.Clear();
-                                switch (Talep.şifrelemeYontemi)
-                                {
-                                    case (0)://şifreleme yok  
-                                        sonuc = Argemup_Dosyalama_Kopyala(fileName, Talep.Hedef + "\\" + Fazlalık);
-                                        break;
-
-                                    case (1)://şifrele
-                                        sonuc = Aş.Karıştır(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Parola, YığınKarıştırGirdi);
-                                        break;
-
-                                    case (2)://çöz
-                                        sonuc = Aş.Düzelt(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Parola, YığınDüzeltGirdi);
-                                        break;
-                                }
-
-                                Talep.IslemormusBoyut = Onceki_IslemormusBoyut;
-
-                                if (Konum_DosyaİşlemiUzunSürecek == 1)
-                                {
-                                    OncekiIslenenBoyut = 0;
-                                    OncekiIslemAnı = DateTime.Now;
-                                    ortalama.Clear();
-                                    Durdur = false;
-
-                                    if (!Path.GetFullPath(Path.GetDirectoryName(fileName)).StartsWith(pak_UzDoİş))
-                                    {
-                                        if (!UzSüDoİş.VarMı(fileName, Talep.Hedef + "\\" + Fazlalık))
-                                        {
-                                            string temsilidosya = UzSüDoİş.KaynakDosyaGeciciKlasöreKopyalandıMı(fileName);
-                                            if (temsilidosya == "")
-                                            {
-                                                temsilidosya = UzSüDoİş.DosyaAdıOluştur(pak_UzDoİş);
-                                                if (!Argemup_Dosyalama_Kopyala(fileName, temsilidosya)) goto devam_hata_1;
-                                            }
-                                            UzSüDoİş.Ekle(fileName, Talep.Hedef + "\\" + Fazlalık, temsilidosya, Talep.şifrelemeYontemi.ToString() + Talep.Parola);
-                                            YazLog("Bilgi", "Uzun surecek dosyalama islemi listeye eklendi. " + Talep.Hedef + "\\" + Fazlalık);
-                                        }
-                                        else YazLog("Bilgi", "Uzun surecek dosyalama islemi listede olduğu için atlandı. " + Talep.Hedef + "\\" + Fazlalık);
-                                    }
-                                    sonuc = true;
-                                }
-
-                                devam_hata_1:
-                                if (!sonuc)
-                                {
-                                    TaKa.hatalı++;
-                                    string ek = "";
-                                    if (Talep.şifrelemeYontemi != 0) ek = Aş.SonHatayıOku();
-                                    else ek = Hata;
-                                    YazLog("HATA", ek + " " + fileName + " ----->>>>>> " + Talep.Hedef + "\\" + Fazlalık);
-                                }
-                                else
-                                {
-                                    Talep.IslemormusBoyut += new FileInfo(fileName).Length;
-                                    Talep.YedeklenenDosyaSayısı++;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                TaKa.hatalı++;
-                                YazLog("HATA", ex.Message + " " + fileName + " ----->>>>> " + Talep.Hedef + "\\" + Fazlalık + " ----->>>>> ");
-                            }
-                        }
-                        else
-                        {
-                            DateTime ftime = File.GetLastWriteTime(fileName);
-                            DateTime ftime2 = File.GetLastWriteTime(Talep.Hedef + "\\" + Fazlalık);
-                            TimeSpan ftimefark = ftime - ftime2;
-
-                            long boyut_k = 0;
-                            long boyut_h = 0;
-                            if (Talep.şifrelemeYontemi == 0)
-                            {
-                                boyut_k = new FileInfo(fileName).Length;
-                                boyut_h = new FileInfo(Talep.Hedef + "\\" + Fazlalık).Length;
-                            }
-
-                            if (System.Math.Abs(ftimefark.TotalSeconds) > 2 ||  //iki dosya arası fark 2 sn yi geçmiş ise 
-                                boyut_k != boyut_h)                             //iki dosya boyutu farklı ise 
-                            {
-                                try
-                                {
-                                    if (File.Exists(Talep.Hedef + "\\" + Fazlalık + "_mup_")) SilDosya(Talep.Hedef + "\\" + Fazlalık + "_mup_");
-                                    İzinAl.Dosya(Talep.Hedef + "\\" + Fazlalık);
-                                    File.Move(Talep.Hedef + "\\" + Fazlalık, Talep.Hedef + "\\" + Fazlalık + "_mup_");
-
-                                    OncekiIslenenBoyut = 0;
-                                    OncekiIslemAnı = DateTime.Now;
-                                    ortalama.Clear();
-                                    switch (Talep.şifrelemeYontemi)
-                                    {
-                                        case (0)://şifreleme yok
-                                            sonuc = Argemup_Dosyalama_Kopyala(fileName, Talep.Hedef + "\\" + Fazlalık);
-                                            break;
-
-                                        case (1)://şifrele
-                                            sonuc = Aş.Karıştır(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Parola, YığınKarıştırGirdi);
-                                            break;
-
-                                        case (2)://çöz
-                                            sonuc = Aş.Düzelt(fileName, Talep.Hedef + "\\" + Fazlalık, Talep.Parola, YığınDüzeltGirdi);
-                                            break;
-                                    }
-
-                                    Talep.IslemormusBoyut = Onceki_IslemormusBoyut;
-
-                                    if (Konum_DosyaİşlemiUzunSürecek == 1)
-                                    {
-                                        OncekiIslenenBoyut = 0;
-                                        OncekiIslemAnı = DateTime.Now;
-                                        ortalama.Clear();
-                                        Durdur = false;
-
-                                        if (!Path.GetFullPath(Path.GetDirectoryName(fileName)).StartsWith(pak_UzDoİş))
-                                        {
-                                            if (!UzSüDoİş.VarMı(fileName, Talep.Hedef + "\\" + Fazlalık))
-                                            {
-                                                string temsilidosya = UzSüDoİş.KaynakDosyaGeciciKlasöreKopyalandıMı(fileName);
-                                                if (temsilidosya == "")
-                                                {
-                                                    temsilidosya = UzSüDoİş.DosyaAdıOluştur(pak_UzDoİş);
-                                                    if (!Argemup_Dosyalama_Kopyala(fileName, temsilidosya)) goto devam_hata_2;
-                                                }
-                                                UzSüDoİş.Ekle(fileName, Talep.Hedef + "\\" + Fazlalık, temsilidosya, Talep.şifrelemeYontemi.ToString() + Talep.Parola);
-                                                YazLog("Bilgi", "Uzun surecek dosyalama islemi listeye eklendi. " + Talep.Hedef + "\\" + Fazlalık);
-                                            }
-                                            else YazLog("Bilgi", "Uzun surecek dosyalama islemi listede olduğu için atlandı. " + Talep.Hedef + "\\" + Fazlalık);
-                                        }
-                                        sonuc = true;
-                                    }
-
-                                    devam_hata_2:
-                                    if (!sonuc)
-                                    {
-                                        TaKa.hatalı++;
-                                        string ek = "";
-                                        if (Talep.şifrelemeYontemi != 0) ek = Aş.SonHatayıOku();
-                                        else ek = Hata;
-                                        YazLog("HATA", ek + " " + fileName + " ----->>>>>> " + Talep.Hedef + "\\" + Fazlalık);
-
-                                        if (File.Exists(Talep.Hedef + "\\" + Fazlalık)) SilDosya(Talep.Hedef + "\\" + Fazlalık);
-                                        İzinAl.Dosya(Talep.Hedef + "\\" + Fazlalık + "_mup_");
-                                        File.Move(Talep.Hedef + "\\" + Fazlalık + "_mup_", Talep.Hedef + "\\" + Fazlalık);
-                                    }
-                                    else
-                                    {
-                                        Talep.IslemormusBoyut += new FileInfo(fileName).Length;
-                                        Talep.YedeklenenDosyaSayısı++;
-                                        if (Konum_DosyaİşlemiUzunSürecek == 0) SilDosya(Talep.Hedef + "\\" + Fazlalık + "_mup_");
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    TaKa.hatalı++;
-                                    YazLog("HATA", ex.Message + " " + fileName + " ----->>>>> " + Talep.Hedef + "\\" + Fazlalık + " ----->>>>> ");
-                                }
-                            }
-                            else
-                            {
-                                try { Talep.IslemormusBoyut += new System.IO.FileInfo(fileName).Length; }
-                                catch (Exception) { }
-                            }
-                        }
-
-                        while_devam:
-                        TaKa.biten++;
-                    }
-
-                    string[] subdirectoryEntries = Listele.Klasör(targetDirectory);
-                    foreach (string subdirectory in subdirectoryEntries)
-                    {
-                        if (Durdur) return;
-                        if (!KaynakSecici_YedeklensinMi_Klasör(subdirectory)) continue;
-
-                        string Fazlalık = subdirectory.Remove(0, Talep.Kaynak.Length);
-                        if (!Directory.Exists(Talep.Hedef + "\\" + Fazlalık)) Directory.CreateDirectory(Talep.Hedef + "\\" + Fazlalık);
-
-                        ProcessDirectory(subdirectory);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Liste_Hatalar.Add("HATA");
-                    Liste_Hatalar.Add(ex.Message + " " + targetDirectory);
-                }
-            }
-            public static bool Argemup_Dosyalama_Kopyala(string Kaynak, string Hedef)
-            {
-                System.IO.FileStream Kaynak_FileStream = null, Hedef_FileStream = null;
-
-                try
-                {
-                    Kaynak_FileStream = new System.IO.FileStream(Kaynak, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-                    if (!Directory.Exists(Path.GetDirectoryName(Hedef))) Directory.CreateDirectory(Path.GetDirectoryName(Hedef));
-                    Hedef_FileStream = new System.IO.FileStream(Hedef, System.IO.FileMode.Create, System.IO.FileAccess.Write);
-
-                    long KaynakOkunmuşAdet = 0;
-                    int KaynakOkunacakDosyaBoyutu;
-                    byte[] Tampon = new byte[4 * 1024];
-
-                    int Tick = Environment.TickCount + 1000;
-                    while (KaynakOkunmuşAdet < Kaynak_FileStream.Length && !Durdur)
-                    {
-                        if (Kaynak_FileStream.Length - KaynakOkunmuşAdet > Tampon.Length) KaynakOkunacakDosyaBoyutu = Tampon.Length;
-                        else KaynakOkunacakDosyaBoyutu = (int)Kaynak_FileStream.Length - (int)KaynakOkunmuşAdet;
-
-                        Kaynak_FileStream.Read(Tampon, 0, KaynakOkunacakDosyaBoyutu);
-                        Hedef_FileStream.Write(Tampon, 0, KaynakOkunacakDosyaBoyutu);
-
-                        KaynakOkunmuşAdet += KaynakOkunacakDosyaBoyutu;
-
-                        if (Environment.TickCount > Tick)
-                        {
-                            Hedef_FileStream.Flush(true);
-
-                            YüzdeDeğeriniDeğerlendir_Sifrele(Hedef, KaynakOkunmuşAdet, Kaynak_FileStream.Length);
-                            IslemGorenDosya = IslemGorenDosya.Remove(0, "Karıştırma".Length);
-                            IslemGorenDosya = "Kopyalama" + IslemGorenDosya;
-
-                            Tick = Environment.TickCount + 1000;
-                        }
-                    }
-
-                    Kaynak_FileStream.Close();
-                    Hedef_FileStream.Close();
-
-                    File.SetCreationTime(Hedef, File.GetCreationTime(Kaynak));
-                    File.SetLastAccessTime(Hedef, File.GetLastAccessTime(Kaynak));
-                    File.SetLastWriteTime(Hedef, File.GetLastWriteTime(Kaynak));
-                    File.SetAccessControl(Hedef, File.GetAccessControl(Kaynak));
-                    File.SetAttributes(Hedef, File.GetAttributes(Kaynak));
-
-                    if (Durdur) { Hata = "Durdurma Sinyali"; goto Cik; }
-
-                    return true;
-                }
-                catch (Exception ex) { Hata = ex.Message; }
-
-                Cik:
-                try { Kaynak_FileStream.Close(); } catch (Exception) { }
-                try { Hedef_FileStream.Close(); } catch (Exception) { }
-                try { SilDosya(Hedef); } catch (Exception) { }
-
-                return false;
-            }
-            public void SürükleBırakKlasörSifreleme()
-            {
-                DahaCokKarmasiklastirma_._Yığın_Karıştır_Girdi_ YığınKarıştırGirdi_2 = new DahaCokKarmasiklastirma_._Yığın_Karıştır_Girdi_(SüBıİş.kaydedilen_ipucu, SüBıİş.EtkinOlan.İsimlerideŞifrele);
-
-                while (SüBıİş.Liste.Count > 0)
-                {
-                    try
-                    {
-                        SüBıİş.EtkinOlan = SüBıİş.Liste[0];
-                        YığınKarıştırGirdi_2.DosyaAdiniKarıştır = SüBıİş.EtkinOlan.İsimlerideŞifrele;
-                        string Fazlalık, HedefKlasör, HedefKlasör_, DosyaAdı;
-                        string[] fileEntries;
-                        
-                        try
-                        {
-                            if (!Directory.Exists(SüBıİş.EtkinOlan.konum_sifrecozme) && !File.Exists(SüBıİş.EtkinOlan.konum_sifrecozme))
-                            {
-                                Directory.CreateDirectory(SüBıİş.EtkinOlan.konum_sifrecozme);
-                                Directory.Delete(SüBıİş.EtkinOlan.konum_sifrecozme);
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            SüBıİş.EtkinOlan.konum_sifrecozme = Path.GetDirectoryName(SüBıİş.EtkinOlan.Kaynak) + "\\Duzeltme\\";
-                        }
-                        SüBıİş.EtkinOlan.konum_sifrecozme = Path.GetDirectoryName(SüBıİş.EtkinOlan.konum_sifrecozme + "\\") + "\\";
-
-                        try
-                        {
-                            if (!Directory.Exists(SüBıİş.EtkinOlan.konum_sifreleme) && !File.Exists(SüBıİş.EtkinOlan.konum_sifreleme))
-                            {
-                                Directory.CreateDirectory(SüBıİş.EtkinOlan.konum_sifreleme);
-                                Directory.Delete(SüBıİş.EtkinOlan.konum_sifreleme);
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            SüBıİş.EtkinOlan.konum_sifreleme = Path.GetDirectoryName(SüBıİş.EtkinOlan.Kaynak) + "\\Karistirma\\";
-                        }
-                        SüBıİş.EtkinOlan.konum_sifreleme = Path.GetDirectoryName(SüBıİş.EtkinOlan.konum_sifreleme + "\\") + "\\";
-
-                        bool Sadece1dosya = false;
-                        string SüBıİş_SürükleBırakListesi_0_;
-                        if (File.Exists(SüBıİş.EtkinOlan.Kaynak))
-                        {
-                            fileEntries = SüBıİş.EtkinOlan.Kaynak.Split('>');
-                            HedefKlasör_ = "";
-                            SüBıİş_SürükleBırakListesi_0_ = Path.GetDirectoryName(fileEntries[0]);
-                            Sadece1dosya = true;
-                        }
-                        else if (Directory.Exists(SüBıİş.EtkinOlan.Kaynak))
-                        {
-                            fileEntries = Listele.Dosya(SüBıİş.EtkinOlan.Kaynak, "*", System.IO.SearchOption.AllDirectories);
-                            HedefKlasör_ = SüBıİş.EtkinOlan.Kaynak.Substring(SüBıİş.EtkinOlan.Kaynak.LastIndexOf('\\'));
-                            SüBıİş_SürükleBırakListesi_0_ = SüBıİş.EtkinOlan.Kaynak;
-                        }
-                        else throw new System.InvalidOperationException("HATALI BİLGİ KULLANILAMIYOR");
-
-                        SürükleBırakKlasörSifreleme_YenidenDene:
-                        SüBıİş.DosyaAdet_Toplam = fileEntries.Length;
-                        SüBıİş.DosyaAdet_İşlenen = 0;
-
-                        for (int i = 0; i < fileEntries.Count(); i++)
-                        {
-                            string fileName = fileEntries[i];
-
-                            try
-                            {
-                                SüBıİş.DosyaAdet_İşlenen++;
-
-                                DosyaAdı = Path.GetFileName(fileName);
-                                Fazlalık = Path.GetDirectoryName(fileName);
-                                Fazlalık = Fazlalık.Remove(0, SüBıİş_SürükleBırakListesi_0_.Length);
-                                while (Fazlalık.EndsWith("\\")) Fazlalık = Fazlalık.Remove(Fazlalık.Count() - 1);
-                                HedefKlasör = HedefKlasör_ + "\\" + Fazlalık;
-
-                                switch (SüBıİş.EtkinOlan.yöntem)
-                                {
-                                    case (ŞifrelemeYöntem.KararVer):
-                                    case (ŞifrelemeYöntem.Çöz):
-                                        if (!Aş.Düzelt(fileName, SüBıİş.EtkinOlan.konum_sifrecozme + HedefKlasör + "\\" + DosyaAdı, SüBıİş.şifre))
-                                        {
-                                            if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.KararVer)
-                                            {
-                                                SüBıİş.EtkinOlan.yöntem = ŞifrelemeYöntem.Şifrele;
-                                                goto SürükleBırakKlasörSifreleme_YenidenDene;
-                                            }
-
-                                            Liste_Hatalar.Add("HATA");
-                                            Liste_Hatalar.Add(Aş.SonHatayıOku() + " " + fileName);
-                                        }
-                                        else
-                                        {
-                                            Talep.IslemormusBoyut += new FileInfo(fileName).Length;
-                                            SüBıİş.EtkinOlan.yöntem= ŞifrelemeYöntem.Çöz;
-                                        }
-                                        break;
-
-                                    case (ŞifrelemeYöntem.Şifrele):
-                                        if (!Aş.Karıştır(fileName, SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör + "\\" + DosyaAdı, SüBıİş.şifre, YığınKarıştırGirdi_2))
-                                        {
-                                            Liste_Hatalar.Add("HATA");
-                                            Liste_Hatalar.Add(Aş.SonHatayıOku() + " " + fileName);
-                                        }
-                                        else Talep.IslemormusBoyut += new FileInfo(fileName).Length;
-                                        break;
-
-                                    case (ŞifrelemeYöntem.Kopyala):
-                                        if (!Argemup_Dosyalama_Kopyala(fileName, SüBıİş.EtkinOlan.konum_sifrecozme + HedefKlasör + "\\" + DosyaAdı))
-                                        {
-                                            Liste_Hatalar.Add("HATA");
-                                            Liste_Hatalar.Add("Kopyalanamadı " + fileName);
-                                        }
-                                        else Talep.IslemormusBoyut += new FileInfo(fileName).Length;
-                                        break;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Liste_Hatalar.Add("HATA");
-                                Liste_Hatalar.Add("Sürükle Bırak Karıştırma " + SüBıİş_SürükleBırakListesi_0_ + " kuyruktan ATILDI >>> EXCEPTION " + ex.Message);
-                            }
-
-                            if (Durdur) return;
-                        }
-
-                        if (!Sadece1dosya)
-                        {
-                            fileEntries = Listele.Klasör(SüBıİş_SürükleBırakListesi_0_, "*", System.IO.SearchOption.AllDirectories);
-                            SüBıİş.DosyaAdet_Toplam = fileEntries.Length + 1000000;
-
-                            //eksik klasörlerin oluşturulması
-                            for (int i = fileEntries.Count() - 1; i >= 0; i--)
-                            {
-                                SüBıİş.DosyaAdet_İşlenen = i;
-
-                                Fazlalık = fileEntries[i].Remove(0, SüBıİş_SürükleBırakListesi_0_.Length);
-                                if (Fazlalık != "") HedefKlasör = HedefKlasör_ + "\\" + Fazlalık;
-                                else HedefKlasör = "";
-
-                                if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Şifrele)
-                                {
-                                    if (!Directory.Exists(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör)) Directory.CreateDirectory(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör);
-                                }
-                                else //sifre çözme ve kopyalama
-                                {
-                                    if (!Directory.Exists(SüBıİş.EtkinOlan.konum_sifrecozme + HedefKlasör)) Directory.CreateDirectory(SüBıİş.EtkinOlan.konum_sifrecozme + HedefKlasör);
-                                }
-                                if (Durdur) return;
-                            }
-
-                            string Kaynak;
-                            //klasör isimlerinini işlenmesi
-                            if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Şifrele && SüBıİş.EtkinOlan.İsimlerideŞifrele)
-                            {
-                                SüBıİş.DosyaAdet_Toplam = fileEntries.Length + 2000000;
-
-                                for (int i = fileEntries.Count() - 1; i >= 0; i--)
-                                {
-                                    SüBıİş.DosyaAdet_İşlenen = i;
-
-                                    Fazlalık = fileEntries[i].Remove(0, SüBıİş_SürükleBırakListesi_0_.Length);
-                                    if (Fazlalık != "") HedefKlasör = HedefKlasör_ + "\\" + Fazlalık;
-                                    else HedefKlasör = "";
-
-                                    Kaynak = SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör + "\\MupYedekleyiciKlasorAdiDosyasi.mup";
-                                    File.WriteAllText(Kaynak, Path.GetFileName(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör));
-                                    File.SetAttributes(Kaynak, FileAttributes.Hidden | FileAttributes.System);
-                                    if (Aş.Karıştır((string)Kaynak, (string)Kaynak, SüBıİş.şifre, YığınKarıştırGirdi_2))
-                                    {
-                                        SilDosya(Kaynak);
-                                        DirectoryInfo hedef__ = Directory.GetParent(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör);
-                                        İzinAl.Klasör(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör);
-                                        Directory.Move(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör, hedef__.FullName + "\\" + Path.GetRandomFileName().Replace(".", ""));
-                                    }
-                                    else if (File.Exists(Kaynak)) SilDosya(Kaynak);
-
-                                    if (Durdur) return;
-                                }
-
-                                Kaynak = SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_ + "\\MupYedekleyiciKlasorAdiDosyasi.mup";
-                                File.WriteAllText(Kaynak, Path.GetFileName(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_));
-                                if (Aş.Karıştır((string)Kaynak, (string)Kaynak, SüBıİş.şifre, YığınKarıştırGirdi_2))
-                                {
-                                    SilDosya(Kaynak);
-                                    DirectoryInfo hedef__ = Directory.GetParent(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_);
-                                    İzinAl.Klasör(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_);
-                                    Directory.Move(SüBıİş.EtkinOlan.konum_sifreleme + HedefKlasör_, hedef__.FullName + "\\" + Path.GetRandomFileName().Replace(".", ""));
-                                }
-                                else if (File.Exists(Kaynak)) SilDosya(Kaynak);
-                            }
-                            else if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Çöz)
-                            {
-                                fileEntries = Listele.Dosya(SüBıİş.EtkinOlan.konum_sifrecozme, "MupYedekleyiciKlasorAdiDosyasi.mup", System.IO.SearchOption.AllDirectories);
-                                SüBıİş.DosyaAdet_Toplam = fileEntries.Length + 3000000;
-
-                                for (int i = fileEntries.Count() - 1; i >= 0; i--)
-                                {
-                                    SüBıİş.DosyaAdet_İşlenen = i;
-
-                                    if (File.Exists(fileEntries[i]))
-                                    {
-                                        string AsılKlasörAdı = File.ReadAllText(fileEntries[i]);
-                                        SilDosya(fileEntries[i]);
-                                        Kaynak = Path.GetDirectoryName(fileEntries[i]);
-                                        string Hedef = Directory.GetParent(Kaynak).FullName + "\\" + AsılKlasörAdı;
-
-                                        if (Directory.Exists(Hedef))
-                                        {
-                                            int gecici_klasör_no = 1;
-                                            while (Directory.Exists(Hedef + "_" + gecici_klasör_no) && !Durdur) gecici_klasör_no++;
-                                            Hedef = Hedef + "_" + gecici_klasör_no;
-                                        }
-
-                                        while (Directory.Exists(Kaynak)) { try { Directory.Move(Kaynak, Hedef); } catch (Exception) { Thread.Sleep(100); SüBıİş.DosyaAdet_Toplam += 1000000; } }
-                                    }
-                                    if (Durdur) return;
-                                }
-                            }
-
-                        }
-
-                        Liste_Hatalar.Add("Bilgi");
-                        Liste_Hatalar.Add("Sürükle Bırak Karıştırma Kalan " + Convert.ToString(SüBıİş.Liste.Count - 1) + ", Tamamlanan " + SüBıİş_SürükleBırakListesi_0_);
-                    }
-                    catch (Exception ex)
-                    {
-                        Liste_Hatalar.Add("HATA");
-                        Liste_Hatalar.Add("Sürükle Bırak Karıştırma " + SüBıİş.EtkinOlan.Kaynak + " kuyruktan ATILDI >>> EXCEPTION " + ex.Message);
-                    }
-
-                    SüBıİş.Liste.RemoveAt(0);
-                    if (Durdur) return;
-                }
-            }
-        }
-        public class FazlaDosyalarıSilen
-        {
-            public void FazlaDosyalarıSil()
-            {
-                while (FaDo.Calistir)
-                {
-                    FaDo.biten = 0;
-                    FaDo.Toplam = 0;
-                    if (Directory.Exists(Talep.Hedef)) { if (Directory.Exists(Talep.Kaynak)) { ProcessDirectory(Talep.Hedef); } }
-                    else Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepArttır;
-                    FaDo.Calistir = false;
-                }
-            }
-
-            public static void ProcessDirectory(string targetDirectory)
-            {
-                string[] fileEntries;
-                try
-                {
-                    fileEntries = Listele.Dosya(targetDirectory);
-                    foreach (string fileName in fileEntries)
-                    {
-                        if (Durdur) return;
-                        if (!KaynakSecici_YedeklensinMi_Dosya(fileName)) continue;
-
-                        string Fazlalık = fileName.Remove(0, Talep.Hedef.Length);
-
-                        IslemGorenDosya = Talep.Kaynak + "\\" + Fazlalık;
-
-                        if (!File.Exists(Talep.Kaynak + "\\" + Fazlalık))
-                        {
-                            if (Fazlalık.Contains("_mup_"))
-                            {
-                                if (Fazlalık.EndsWith("._mup_Ayarlar_mup_"))
-                                {
-                                    //ayarlar dosyası işlem yapma
-                                }
-                                else
-                                {
-                                    if (File.Exists((Talep.Hedef + "\\" + Fazlalık).Substring(0, (Talep.Hedef + "\\" + Fazlalık).Length - ("_mup_").Length))) SilDosya(Talep.Hedef + "\\" + Fazlalık);
-                                    else if (!File.Exists((Talep.Kaynak + "\\" + Fazlalık).Substring(0, (Talep.Kaynak + "\\" + Fazlalık).Length - ("_mup_").Length))) SilDosya(Talep.Hedef + "\\" + Fazlalık);
-                                    else
-                                    {
-                                        TaKa.hatalı++;
-                                        YazLog("Bilgi", "_mup_ Korumalı Dosya " + Talep.Hedef + "\\" + Fazlalık);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (SilDosya(Talep.Hedef + "\\" + Fazlalık)) FaDo.biten++;
-                                else
-                                {
-                                    TaKa.hatalı++;
-                                    YazLog("HATA", "Hatalı Silinmiyor 1 " + Talep.Hedef + "\\" + Fazlalık);
-                                }
-                            }
-                        }
-                        FaDo.Toplam++;
-                    }
-
-                    string[] subdirectoryEntries = Listele.Klasör(targetDirectory);
-                    foreach (string subdirectory in subdirectoryEntries)
-                    {
-                        if (Durdur) return;
-                        if (!KaynakSecici_YedeklensinMi_Klasör(subdirectory)) continue;
-
-                        ProcessDirectory(subdirectory);
-
-                        string Fazlalık = subdirectory.Remove(0, Talep.Hedef.Length);
-                        if (!Directory.Exists(Talep.Kaynak + "\\" + Fazlalık))
-                        {
-                            try
-                            {
-                                İzinAl.Klasör(Talep.Hedef + "\\" + Fazlalık);
-                                Directory.Delete(Talep.Hedef + "\\" + Fazlalık, true);
-                            }
-                            catch (Exception ex)
-                            {
-                                TaKa.hatalı++;
-                                YazLog("HATA", "Hatalı Silinmiyor ex " + Talep.Hedef + "\\" + Fazlalık + " ----->>>>> " + ex.Message);
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Liste_Hatalar.Add("HATA");
-                    Liste_Hatalar.Add(ex.ToString() + " " + targetDirectory);
-                }
-            }
-
-            public void SilKlasör()
-            {
-                try
-                {
-                    if (Directory.Exists(Talep.SilinecekKlasör.TrimEnd('\\'))) SilKlasör_(Talep.SilinecekKlasör);
-                    if (Directory.Exists(Talep.SilinecekKlasör.TrimEnd('\\')))
-                    {
-                        İzinAl.Klasör(Talep.SilinecekKlasör);
-                        Directory.Delete(Talep.SilinecekKlasör, true);
-                    }
-                }
-                catch (Exception)
-                {
-                    TaKa.hatalı++;
-                }
-
-                FaDo.Calistir = false;
-            }
-
-            public void SilKlasör_(string yol)
-            {
-                string[] fileEntries;
-                try
-                {
-                    fileEntries = Listele.Dosya(yol);
-                    foreach (string fileName in fileEntries)
-                    {
-                        if (Durdur) return;
-
-                        if (SilDosya(fileName)) FaDo.biten++;
-                        else
-                        {
-                            TaKa.hatalı++;
-                            YazLog("HATA", "Hatalı Silinmiyor 2 " + fileName);
-                        }
-
-                    }
-
-                    string[] subdirectoryEntries = Listele.Klasör(yol);
-                    foreach (string subdirectory in subdirectoryEntries)
-                    {
-                        if (Durdur) return;
-
-                        try
-                        {
-                            SilKlasör_(subdirectory);
-                            İzinAl.Klasör(subdirectory);
-                            Directory.Delete(subdirectory, true);
-                        }
-                        catch (Exception ex)
-                        {
-                            YazLog("HATA", "Hatalı Silinmiyor ex " + subdirectory + " ----->>>>> " + ex.Message);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Liste_Hatalar.Add("HATA");
-                    Liste_Hatalar.Add(ex.Message + " " + yol);
-                }
-            }
-        }
-        public class TarihselFarkArayan
-        {
-            public void TarihselFarkAra()
-            {
-                while (TaFaA.Calistir)
-                {
-                    TaFaA.KlasörlerAynı = false;
-
-                    try
-                    {
-                        if (!Directory.Exists(TaFaA.A)) break;
-                        if (!Directory.Exists(TaFaA.B)) break;
-
-                        if (!ProcessDirectory(TaFaA.A, TaFaA.B)) break;
-                        if (!ProcessDirectory(TaFaA.B, TaFaA.A)) break;
-
-                        TaFaA.KlasörlerAynı = true;
-                    }
-                    catch (Exception)
-                    {
-                        //olmayan hedef atlanıyor
-                    }
-                    TaFaA.Calistir = false;
-                }
-                TaFaA.Calistir = false;
-            }
-
-            public static bool ProcessDirectory(string A, string B)
-            {
-                string[] fileEntries;
-                try
-                {
-                    fileEntries = Listele.Dosya(A);
-                    foreach (string fileName in fileEntries)
-                    {
-                        if (Durdur) return false;
-                        if (!KaynakSecici_YedeklensinMi_Dosya(fileName)) continue;
-
-                        string Fazlalık = fileName.Remove(0, A.Length);
-
-                        IslemGorenDosya = "Özdeşlik Kontrolü, Bekleyiniz>" + B + "\\" + Fazlalık;
-
-                        if (!File.Exists(B + "\\" + Fazlalık))
-                        {
-                            return false;
-                        }
-                        else
-                        {
-                            DateTime ftime = File.GetLastWriteTime(fileName);
-                            DateTime ftime2 = File.GetLastWriteTime(B + "\\" + Fazlalık);
-
-                            TimeSpan ftimefark = ftime - ftime2;
-
-                            if (System.Math.Abs(ftimefark.TotalSeconds) > 2) //ikli dosya arası fark 3 sn yi geçmiş ise 
-                            {
-                                return false;
-                            }
-                        }
-                    }
-
-                    string[] subdirectoryEntries = Listele.Klasör(A);
-                    foreach (string subdirectory in subdirectoryEntries)
-                    {
-                        if (Durdur) return false;
-                        if (!KaynakSecici_YedeklensinMi_Klasör(subdirectory)) continue;
-
-                        string Fazlalık = subdirectory.Remove(0, A.Length);
-                        if (!Directory.Exists(B + "\\" + Fazlalık)) return false;
-
-                        if (!ProcessDirectory(A + "\\" + Fazlalık + "\\", B + "\\" + Fazlalık + "\\"))
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Liste_Hatalar.Add("HATA");
-                    Liste_Hatalar.Add(ex.Message + " " + A);
-                }
-                return false;
-            }
-        }
-        public class GereksizUygulamaKapatan
-        {
-            public void Calistir()
-            {
-                while (GeUyKa_Uygulama.Count > 0)
-                {
-                    if (Durdur) return;
-
-                    try
-                    {
-                        System.Diagnostics.Process[] processes = System.Diagnostics.Process.GetProcesses();
-
-                        foreach (var proc in processes)
-                        {
-                            if (Durdur) return;
-
-                            for (int i = 0; i < GeUyKa_Uygulama.Count; i += 2)
-                            {
-                                if (Durdur) return;
-
-                                if (proc.ProcessName.Trim().ToLower() == GeUyKa_Uygulama[i].Trim().ToLower())
-                                {
-                                    using (System.Diagnostics.PerformanceCounter pcProcess = new System.Diagnostics.PerformanceCounter("Process", "% Processor Time", proc.ProcessName))
-                                    {
-                                        pcProcess.NextValue();
-                                        System.Threading.Thread.Sleep(1000);
-                                        Double ss = pcProcess.NextValue();
-                                        if (ss >= Convert.ToDouble(GeUyKa_Uygulama[i + 1]))
-                                        {
-                                            if (!proc.HasExited)
-                                            {
-                                                YazLog("Bilgi", "Uygulama Kapatıldı " + proc.ProcessName + " cpu %" + Convert.ToString(ss));
-                                                proc.Kill();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception) { }
-                    System.Threading.Thread.Sleep(10000);
-                }
-            }
-        }
-        #endregion
-
         public AnaEkran()
         {
             InitializeComponent();
         }
-        private void Form1_Load(object sender, EventArgs e)
+        void AnaEkran_Load(object sender, EventArgs e)
         {
-            try
+            Ortak.AnaEkran = this;
+            Ortak.Günlük_MetinKutusu = Günlük_MetinKutusu;
+            Ortak.Düzlem = Düzlem_Talepler;
+            Ortak.Buton_Günlük = Buton_Günlük;
+
+            DateTime date_terhis = new DateTime(2011, 05, 05, 09, 20, 10);
+            DateTime dates_simdi = DateTime.Now;
+            TimeSpan fark = dates_simdi.Subtract(date_terhis);
+
+            string ProgAdVer = "Mup Yedekleyici V" + Application.ProductVersion + " " + fark.Days;
+            if (Path.GetFileNameWithoutExtension(Application.ExecutablePath).ToLower() != "yedekleyici") ProgAdVer += " (" + Path.GetFileNameWithoutExtension(Application.ExecutablePath) + ")";
+            this.Text = ProgAdVer;
+
+            if (File.Exists(Ortak.pak_Banka + "GizliMenuleriGoster.Ayarlar")) Ortak.GizliMenüleriGöster = true;
+
+            bool sonuç;
+        YenidenDene_Ayarlar:
+            Ortak.Ayarlar = new Ayarlar_(out sonuç, "", Ortak.pak_Banka + "\\.Yedekleyici.Ayarlar");
+            if (!sonuç)
             {
-                DateTime dates_simdi = new DateTime();
-                DateTime date_terhis = new DateTime(2011, 05, 05, 09, 20, 10);
-                dates_simdi = DateTime.Now;
-                TimeSpan fark = dates_simdi.Subtract(date_terhis);
-
-                ProgAdVer = "Mup Yedekleyici V" + Application.ProductVersion + " " + fark.Days;
-                if (Path.GetFileNameWithoutExtension(Application.ExecutablePath).ToLower() != "yedekleyici") ProgAdVer += " (" + Path.GetFileNameWithoutExtension(Application.ExecutablePath) + ")";
-                this.Text = ProgAdVer;
-
-                Talep.SayacOtoYedek = 1000;
-                dataGridView1.RowCount = 1;
-                dataGridView1[0, 0].Value = "İşlenen";
-
-                comboBox1.SelectedIndex = 0;
-                SüBıİş.Liste = new List<SürükleBırakİşlemi_>();
-                SüBıİş.EtkinOlan = new SürükleBırakİşlemi_() { yöntem = ŞifrelemeYöntem.KararVer };
-                SüBıİş.kaydedilen_yöntem = (ŞifrelemeYöntem)comboBox1.SelectedIndex;
-                SüBıİş.FareTuşunaBasılıyor = false;
-
-                SilDosya(pak_Banka + "Hatalar.csv");
-
-                SürekliYdeklemeZamanlama = DateTime.Now;
-
-                textBox5.Left = groupBox1.Left;
-                textBox5.Top = groupBox1.Top;
-                textBox5.Width = groupBox1.Width;
-                textBox5.Height = checkedListBox1.Height + groupBox1.Height;
-
-                flowLayoutPanel1.Height = 290;
-                flowLayoutPanel1.Width = 3 + button7.Width + 6 + button8.Width +
-                                            6 + button9.Width + 6 + button10.Width +
-                                            6 + button11.Width + 6 + button12.Width +
-                                            6 + checkBox2.Width + 25;
-                flowLayoutPanel1.Left = 10;
-
-                bool sonuç = false;
-                string Yol = pak_Banka + Environment.MachineName.ToUpper() + "." + Environment.UserName.ToUpper() + "._mup_Ayarlar_mup_";
-                string Parola = Convert.ToString(195324687) + Environment.MachineName.ToUpper() + "." + Environment.UserName.ToUpper();
-                Ayarlar = new ArgeMup.HazirKod.Ayarlar_(out sonuç, Parola, Yol);
-                if (!sonuç)
-                {
-                    DialogResult cevap = MessageBox.Show("Ayarlarınızın okunmaya çalışıldığı dosya, bütünlük kontrolünü geçememiş olması sebebiyle okunamamaktadır.\r\rYeni bir ayarlar dosyası ürettirmek ister misiniz?\r\r" + Yol, "HATA", MessageBoxButtons.YesNo, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                    if (cevap == DialogResult.Yes)
-                    {
-                        if (File.Exists(Yol)) File.Move(Yol, Yol + ".Parmak izi hatali");
-                        if (!Ayarlar.YenidenBaşlat(Parola, Yol))
-                        {
-                            MessageBox.Show("İşlemde hata oluştu. Uygulamayı kapatıp, alttaki dosyanın adını elle değiştirmeyi deneyiniz.\r\r" + Yol, "HATA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    else MessageBox.Show("Yapacağınız değişiklikler kaydedilemeyecektir.\r\r" + Yol, "UYARI", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-
-                PeTeİkKo = new PencereVeTepsiIkonuKontrolu_(this, Ayarlar, false, "", Location.X, Location.Y, Width, Height);
-                PeTeİkKo.TepsiİkonunuBaşlat();
-                PeTeİkKo.Tepsiİkonu.ContextMenuStrip = contextMenuStrip1;
+                File.Delete(Ortak.pak_Banka + "\\.Yedekleyici.Ayarlar");
+                goto YenidenDene_Ayarlar;
             }
-            catch (Exception) { }
-        }
-        private void AnaEkran_Shown(object sender, EventArgs e)
-        {
-            UygulamaOncedenCalistirildiMi = new UygulamaOncedenCalistirildiMi_();
-            if (UygulamaOncedenCalistirildiMi.KontrolEt(Application.ExecutablePath))
+
+            Ayarlar_KarakterBüyüklüğü.Value = Convert.ToDecimal(Ortak.Ayarlar.Oku("Ayarlar_KarakterBüyüklüğü", "8"));
+            Ortak.PeTeİkKo = new PencereVeTepsiIkonuKontrolu_(this, Ortak.Ayarlar);
+            Ortak.PeTeİkKo.TepsiİkonunuBaşlat();
+            Ortak.PeTeİkKo.Tepsiİkonu.ContextMenuStrip = MenuSağ_Uyg;
+
+            Ortak.UygulamaOncedenCalistirildiMi = new UygulamaOncedenCalistirildiMi_();
+            if (Ortak.UygulamaOncedenCalistirildiMi.KontrolEt(Application.ExecutablePath))
             {
-                UygulamaOncedenCalistirildiMi.DiğerUygulamayıÖneGetir();
-                PeTeİkKo.MetniBaloncuktaGöster(ProgAdVer + " uygulaması aynı yoldan çalışan başka bir örneği bulunduğundan kapatılacaktır.\r\r" + Application.ExecutablePath, ToolTipIcon.Info, 10000);
+                Ortak.UygulamaOncedenCalistirildiMi.DiğerUygulamayıÖneGetir();
+                Ortak.PeTeİkKo.MetniBaloncuktaGöster("Aynı klasörden birden fazla çalıştırılmamalıdır, kapatılacaktır.\r\r" + Application.ExecutablePath, ToolTipIcon.Info, 10000);
                 Hide();
-                Thread.Sleep(5000);
+                System.Threading.Thread.Sleep(5000);
                 Application.Exit();
                 return;
             }
-            
-            TaleplerDosyasınıListele();
-            TazeleChecedBox1();
-            GosterTalepBilgileri(0);
 
-            flowLayoutPanel1.Top = textBox5.Top + textBox5.Height;
+            Directory.CreateDirectory(Ortak.pak_Banka);
+            Directory.CreateDirectory(Ortak.pak_Şablon);
+            if (!File.Exists(Ortak.pak_Şablon + ".Yedekleyici_Senaryo")) File.WriteAllBytes(Ortak.pak_Şablon + ".Yedekleyici_Senaryo", Properties.Resources.Senaryo);
+            if (!File.Exists(Ortak.pak_Şablon + ".Yedekleyici_Talep")) File.WriteAllBytes(Ortak.pak_Şablon + ".Yedekleyici_Talep", Properties.Resources.Talep);
+            if (!File.Exists(Ortak.pak_Şablon + ".Yedekleyici_DosyaAtlamaListesi")) File.WriteAllBytes(Ortak.pak_Şablon + ".Yedekleyici_DosyaAtlamaListesi", Properties.Resources.DosyaAtlamaListesi);
+            if (!File.Exists(Ortak.pak_Şablon + "GizliMenuleriGoster.Ayarlar")) File.WriteAllBytes(Ortak.pak_Şablon + "GizliMenuleriGoster.Ayarlar", Properties.Resources.GizliMenuleriGoster);
 
-            timer1.Enabled = true;
-            timer3.Enabled = true;
-
-            if (Directory.Exists(pak_UzDoİş)) SilKlasör(pak_UzDoİş);
-            if (Directory.Exists(pak_Gecici)) SilKlasör(pak_Gecici);
-
-            Sağ_Menu_Durum.SelectedIndex = (int)checkBox3.CheckState;
+            File.Delete(Ortak.pak_Banka + "Gunluk.csv");
         }
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        void AnaEkran_Shown(object sender, EventArgs e)
         {
-            timer2_Tick(null, null);
-            Durdur = false;
-            ListeyiTaleplerDosyasınaYaz();
+            while (Panel_AnaEkran.Controls.Count > 0) Panel_AnaEkran.Controls.RemoveAt(0);
+            Panel_AnaEkran.Controls.Add(Panel_Senaryo);
+            Panel_AnaEkran.Controls.Add(Panel_Talepler);
+            Panel_AnaEkran.Controls.Add(Panel_KlasörleriListele);
+            Panel_AnaEkran.Controls.Add(Panel_KlasörleriKarıştır);
+            Panel_AnaEkran.Controls.Add(Panel_Ayarlar);
+            Panel_AnaEkran.Controls.Add(Panel_Günlük);
+            Panel_Aç(Ortak.PanelListesi.Senaryo);
 
-            button2_Click(null, null);
-        }
-        private void Form1_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            #region Kalıp Kontrolü
+            bool sonuç = true;
+            List<string> Kalıp_Dosyaları = new List<string>();
+            Kalıp_Dosyaları.AddRange(Ortak.Listele.Dosya(Ortak.pak_Banka, SearchOption.AllDirectories, "*.Yedekleyici_Talep"));
+            Kalıp_Dosyaları.AddRange(Ortak.Listele.Dosya(Ortak.pak_Banka, SearchOption.AllDirectories, "*.Yedekleyici_Senaryo"));
+            string kalıplar = Ortak.Ayarlar.Oku("Kalıplar");
+            foreach (var dosya in Kalıp_Dosyaları)
             {
-                e.Effect = DragDropEffects.Copy;
+                string kalıp = Ortak.Ayarlar.Oku_AltDal(kalıplar, dosya);
+                if (string.IsNullOrEmpty(kalıp)) { sonuç = false; break; }
 
-                textBox1.BackColor = Color.YellowGreen;
-                textBox2.BackColor = Color.YellowGreen;
-                textBox4.BackColor = Color.YellowGreen;
-                textBox6.BackColor = Color.YellowGreen;
-                checkedListBox1.BackColor = Color.YellowGreen;
-                textBox5.BackColor = Color.YellowGreen;
-                dataGridView1.DefaultCellStyle.BackColor = Color.YellowGreen;
+                byte[] dosyaiçeriği_dizi = File.ReadAllBytes(dosya);
+                dosyaiçeriği_dizi = D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(dosyaiçeriği_dizi);
+                string dosyaiçeriği_metin = D_HexMetin.BaytDizisinden(dosyaiçeriği_dizi);
+                if (kalıp != dosyaiçeriği_metin) { sonuç = false; break; }
             }
+            if (!sonuç)
+            {
+                if (Ortak.GizliMenüleriGöster) Buton_KalıplarıGüncelle_Click(null, null);
+                else
+                {
+                    Buton_KalıplarıGüncelle.Visible = true;
+                    Buton_KalıplarıGüncelle.Enabled = true;
+                    Buton_KalıplarıGüncelle.Dock = DockStyle.Fill;
+                    Panel_Aç(Ortak.PanelListesi.Ayarlar);
+
+                    Günlük_Zamanlayıcı.Enabled = true;
+                    return;
+                }
+            }
+            #endregion
+
+            Senaryo.Ortak.BilinenleriAç(Ağaç_Senaryo);
+            Talep.Ortak.Listele();
+
+            Buton_Talepler.DropDownItems.Clear();
+            (MenuSağ_Uyg.Items[1] as ToolStripMenuItem).DropDownItems.Clear();
+            foreach (var t in Talep.Ortak.Liste)
+            {
+                #region Önyüz
+                ToolStripMenuItem ts = new ToolStripMenuItem(t.Key);
+                ts.DisplayStyle = ToolStripItemDisplayStyle.Text;
+                Buton_Talepler.DropDownItems.Add(ts);
+
+                ToolStripMenuItem ts_1 = new ToolStripMenuItem("Çalıştır");
+                ts_1.Click += Buton_Talepler_AltButonlar_Click;
+                ts_1.ToolTipText = t.Key;
+                ts_1.DisplayStyle = ToolStripItemDisplayStyle.Text;
+                ts.DropDownItems.Add(ts_1);
+
+                ToolStripMenuItem ts_2 = new ToolStripMenuItem("Talep Dosyasi");
+                ts_2.Click += Buton_Talepler_AltButonlar_Click;
+                ts_2.ToolTipText = t.Value[0];
+                ts_2.DisplayStyle = ToolStripItemDisplayStyle.Text;
+                ts.DropDownItems.Add(ts_2);
+
+                ToolStripMenuItem ts_3 = new ToolStripMenuItem("Kaynak Klasör");
+                ts_3.Click += Buton_Talepler_AltButonlar_Click;
+                ts_3.ToolTipText = t.Value[1];
+                ts_3.DisplayStyle = ToolStripItemDisplayStyle.Text;
+                ts.DropDownItems.Add(ts_3);
+
+                ToolStripMenuItem ts_4 = new ToolStripMenuItem("Hedef Klasör");
+                ts_4.Click += Buton_Talepler_AltButonlar_Click;
+                ts_4.ToolTipText = t.Value[2];
+                ts_4.DisplayStyle = ToolStripItemDisplayStyle.Text;
+                ts.DropDownItems.Add(ts_4);
+                #endregion
+
+                #region MenuSağ
+                ToolStripMenuItem ts_5 = new ToolStripMenuItem(t.Key);
+                ts_5.Click += Buton_Talepler_AltButonlar_Click;
+                ts_5.ToolTipText = t.Key;
+                ts_5.DisplayStyle = ToolStripItemDisplayStyle.Text;
+                (MenuSağ_Uyg.Items[1] as ToolStripMenuItem).DropDownItems.Add(ts_5);
+                #endregion
+            }
+
+            while ((MenuSağ_Uyg.Items[0] as ToolStripMenuItem).DropDownItems.Count > 1) (MenuSağ_Uyg.Items[0] as ToolStripMenuItem).DropDownItems.RemoveAt(1);
+            foreach (Senaryo.Bir_Senaryo_ sny in Senaryo.Ortak.Senaryo_Listesi)
+            {
+                ToolStripMenuItem ts_sny = new ToolStripMenuItem(sny.Tanim);
+                ts_sny.Click += MenuSağ_Uyg_Senaryo_TümünüDurdur_Click;
+                (MenuSağ_Uyg.Items[0] as ToolStripMenuItem).DropDownItems.Add(ts_sny);
+            }
+
+            ParŞab_Liste.Items.Clear();
+            Ortak.ParolaŞablonu = Ortak.Ayarlar.Listele_AltDal(Ortak.Ayarlar.Oku("ParolaŞablonu"));
+            foreach (var ş in Ortak.ParolaŞablonu) ParŞab_Liste.Items.Add(ş.Adı);
+
+            if (Ortak.GizliMenüleriGöster)
+            {
+                //Günlük_Zamanlayıcı.Interval = 100;
+                Buton_Deneme.Visible = true;
+            }
+
+            Ayarlar_DallarıKendiliğinden_AçKapat.Checked = Convert.ToBoolean(Ortak.Ayarlar.Oku("Ayarlar_DallarıKendiliğinden_AçKapat", "true"));
+
+            if (Directory.Exists(Ortak.pak_Geçici))
+            {
+                string tlp_adı = "GeciciDosyalariSil";
+                string[] tlp_içeriği = { "Tanim;" + tlp_adı + Environment.NewLine,
+                                         "Kaynak;" + Ortak.pak_Geçici + Environment.NewLine,
+                                         "Hedef;" + Ortak.pak_Geçici + Environment.NewLine,
+                                         "Dosyalari;Sil" };
+                File.WriteAllLines(Ortak.pak_Geçici + tlp_adı + ".Yedekleyici_Talep", tlp_içeriği);
+                Talep.Ortak.Liste.Add(tlp_adı, new string[] { Ortak.pak_Geçici + tlp_adı + ".Yedekleyici_Talep", "", "" });
+
+                string[] sny_içeriği = { "Tanim;Geçici Klasörü Sil" + Environment.NewLine,
+                                         ">;E;Komut;Talep;" + tlp_adı };
+                Senaryo.Bir_Senaryo_ sny_kendi = new Senaryo.Bir_Senaryo_(sny_içeriği);
+                Senaryo.Ortak.Senaryo_Başlat(sny_kendi);
+            }
+
+            Günlük_Zamanlayıcı.Enabled = true;
+        }
+        void AnaEkran_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Anaİzin(false);
+        }
+
+        void Buton_Deneme_Click(object sender, EventArgs e)
+        {
+            AnaEkran_FormClosed(null, null);
+            AnaEkran_Shown(null, null);
+            //Senaryo.Ortak.Senaryo_Başlat(Senaryo.Ortak.Senaryo_Listesi[0].Tanim);
+        }
+        void Buton_Senaryo_Click(object sender, EventArgs e)
+        {
+            Panel_Aç(Ortak.PanelListesi.Senaryo);
+        }
+        void Buton_Talepler_Click(object sender, EventArgs e)
+        {
+            Panel_Aç(Ortak.PanelListesi.Talepler);
+        }
+        void Buton_Talepler_AltButonlar_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem tsmi = sender as ToolStripMenuItem; string girdi = tsmi.ToolTipText;
+            try { girdi = Senaryo.Değişken.Oku_MetinVeyaDeğişken(tsmi.ToolTipText); } catch (Exception) { }
+
+            if (File.Exists(girdi)) System.Diagnostics.Process.Start("notepad.exe", girdi);
+            else if (Directory.Exists(girdi)) System.Diagnostics.Process.Start(girdi);
+            else
+            {
+                Ortak.Dsi.TümünüDurdur();
+
+                string sny_adı = D_GeriDönülemezKarmaşıklaştırmaMetodu.Metinden(Path.GetRandomFileName(), 6);
+                string[] sny_içeriği = { "Tanim;" + sny_adı + Environment.NewLine,
+                                         ">;E;Komut;Talep;" + girdi };
+
+                Senaryo.Bir_Senaryo_ sny_kendi = new Senaryo.Bir_Senaryo_(sny_içeriği);
+                Senaryo.Ortak.Senaryo_Başlat(sny_kendi);
+            }
+        }
+        void Buton_KlasörleriListele_Click(object sender, EventArgs e)
+        {
+            Panel_Aç(Ortak.PanelListesi.KlasörleriListele);
+        }
+        void Buton_KlasörleriKarıştır_Click(object sender, EventArgs e)
+        {
+            Panel_Aç(Ortak.PanelListesi.KlasörleriKarıştır);
+        }
+        void Buton_Günlük_Click(object sender, EventArgs e)
+        {
+            Panel_Aç(Ortak.PanelListesi.Günlük);
+            Buton_Günlük.Image = Properties.Resources.M_Gunluk;
+        }
+        void Buton_Ayarlar_Click(object sender, EventArgs e)
+        {
+            Panel_Aç(Ortak.PanelListesi.Ayarlar); 
+        }
+        void Buton_KalıplarıGüncelle_Click(object sender, EventArgs e)
+        {
+            Buton_KalıplarıGüncelle.Text = "Uygulamayı Tekrar Başlatın";
+            Application.DoEvents();
+
+            List<string> Kalıp_Dosyaları = new List<string>();
+            Kalıp_Dosyaları.AddRange(Ortak.Listele.Dosya(Ortak.pak_Banka, SearchOption.AllDirectories, "*.Yedekleyici_Talep"));
+            Kalıp_Dosyaları.AddRange(Ortak.Listele.Dosya(Ortak.pak_Banka, SearchOption.AllDirectories, "*.Yedekleyici_Senaryo"));
+            string kalıplar = "";
+            foreach (var dosya in Kalıp_Dosyaları)
+            {
+                byte[] dosyaiçeriği_dizi = File.ReadAllBytes(dosya);
+                dosyaiçeriği_dizi = D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(dosyaiçeriği_dizi);
+                string dosyaiçeriği_metin = D_HexMetin.BaytDizisinden(dosyaiçeriği_dizi);
+
+                Ortak.Ayarlar.Yaz_AltDal(ref kalıplar, dosya, dosyaiçeriği_metin);
+            }
+            Ortak.Ayarlar.Yaz("Kalıplar", kalıplar);
+
+            kalıplar = Ortak.pak_AnaKlasör + "Yedek\\Kalip_" + (Environment.MachineName + "." + Environment.UserName).ToUpper() + "_" + DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".zip";
+            Directory.CreateDirectory(Path.GetDirectoryName(kalıplar));
+            System.IO.Compression.ZipFile.CreateFromDirectory(Ortak.pak_Banka, kalıplar, System.IO.Compression.CompressionLevel.Optimal, true);
+
+            Application.DoEvents();
+            System.Threading.Thread.Sleep(500);
+
+            if (Ortak.GizliMenüleriGöster) { Buton_KalıplarıGüncelle.Enabled = false; Buton_KalıplarıGüncelle.Visible = false; }
+            else Close();
+        }
+        void Buton_Çalışıyor_Click(object sender, EventArgs e)
+        {
+            Anaİzin(!(Buton_Çalışıyor.Tag == null));
+        }
+
+        void ParŞab_Par1_TextChanged(object sender, EventArgs e)
+        {
+            ParŞab_Ekle.Enabled = ParŞab_Par1.Text == ParŞab_Par2.Text;
+        }
+        void ParŞab_Ekle_Click(object sender, EventArgs e)
+        {
+            if (ParŞab_Tanım.Text == "" || ParŞab_Par1.Text == "")
+            {
+                Ortak.DurumBildirimi.BaloncukluUyarı("Boş olamaz", ToolTipIcon.Error, 3500, ParŞab_Tanım);
+                return;
+            }
+
+            if (ParŞab_Liste.Items.Contains(ParŞab_Tanım.Text))
+            {
+                Ortak.DurumBildirimi.BaloncukluUyarı("Benzersiz bir tanım seçilmeli", ToolTipIcon.Error, 3500, ParŞab_Liste);
+                return;
+            }
+
+            ParŞab_Sil.Enabled = false;
+            ParŞab_Liste.Items.Add(ParŞab_Tanım.Text);
+
+            string g = ""; 
+            Ortak.ParolaŞablonu.Add(new Depo.Biri(ParŞab_Tanım.Text, Ortak.Karıştır(D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(ParŞab_Par1.Text), 128)), Ortak.Parola)));
+            Ortak.Ayarlar.ListeyiEkle_AltDal(ref g, Ortak.ParolaŞablonu);
+            Ortak.Ayarlar.Yaz("ParolaŞablonu", g);
+        }
+        void ParŞab_Liste_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ParŞab_Sil.Enabled = true;
+        }
+        void ParŞab_Sil_Click(object sender, EventArgs e)
+        {
+            string g = "";
+            Ortak.Ayarlar.ListeyiEkle_AltDal(ref g, Ortak.ParolaŞablonu);
+            Ortak.Ayarlar.Sil_AltDal(ref g, ParŞab_Liste.SelectedItem.ToString());
+            Ortak.Ayarlar.Yaz("ParolaŞablonu", g);
+
+            ParŞab_Liste.Items.Remove(ParŞab_Liste.SelectedItem);
+
+            ParŞab_Sil.Enabled = false;
+        }
+
+        void Ayarlar_KarakterBüyüklüğü_ValueChanged(object sender, EventArgs e)
+        {
+            PuntoDeğişti((float)Ayarlar_KarakterBüyüklüğü.Value);
+            Ortak.Ayarlar.Yaz("Ayarlar_KarakterBüyüklüğü", Ayarlar_KarakterBüyüklüğü.Value.ToString());
+        }
+        void Ayarlar_DallarıKendiliğinden_AçKapat_CheckedChanged(object sender, EventArgs e)
+        {
+            Ortak.Ayarlar.Yaz("Ayarlar_DallarıKendiliğinden_AçKapat", Ayarlar_DallarıKendiliğinden_AçKapat.Checked.ToString());
+        }
+        void Günlük_Zamanlayıcı_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Ortak.UygulamayıKapatmaSayacı > 0)
+                {
+                    Ortak.UygulamayıKapatmaSayacı -= Günlük_Zamanlayıcı.Interval;
+                    if (Ortak.UygulamayıKapatmaSayacı <= 0) Close();
+                }
+
+                if (Buton_KalıplarıGüncelle.Enabled == true)
+                {
+                    Show();
+                    WindowState = FormWindowState.Normal;
+                    Show();
+                    BringToFront();
+
+                    Ortak.PeTeİkKo.MetniBaloncuktaGöster("Kalıpları Güncelle", ToolTipIcon.Error);
+                }
+
+                if (Buton_Çalışıyor.Tag == null)
+                {
+                    //Talep sayfasındaki eski görsellerin silinmesi
+                    foreach (Talep.Görsel_ biri in Ortak.Düzlem.Controls)
+                    {
+                        if (DateTime.Now - biri.SonGüncellenme > TimeSpan.FromHours(5))
+                        {
+                            biri.Dispose();
+                            Ortak.Düzlem.Controls.Remove(biri);
+                        }
+                    }
+
+                    //Dalları kırpma
+                    if (WindowState != FormWindowState.Minimized && Ortak.EtkinPanel == Ortak.PanelListesi.Senaryo)
+                    {
+                        foreach (TreeNode biri in Ağaç_Senaryo.Nodes)
+                        {
+                            if (biri.ToolTipText.Contains("hatalı")) continue;
+
+                            Ortak.AğaçGörseliniGüncelle(biri, Ağaç_AltDallarınSimgesiniKkontrolet(biri));
+                        }
+                    }
+
+                    //Senaryoları çalıştır
+                    foreach (Senaryo.Bir_Senaryo_ biri in Senaryo.Ortak.Senaryo_Listesi)
+                    {
+                        if (biri.TekrarÇalıştırmaZamanAralığı_msn > 0)
+                        {
+                            if (biri.TekrarÇalıştırmaZamanAralığı_msn_sayac < Environment.TickCount)
+                            {
+                                Senaryo.Ortak.Senaryo_Başlat(biri);
+                                biri.TekrarÇalıştırmaZamanAralığı_msn_sayac = Environment.TickCount + biri.TekrarÇalıştırmaZamanAralığı_msn;
+                            }
+                        }
+                    }
+                } 
+                else if ((DateTime.Now - (DateTime)Buton_Çalışıyor.Tag).TotalSeconds > 30)
+                {
+                    Buton_Çalışıyor.Image = Properties.Resources.D_Yeni;
+                    Refresh();
+                    System.Media.SystemSounds.Asterisk.Play();
+                    System.Threading.Thread.Sleep(500);
+                    Buton_Çalışıyor.Image = Properties.Resources.D_Hata;
+
+                    Buton_Çalışıyor.Tag = DateTime.Now;
+                }
+            }
+            catch (Exception ex) { Ortak.Günlük_Ekle(ex.ToString()); }
+        }
+        int Ağaç_AltDallarınSimgesiniKkontrolet(TreeNode Dal)
+        {
+            int[] AltDallar = new int[Dal.Nodes.Count+1];
+            for (int i = 0; i < Dal.Nodes.Count; i++) AltDallar[i] = Ağaç_AltDallarınSimgesiniKkontrolet(Dal.Nodes[i]);
+            
+            if (Dal.Parent == null) AltDallar[Dal.Nodes.Count] = (int)Ortak.Resimler.EnFazla;
+            else AltDallar[Dal.Nodes.Count] = Dal.ImageIndex;
+
+            int EnDüşük = AltDallar.Min();
+
+            if (Ayarlar_DallarıKendiliğinden_AçKapat.Checked)
+            {
+                if (EnDüşük >= (int)Ortak.Resimler.Tamam) { if (Dal.IsExpanded) Dal.Collapse(true); }
+                else { if (!Dal.IsExpanded) Dal.Expand(); }
+            }
+
+            return EnDüşük;
+        }
+
+        void MenuSağ_Senaryo_Başlat_Click(object sender, EventArgs e)
+        {
+            if (Ağaç_Senaryo.SelectedNode.Parent == null)
+            {
+                Senaryo.Ortak.Senaryo_Başlat(Ağaç_Senaryo.SelectedNode.Text);
+            }
+            else
+            {
+                Senaryo.Bir_Adım_ Adım = (Senaryo.Bir_Adım_)Ağaç_Senaryo.SelectedNode.Tag;
+                if (Adım.Seviye > 0)
+                {
+                    Adım.Senaryo.Durdurmaİsteği = false;
+                    Senaryo.Ortak.Adım_Başlat(Adım);
+                }
+            }
+        }
+        void MenuSağ_Senaryo_Durdur_Click(object sender, EventArgs e)
+        {
+            if (Ağaç_Senaryo.SelectedNode.Parent == null)
+            {
+                Senaryo.Ortak.Senaryo_Durdur(Ağaç_Senaryo.SelectedNode.Text);
+            }
+        }
+        void MenuSağ_Senaryo_Dosya_Click(object sender, EventArgs e)
+        {
+            if (Ağaç_Senaryo.SelectedNode.Parent == null)
+            {
+                Senaryo.Bir_Senaryo_ sny = Senaryo.Ortak.Senaryo_Bul(Ağaç_Senaryo.SelectedNode.Text);
+                if (sny != null)
+                {
+                    System.Diagnostics.Process.Start("notepad.exe", sny.DosyaYolu);
+                }
+            }
+        }
+        void MenuSağ_Senaryo_Genişlet_Click(object sender, EventArgs e)
+        {
+            Ağaç_Senaryo.SelectedNode.ExpandAll();
+        }
+        void MenuSağ_Senaryo_Daralt_Click(object sender, EventArgs e)
+        {
+            Ağaç_Senaryo.SelectedNode.Collapse(false);
+        }
+
+        void Ağaç_Senaryo_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            Ağaç_Senaryo.SelectedNode = e.Node;
+        }
+        void Ağaç_Senaryo_BeforeCheck(object sender, TreeViewCancelEventArgs e)
+        {
+            e.Cancel = true;
+        }
+
+        void MenuSağ_Uyg_Çıkış_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+        void MenuSağ_Uyg_Senaryo_TümünüDurdur_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem tsmi = sender as ToolStripMenuItem;
+            if (tsmi.Text == "Tümünü Durdur") AnaEkran_FormClosed(null, null);
+            else Senaryo.Ortak.Senaryo_Başlat(tsmi.Text);
+        }
+
+        void PuntoDeğişti(float Boyut)
+        {
+            Ortak.KarakterBüyüklüğü = Boyut;
+
+            statusStrip1.ImageScalingSize = new Size((int)Boyut * 2, (int)Boyut * 2);
+            statusStrip1.Font = new Font(statusStrip1.Font.FontFamily, Boyut);
+            this.Font = new Font(this.Font.FontFamily, Boyut);
+
+            ResimListesi.ImageSize = new Size((int)(Boyut * 1.75), (int)(Boyut * 1.75));
+            ResimListesi.Images.Clear();
+            ResimListesi.Images.Add(Properties.Resources.D_Calisiyor);
+            ResimListesi.Images.Add(Properties.Resources.D_Hata);
+            ResimListesi.Images.Add(Properties.Resources.D_Tamam);
+            ResimListesi.Images.Add(Properties.Resources.D_Tamam_Hayir);
+            ResimListesi.Images.Add(Properties.Resources.D_Yeni);
+            ResimListesi.Images.Add(Properties.Resources.M_Senaryo);
+            ResimListesi.Images.Add(Properties.Resources.M_Talepler);
+            ResimListesi.Images.Add(Properties.Resources.M_KlasorleriListele);
+            ResimListesi.Images.Add(Properties.Resources.M_KlasorleriKaristirDuzelt);
+            ResimListesi.Images.Add(Properties.Resources.M_Ayarlar);
+        }
+        void Panel_Aç(Ortak.PanelListesi Adı)
+        {
+            if (Ortak.EtkinPanel == Adı) return;
+
+            for (int i = 0; i < Panel_AnaEkran.Controls.Count; i++) Panel_AnaEkran.Controls[i].Visible = false;
+            Panel_AnaEkran.Controls[(int)Adı].Visible = true;
+            Ortak.EtkinPanel = Adı;
+        }
+        void Anaİzin(bool Aç)
+        {
+            if (Aç)
+            {
+                Buton_Çalışıyor.Image = Properties.Resources.D_Tamam;
+                Buton_Çalışıyor.Tag = null;
+
+                foreach (var s in Senaryo.Ortak.Senaryo_Listesi) s.TekrarÇalıştırmaZamanAralığı_msn_sayac = 0;
+            }
+            else
+            {
+                Buton_Çalışıyor.Image = Properties.Resources.D_Hata;
+                Buton_Çalışıyor.Tag = DateTime.Now;
+
+                foreach (var s in Senaryo.Ortak.Senaryo_Listesi)
+                {
+                    s.Durdurmaİsteği = true;
+                    while (s.ÇalışanGörevAdedi > 0) { System.Threading.Thread.Sleep(100); Application.DoEvents(); }
+                }
+
+                Ortak.Dsi.TümünüDurdur();
+            }
+        }
+		void Panel_KlasörleriListele_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
             else e.Effect = DragDropEffects.None;
         }
-        private void Form1_DragLeave(object sender, EventArgs e)
+        void Panel_KlasörleriListele_DragDrop(object sender, DragEventArgs e)
         {
-            textBox1.BackColor = Color.White;
-            textBox2.BackColor = Color.White;
-            textBox4.BackColor = Color.White;
-            textBox6.BackColor = Color.White;
-            checkedListBox1.BackColor = Color.White; ;
-            textBox5.BackColor = Color.Gainsboro;
-            dataGridView1.DefaultCellStyle.BackColor = Color.White;
-        }
-        private void Form1_DragDrop(object sender, DragEventArgs e)
-        {
-            Form1_DragLeave(null, null);
-            textBox5.AppendText(Environment.NewLine);
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string file in files)
-            {
-                SürükleBırakİşlemi_ yeni = new SürükleBırakİşlemi_()
-                {
-                    Kaynak = file,
-                    konum_sifrecozme = SüBıİş.kaydedilen_konum_sifrecozme,
-                    konum_sifreleme = SüBıİş.kaydedilen_konum_sifreleme,
-                    İsimlerideŞifrele = SüBıİş.kaydedilen_İsimlerideŞifrele,
-                    yöntem = SüBıİş.kaydedilen_yöntem
-                };
-
-                SürükleBırakİşlemleri_Başlat(yeni);
-            }
-        }
-        private void dataGridView1_DragDrop(object sender, DragEventArgs e)
-        {
-            Form1_DragLeave(null, null);
-
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             string alinan;
             foreach (string file in files)
@@ -1235,1470 +555,29 @@ namespace Yedekleyici
 
                 if (alinan != "")
                 {
-                    KlasorGezgini frm2 = new KlasorGezgini(this);
+                    KlasorGezgini frm2 = new KlasorGezgini();
                     frm2.Show();
                     frm2.Baslangiçİşlemleri(alinan);
                 }
             }
         }
-        private void textBox_sü_bı_girdi_TextChanged(object sender, EventArgs e)
-        {
-            string sonuç = Aş.Düzelt(textBox_sü_bı_girdi.Text, textBox_sü_bı_şifre.Text);
-            if (sonuç == "") sonuç = Aş.Karıştır(textBox_sü_bı_girdi.Text, textBox_sü_bı_şifre.Text);
-            textBox_sü_bı_çıktı.Text = sonuç;
 
-            if (textBox_sü_bı_girdi.Text != "") textBox_sü_bı_çıktı2.Text = D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(textBox_sü_bı_girdi.Text)));
-
-            flowLayoutPanel1_MouseMove(null, null);
-        }
-        public void SürükleBırakİşlemleri_Başlat(SürükleBırakİşlemi_ Yeni)
-        {
-            if (SüBıİş.şifre == "")
-            {
-                PeTeİkKo.MetniBaloncuktaGöster("Parola doldurulmadan işlem yapılamaz.", ToolTipIcon.Error);
-                flowLayoutPanel1.Visible = true;
-                flowLayoutPanel1.Location = new Point(0, 0);
-                textBox7.Focus();
-                return;
-            }
-
-            if (File.Exists(Yeni.Kaynak) || Directory.Exists(Yeni.Kaynak))
-            {
-                bool aynısıvar = false;
-                int i = 0;
-                for (; i < SüBıİş.Liste.Count; i++)
-                {
-                    if (SüBıİş.Liste[i].Kaynak == Yeni.Kaynak)
-                    {
-                        aynısıvar = true;
-                        break;
-                    }
-                }
-
-                if (!aynısıvar)
-                {
-                    SüBıİş.Liste.Add(Yeni);
-                    GosterLog("Bilgi", "Sürükle Bırak Karıştırma Kuyruğa Eklendi " + Yeni.Kaynak + " Sıra No " + Convert.ToString(SüBıİş.Liste.Count));
-                }
-                else GosterLog("UYARI", "Sürükle Bırak Karıştırma ZATEN KUYRUKTA " + Yeni.Kaynak + " Sıra No " + Convert.ToString(i + 1));
-            }
-            else GosterLog("UYARI", "UYGUN DEGİL " + Yeni.Kaynak);
-        }
-
-        static public bool YazLog(string Tip, string mesaj)
+        void GeDönülemezKa_Girdi_TextChanged(object sender, EventArgs e)
         {
             try
             {
-                DateTime saveNow = DateTime.Now;
-                using (StreamWriter file = new StreamWriter(pak_Banka + "Hatalar.csv", true))
-                {
-                    Liste_Hatalar.Add(Tip);
-                    Liste_Hatalar.Add(mesaj);
-                    file.WriteLine(saveNow.ToString() + ";" + Tip + " " + mesaj);
-                }
-
-                return true;
+                string[] dizi = GeDönülemezKa_Girdi.Text.Split('|');
+                GeDönülemezKa_Çıktı.Text = D_GeriDönülemezKarmaşıklaştırmaMetodu.Metinden(dizi[1], Convert.ToInt32(dizi[0]));
             }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show("İstenmeyen Durum " + ex.Message);
-            }
-            return false;
+            catch (Exception) { GeDönülemezKa_Girdi.Text = "32|" + GeDönülemezKa_Girdi.Text; }
         }
-        public void GosterLog(string Tip, string mesaj)
+        void GeDönülebilirKa_Parola_TextChanged(object sender, EventArgs e)
         {
-            if (Tip != "HATA")
-            {
-                switch (textBox5.Lines.Count())
-                {
-                    case (0):
-                        break;
-
-                    case (1):
-                    case (2):
-                        if (textBox5.Lines[0].Contains(mesaj)) return;
-                        break;
-
-                    default:
-                        if (textBox5.Lines[textBox5.Lines.Count() - 2].Contains(mesaj)) return;
-                        break;
-                }
-            }
-
-            textBox5.AppendText("- " + Tip + " " + Convert.ToString(DateTime.Now) + " " + mesaj + Environment.NewLine);
-            textBox5.ScrollToCaret();
+            string sonuç = Ortak.Düzelt(GeDönülebilirKa_Girdi.Text, GeDönülebilirKa_Parola.Text);
+            if (sonuç == "") sonuç = Ortak.Karıştır(GeDönülebilirKa_Girdi.Text, GeDönülebilirKa_Parola.Text);
+            GeDönülebilirKa_Çıktı.Text = sonuç;
         }
 
-        public void TaleplerDosyasınıListele()
-        {
-            TaleplerDosyası = Ayarlar.Listele();
-            for (int i = 0; i < TaleplerDosyası.Count();)
-            {
-                if (!TaleplerDosyası[i].Adı.StartsWith("Talep_")) TaleplerDosyası.RemoveAt(i);
-                else i++;
-            }
-
-            string okunan = Ayarlar.Oku("Sürükle Bırak İşlemleri");
-            if (okunan != "")
-            {
-                SüBıİş.şifre = "";
-                textBox7.Text = "";
-
-                SüBıİş.kaydedilen_konum_sifrecozme = Ayarlar.Oku_AltDal(okunan, "düzeltme konumu");
-                if (SüBıİş.kaydedilen_konum_sifrecozme == "") textBox6.Text = ">>>>> Kaynak Konumu + \"\\Duzeltme\"";
-                else textBox6.Text = SüBıİş.kaydedilen_konum_sifrecozme;
-
-                SüBıİş.kaydedilen_konum_sifreleme = Ayarlar.Oku_AltDal(okunan, "karıştırma konumu");
-                if (SüBıİş.kaydedilen_konum_sifreleme == "") textBox4.Text = ">>>>> Kaynak Konumu + \"\\Karistirma\"";
-                else textBox4.Text = SüBıİş.kaydedilen_konum_sifreleme;
-
-                SüBıİş.kaydedilen_yöntem = (ŞifrelemeYöntem)Convert.ToInt32(Ayarlar.Oku_AltDal(okunan, "yöntem"));
-                comboBox1.SelectedIndex = (int)SüBıİş.kaydedilen_yöntem;
-
-                checkBox4.Checked = true;
-                if (Ayarlar.Oku_AltDal(okunan, "isimleride şifrele") == "Hayır") checkBox4.Checked = false;
-                SüBıİş.kaydedilen_İsimlerideŞifrele = checkBox4.Checked;
-
-                textBox8.Text = Ayarlar.Oku_AltDal(okunan, "ipucu");
-                if (string.IsNullOrEmpty(textBox8.Text)) textBox8.Text = "İpucu";
-                else textBox8.Text = textBox8.Text.Replace(";", ".,");
-                if (textBox8.Text != "İpucu") SüBıİş.kaydedilen_ipucu = textBox8.Text;
-                else SüBıİş.kaydedilen_ipucu = "";
-            }
-            else button13_Click(null, null); 
-        }
-        private void ListeyiTaleplerDosyasınaYaz()
-        {
-            if (Durdur) return;
-
-            List<Depo.Biri> gecici = Ayarlar.Listele();
-            for (int i = 0; i < gecici.Count();i++)
-            {
-                if (gecici[i].Adı.StartsWith("Talep_")) Ayarlar.Sil(gecici[i].Adı);
-            }
-
-            Ayarlar.ListeyiEkle(TaleplerDosyası);
-
-            string okunan = "";
-            Ayarlar.Yaz_AltDal(ref okunan, "düzeltme konumu", SüBıİş.kaydedilen_konum_sifrecozme);
-            Ayarlar.Yaz_AltDal(ref okunan, "karıştırma konumu", SüBıİş.kaydedilen_konum_sifreleme);
-            Ayarlar.Yaz_AltDal(ref okunan, "yöntem", Convert.ToString((Int32)(SüBıİş.kaydedilen_yöntem)));
-            Ayarlar.Yaz_AltDal(ref okunan, "ipucu", SüBıİş.kaydedilen_ipucu);
-            Ayarlar.Yaz_AltDal(ref okunan, "isimleride şifrele", SüBıİş.kaydedilen_İsimlerideŞifrele.ToString());
-            Ayarlar.Yaz("Sürükle Bırak İşlemleri", okunan);
-        }
-        public bool GosterTalepBilgileri(int no)
-        {
-            if (TaleplerDosyası.Count == 0) return false;
-            if (no < 0 || no > TaleplerDosyası.Count) return false;
-
-            string okunan = TaleplerDosyası[no].İçeriği;
-            label14.Text = "Son Yedek " + Ayarlar.Oku_AltDal(okunan, "son yedek anı");
-            textBox3.Text = TaleplerDosyası[no].Adı .Remove(0, "Talep_".Length);
-            textBox1.Text = Ayarlar.Oku_AltDal(okunan, "kaynak");
-            textBox1.Tag = Ayarlar.Oku_AltDal(okunan, "kaynak secici tam liste");
-            textBox2.Text = Ayarlar.Oku_AltDal(okunan, "hedef");
-            Zamanlama.Tag = okunan;
-            
-            if (Ayarlar.Oku_AltDal(okunan, "etkin mi") == "Evet") return true;
-            else return false;
-        }
-        public bool GosterArkaPlanTalepBilgileri(int no)
-        {
-            if (TaleplerDosyası.Count == 0) return false;
-            if (no < 0 || no > TaleplerDosyası.Count) return false;
-
-            string okunan = TaleplerDosyası[no].İçeriği;
-            Talep.SonYedekTarihi = Ayarlar.Oku_AltDal(okunan, "son yedek anı");
-            Talep.Tanım = TaleplerDosyası[no].Adı.Remove(0, "Talep_".Length);
-
-            Talep.Kaynak = Ayarlar.Oku_AltDal(okunan, "kaynak");
-            if (!Talep.Kaynak.EndsWith("\\")) Talep.Kaynak += "\\";
-
-            Talep.KaynakSecici_TamListe = Ayarlar.Oku_AltDal(okunan, "kaynak secici tam liste");
-
-            Talep.Hedef = Ayarlar.Oku_AltDal(okunan, "hedef");
-            if (!Talep.Hedef.EndsWith("\\")) Talep.Hedef += "\\";
-
-            Talep.Süre = Convert.ToInt32(Ayarlar.Oku_AltDal(okunan, "Süre_Arka", "15"));
-            Talep.Pzt = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Pzt", bool.TrueString));
-            Talep.Sa = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Sa", bool.TrueString));
-            Talep.Çrş = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Çrş", bool.TrueString));
-            Talep.Per = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Per", bool.TrueString));
-            Talep.Cu = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Cu", bool.TrueString));
-            Talep.Cts = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Cts", bool.TrueString));
-            Talep.Paz = bool.Parse(Ayarlar.Oku_AltDal(okunan, "Paz", bool.TrueString));
-            Talep.Başlangıç = DateTime.Parse(Ayarlar.Oku_AltDal(okunan, "Başlangıç", (new DateTime(1938, 11, 10, 0, 0, 0)).ToString()));
-            Talep.Bitiş = DateTime.Parse(Ayarlar.Oku_AltDal(okunan, "Bitiş", (new DateTime(1938, 11, 10, 23, 59, 59)).ToString()));
-            Talep.FarklıKlasörSayisi = Convert.ToInt16(Ayarlar.Oku_AltDal(okunan, "FarklıKlasörSayısı", "1"));
-            Talep.FazlaDosyalarıSil = bool.Parse(Ayarlar.Oku_AltDal(okunan, "FazlaDosyalarıSil", bool.FalseString));
-            Talep.ArkaPlandaÇalıştır = bool.Parse(Ayarlar.Oku_AltDal(okunan, "ArkaPlandaÇalıştır", bool.TrueString));
-            Talep.Parola = Ayarlar.Oku_AltDal(okunan, "Parola");
-
-            Talep.şifrelemeYontemi = 0;
-            if (Ayarlar.Oku_AltDal(okunan, "Karıştır", bool.FalseString) == bool.TrueString) Talep.şifrelemeYontemi = 1;
-            else if (Ayarlar.Oku_AltDal(okunan, "Düzelt", bool.FalseString) == bool.TrueString) Talep.şifrelemeYontemi = 2;
-
-            if (Talep.FarklıKlasörSayisi > 1) Talep.FazlaDosyalarıSil = false;
-
-            if (Ayarlar.Oku_AltDal(okunan, "etkin mi") == "Evet") return true;
-            else return false;     
-        }
-        public void SilTalep(int no)
-        {
-            if (TaleplerDosyası.Count == 0) return;
-            TaleplerDosyası.RemoveAt(no);
-            ListeyiTaleplerDosyasınaYaz();
-        }
-        public void DegiştirTalep(int no, int tür, string bilgi)
-        {
-            if (Durdur) return;
-            if (TaleplerDosyası.Count == 0) return;
-
-            if (no >= TaleplerDosyası.Count) return;
-
-            Depo.Biri gecici = new Depo.Biri(TaleplerDosyası[no].Adı, TaleplerDosyası[no].İçeriği);
-
-            switch (tür)
-            {
-                case (0)://durum
-                    Ayarlar.Yaz_AltDal(ref gecici.İçeriği, "etkin mi", bilgi); 
-                    break;
-
-                case (1)://son tarih
-                    Ayarlar.Yaz_AltDal(ref gecici.İçeriği, "son yedek anı", bilgi); 
-                    break;
-            }
-
-            TaleplerDosyası[no] = gecici;
-            ListeyiTaleplerDosyasınaYaz();
-        }
-        private bool YazTalep(string TalepDurumu)
-        {
-            try
-            {
-                string yazılan = "";            
-                Ayarlar.Yaz_AltDal(ref yazılan, "kaynak", textBox1.Text);
-                Ayarlar.Yaz_AltDal(ref yazılan, "hedef", textBox2.Text);
-                Ayarlar.Yaz_AltDal(ref yazılan, "son yedek anı", DateTime.Now.AddMinutes((Convert.ToDouble(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Süre_Arka", "15")) + 1) * -1).ToString());
-                Ayarlar.Yaz_AltDal(ref yazılan, "kaynak secici tam liste", (string)textBox1.Tag);
-
-                Ayarlar.Yaz_AltDal(ref yazılan, "Süre_Arka", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Süre_Arka", "15"));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Pzt", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Pzt", bool.TrueString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Sa", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Sa", bool.TrueString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Çrş", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Çrş", bool.TrueString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Per", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Per", bool.TrueString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Cu", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Cu", bool.TrueString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Cts", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Cts", bool.TrueString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Paz", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Paz", bool.TrueString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Başlangıç", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Başlangıç", (new DateTime(1938, 11, 10, 0, 0, 0)).ToString()));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Bitiş", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Bitiş", (new DateTime(1938, 11, 10, 23, 59, 59)).ToString()));
-                Ayarlar.Yaz_AltDal(ref yazılan, "FarklıKlasörSayısı", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "FarklıKlasörSayısı", "1"));
-                Ayarlar.Yaz_AltDal(ref yazılan, "FazlaDosyalarıSil", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "FazlaDosyalarıSil", bool.FalseString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "ArkaPlandaÇalıştır", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "ArkaPlandaÇalıştır", bool.TrueString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "SadeceKopyala", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "SadeceKopyala", bool.TrueString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Karıştır", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Karıştır", bool.FalseString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Düzelt", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Düzelt", bool.FalseString));
-                Ayarlar.Yaz_AltDal(ref yazılan, "Parola", Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Parola", ""));
-
-                Ayarlar.Yaz_AltDal(ref yazılan, "etkin mi", TalepDurumu); 
-                Depo.Biri yeni = new Depo.Biri("Talep_" + textBox3.Text, yazılan);
-
-                if (EkleDeğiştir.Text == "Ekle") TaleplerDosyası.Add(yeni);
-                else
-                {
-                    for (int i = 0; i < TaleplerDosyası.Count; i++)
-                    {
-                        if (TaleplerDosyası[i].Adı .Remove(0, "Talep_".Length) == textBox3.Text)
-                        {
-                            TaleplerDosyası.RemoveAt(i);
-                            TaleplerDosyası.Insert(i, yeni);
-                        } 
-                    }
-                }
-
-                ListeyiTaleplerDosyasınaYaz();
-
-                EkleDeğiştir.Text = "Değiştir";
-                return true;
-            }
-            catch (Exception ex)
-            {
-                YazLog("HATA", "YazTalep " + ex.Message);
-            }
-            return false;
-        }
-
-        static public bool SilDosya(string ad)
-        {
-            try
-            {
-                if (!File.Exists(ad)) return true;
-                if (!İzinAl.Dosya(ad)) return false;
-
-                File.SetAttributes(ad, FileAttributes.Normal);
-                File.Delete(ad);
-                return true;
-            }
-            catch (Exception)  { }
-
-            return false;
-        }
-        static public void SilKlasör(string yol)
-        {
-            Yapilacak_İşler yedek = Yapilacak_İşler_Sayaç;
-            Yapilacak_İşler_Sayaç = Yapilacak_İşler.DahaBekle;
-            Talep.SilinecekKlasör = yol;
-            FaDo.Calistir = true;
-
-            Thread_FazlaDosyalarıSilen = new Thread(Object_FazlaDosyalarıSilen.SilKlasör);
-            Thread_FazlaDosyalarıSilen.Start();
-
-            while (FaDo.Calistir) Application.DoEvents();
-
-            Yapilacak_İşler_Sayaç = yedek;
-        }
-        public bool KarsilastirKlasör(string A, string B)
-        {
-            //false farklı
-            //true aynı
-            Yapilacak_İşler yedek = Yapilacak_İşler_Sayaç;
-            Yapilacak_İşler_Sayaç = Yapilacak_İşler.DahaBekle;
-
-            TaFaA.Calistir = true;
-            TaFaA.A = A;
-            TaFaA.B = B;
-            Thread_TarihselFarkArayan = new Thread(Object_TarihselFarkArayan.TarihselFarkAra);
-            Thread_TarihselFarkArayan.Start();
-            while (TaFaA.Calistir)
-            {
-                try
-                {
-                    if (IslemGorenDosya.Contains(">"))
-                    {
-                        string[] gecici = IslemGorenDosya.Split('>');
-                        label5.Text = gecici[0];
-                        label4.Text = gecici[1];
-                    }
-                    else
-                    {
-                        label5.Text = Path.GetFileName(IslemGorenDosya);
-                        label4.Text = Path.GetDirectoryName(IslemGorenDosya);
-                    }
-                }
-                catch (Exception)
-                {
-                    label5.Text = "";
-                    label4.Text = IslemGorenDosya;
-                }
-
-                Thread.Sleep(100);
-                Application.DoEvents();
-            }
-
-            Yapilacak_İşler_Sayaç = yedek;
-            if (TaFaA.KlasörlerAynı)    return true;
-            else                        return false;
-        }
-
-        private void checkBox2_CheckStateChanged(object sender, EventArgs e)
-        {
-            if (checkBox2.Checked)
-            {
-                textBox5.Visible = false;
-                checkedListBox1.Visible = true;
-                groupBox1.Visible = true;
-            }
-            else
-            {
-                textBox5.Visible = true;
-                checkedListBox1.Visible = false;
-                groupBox1.Visible = false;
-            }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (Yapilacak_İşler_Sayaç != Yapilacak_İşler.Bekleme) return;
-            checkBox3.Checked = false;
-            Yapilacak_İşler_Sayaç = Yapilacak_İşler.Hazirlik;
-        }
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            if (checkBox3.CheckState == CheckState.Unchecked)
-            {
-                if (checkBox3.ForeColor == System.Drawing.Color.Red) checkBox3.ForeColor = System.Drawing.Color.Black;
-                else checkBox3.ForeColor = System.Drawing.Color.Red;
-            }
-
-            timer1.Enabled = false;
-            switch(Yapilacak_İşler_Sayaç)
-            {
-                case (Yapilacak_İşler.Bekleme):
-                case (Yapilacak_İşler.DahaBekle):
-                    timer1.Interval = 500;
-                    Talep.SonTalepNo = 0;
-
-                    dataGridView1[1, 0].Value = "...";
-                    progressBar1.Style = ProgressBarStyle.Marquee;
-                    this.Text = ProgAdVer;
-                    PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
-
-                    button1.Enabled = true;
-                    groupBox1.Enabled = true;
-                    break;
-
-                case (Yapilacak_İşler.Hazirlik):
-                    timer1.Interval = 100;
-
-                    if (TaleplerDosyası.Count == 0)
-                    {
-                        Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-                        timer1.Enabled = true;
-                        return;
-                    }
-                    FaDo.biten = 0;
-                    TaKa.biten = 0;
-                    TaKa.hatalı = 0;
-                    Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepBul;
-                    break;
-
-                case (Yapilacak_İşler.TalepBul):
-                    button1.Enabled = false;
-                    groupBox1.Enabled = false;
-
-                    label5.Text = "...";
-                    label4.Text = "Adım " + Convert.ToString(Talep.SonTalepNo+1) + " " + Talep.Tanım;
-
-                    if (GosterArkaPlanTalepBilgileri(Talep.SonTalepNo)) 
-                    {
-                        if (Talep.Tanım.Contains(">>>>>Komut>"))
-                        {
-                            label5.Text = "Çalışıyor";
-
-                            try
-                            {
-                                string[] kom = Talep.Tanım.Split('>');
-                                if (kom[6] == "Bekle")
-                                {
-                                    decimal bekleme = Convert.ToInt32(kom[7]);
-                                    if (bekleme >= 24 * 60) GosterLog("UYARI", Talep.Tanım + " Bekleme süresi 24 saatten fazla olduğu için atlandı.");
-                                    {
-                                        SürekliYdeklemeZamanlama = DateTime.Now;
-                                        SürekliYdeklemeZamanlama = SürekliYdeklemeZamanlama.AddMinutes((double)bekleme);
-                                        GosterLog("Bilgi", Talep.Tanım + " Sistem " + Convert.ToString(bekleme) + " dakikalığına donduruldu. " + Convert.ToString(SürekliYdeklemeZamanlama)); 
-                                    }
-                                }
-                                else if (kom[6] == "Calistir")
-                                {
-                                    string ad = Path.GetFileNameWithoutExtension(kom[7]);
-                                    System.Diagnostics.Process[] processes = System.Diagnostics.Process.GetProcesses();
-                                    bool uygulamaacik = false;
-                                    foreach (var proc in processes)
-                                    {
-                                        if (proc.ProcessName.Trim().ToLower() == ad.Trim().ToLower()) uygulamaacik = true;
-                                    }
-
-                                    if (uygulamaacik) GosterLog("Bilgi", Talep.Tanım + " belirtilen uygulama zaten çalıştığı için atlandı.");
-                                    else
-                                    { 
-                                        System.Diagnostics.Process process = new System.Diagnostics.Process();
-                                        process.StartInfo.UseShellExecute = true;
-                                        process.StartInfo.FileName = Path.GetFileName(kom[7]);
-                                        process.StartInfo.WorkingDirectory = Path.GetDirectoryName(kom[7]);          
-                                        if (kom.Count() >= 9) process.StartInfo.Arguments = kom[8];
-                                        if (kom.Count() >= 10)
-                                        {
-                                            if (kom[9] != "") process.StartInfo.Verb = kom[9];
-                                        }
-                                        if (kom.Count() >= 11) 
-                                        { 
-                                            if (kom[10] == "Hidden") process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                                            else if (kom[10] == "Maximized") process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Maximized;
-                                            else if (kom[10] == "Minimized") process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Minimized;
-                                            else if (kom[10] == "Normal") process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
-                                        }
-                                        if (kom.Count() >= 12) { if (kom[11] == "DontUseShellExecute") process.StartInfo.UseShellExecute = false; }
-                                        process.Start();
-
-                                        GosterLog("Bilgi", Talep.Tanım + " belirtilen uygulama çalıştırıldı.");
-                                    } 
-                                }
-                                else if (kom[6] == "Kapat")
-                                {
-                                    if (kom.Count() == 7 || (kom.Count() > 7 && kom[7] == ""))
-                                    {
-                                        while (!string.IsNullOrEmpty(UzSüDoİş.DurumuOku())) { Thread.Sleep(100); Application.DoEvents(); if (Durdur) return; }
-                                        
-                                        GosterLog("Bilgi", Talep.Tanım + " Uygulama kapatılıyor.");
-                                        System.Threading.Thread.Sleep(1000);
-                                        this.Close();
-                                    }
-                                    else
-                                    {
-                                        if (kom.Count() == 8)
-                                        {
-                                            string ad = Path.GetFileNameWithoutExtension(kom[7]);
-                                            System.Diagnostics.Process[] processes = System.Diagnostics.Process.GetProcesses();
-                                            foreach (var proc in processes)
-                                            {
-                                                if (proc.ProcessName.Trim().ToLower() == ad.Trim().ToLower())
-                                                {
-                                                    if (!proc.HasExited) proc.Kill();
-                                                }
-                                            }
-                                        }
-                                        else if (kom.Count() > 8 && kom[8] == "")
-                                        {
-                                            string ad = Path.GetFileNameWithoutExtension(kom[7]);
-                                            System.Diagnostics.Process[] processes = System.Diagnostics.Process.GetProcesses();
-                                            foreach (var proc in processes)
-                                            {
-                                                if (proc.ProcessName.Trim().ToLower() == ad.Trim().ToLower())
-                                                {
-                                                    if (!proc.HasExited) proc.Kill();
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            string ad = Path.GetFileNameWithoutExtension(kom[7]);
-                                            if (!GeUyKa_Uygulama.Contains(ad))
-                                            {
-                                                GeUyKa_Uygulama.Add(ad);
-                                                GeUyKa_Uygulama.Add(kom[8]);
-                                                GosterLog("Bilgi", "Kuyruğa Eklendi " + ad + "%" + kom[8]);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            catch (Exception ex) { GosterLog("HATA", Talep.Tanım + " " + ex.Message); }
-
-                            DegiştirTalep(Talep.SonTalepNo, 1, Convert.ToString(DateTime.Now));
-                            if (checkBox3.Checked) Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-                            else Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepArttır;
-                            break;
-                        }
-
-                        try
-                        {
-                            if (!Directory.Exists(Talep.Kaynak)) throw new Exception();
-                            Directory.CreateDirectory(Talep.Hedef);
-
-                            if (!DosyaSistemiIzleyici.DeğişiklikVarMı(Talep.Tanım, Talep.Kaynak, Talep.Hedef)) throw new Exception("DosyaSistemiIzleyici");
-                            else DosyaSistemiIzleyici.Durdur(Talep.Tanım, Talep.Kaynak, Talep.Hedef);
-                        }
-                        catch (Exception ex)
-                        {
-                            Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepArttır;
-                            timer1.Enabled = true;
-
-                            DegiştirTalep(Talep.SonTalepNo, 1, Convert.ToString(DateTime.Now));
-
-                            if (ex.Message == "DosyaSistemiIzleyici") label5.Text = "Kaynak = Hedef";
-                            else label5.Text = "Kaynak/Hedef Kullanılamıyor";
-                            return;
-                        }
-
-                        Talep.Kaynakça = KaynakSecici_.Aç(Talep.Kaynak, Talep.KaynakSecici_TamListe, true);
-
-                        if (Talep.FarklıKlasörSayisi > 1)
-                        {
-                            Talep.OrjinalHedef = Talep.Hedef;
-                            string tarih = DateTime.Now.ToString("dd_MM_yyyy HH-mm-ss");
-
-                            Talep.Hedef += tarih + "\\";
-
-                            FaDo.biten = 0;
-                            string[] subdirectoryEntries = Listele.Klasör(Talep.OrjinalHedef);
-                            if (subdirectoryEntries.Count() > 0)
-                            {
-                                //sıralama
-                                var Tarihler = new List<DateTime>();
-                                foreach (string klasör in subdirectoryEntries)
-                                {
-                                    try
-                                    {
-                                        Tarihler.Add(DateTime.ParseExact(klasör.Remove(0, Talep.OrjinalHedef.Length), "dd_MM_yyyy HH-mm-ss", System.Globalization.CultureInfo.InvariantCulture));
-                                    }
-                                    catch (Exception) { }
-
-                                    Application.DoEvents();
-                                }
-
-                                //silmeye 0. elemandan başlanacak
-                                Tarihler.Sort((a, b) => a.CompareTo(b));
-
-                                if (Tarihler.Count > 0)
-                                {
-                                    //Değişiklik kontrolü
-                                    Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye = Tarihler[Tarihler.Count() - 1].ToString();
-                                    Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye = Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye.Replace(".", "_");
-                                    Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye = Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye.Replace(":", "-");
-                                    Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye = Talep.OrjinalHedef + Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye + "\\";
-
-                                    if (KarsilastirKlasör(Talep.Kaynak, Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye))
-                                    {
-                                        DegiştirTalep(Talep.SonTalepNo, 1, Convert.ToString(DateTime.Now));
-                                        GosterLog("Bilgi", Talep.Tanım + " Klasörler özdeş " + Talep.Kaynak + " " + Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye);
-                                        Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepArttır;
-                                        label5.Text = "Klasörler Özdeş";
-                                        break;
-                                    }
-
-                                    if (Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler == null) Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler = new List<string>();
-                                    Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler.Clear();
-
-                                    for (int i = 0; i < Tarihler.Count - Talep.FarklıKlasörSayisi; i++)
-                                    {
-                                        //Fazlalık eskileri silme
-                                        string son_ornek = Tarihler[i].ToString();
-                                        son_ornek = son_ornek.Replace(".", "_");
-                                        son_ornek = son_ornek.Replace(":", "-");
-
-                                        Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler.Add(Talep.OrjinalHedef + son_ornek);
-                                    }
-                                }
-
-                                //yeniyi baslatma devam ediyor
-                            }
-                        }
-
-                        DoSaBu.Calistir = true;
-                        Thread_DosyaSayisiniBulan = new Thread(Object_DosyaSayisiniBulan.DosyaSayisiniBul);
-                        Thread_DosyaSayisiniBulan.Start();
-                        Yapilacak_İşler_Sayaç = Yapilacak_İşler.Sayma;
-                        label5.Text = "Çalışıyor";
-                    }
-                    else
-                    {
-                        label5.Text = "Durgun";
-
-                        if (checkBox3.Checked) Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-                        else                   Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepArttır;    
-                    }
-                    break;
-
-                case (Yapilacak_İşler.TalepArttır):
-                    if (checkBox3.Checked) Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-                    else
-                    {
-                        if (++Talep.SonTalepNo < TaleplerDosyası.Count)
-                        {
-                            Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepBul;
-                        }
-                        else
-                        {
-                            Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-                            label4.Text = "...";
-                            label5.Text = "...";
-                        }
-                    }
-                    break;
-
-                case (Yapilacak_İşler.Sayma):
-                    timer1.Interval = 200;
-
-                    if (!DoSaBu.Calistir)
-                    {     
-                        progressBar1.Maximum = Talep.ToplamDosyaSayısı+1; 
-                        progressBar1.Value = 0;
-
-                        TaKa.Calistir = true;
-                        TaKa.checkbox3 = checkBox3.Checked;
-                        Thread_TarihselKarşilaştiran = new Thread(Object_TarihselKarşilaştiran.TarihselKarşilaştir);
-                        Thread_TarihselKarşilaştiran.Start();
-                        Yapilacak_İşler_Sayaç = Yapilacak_İşler.tarihsel_karşilaştir;
-                        progressBar1.Style = ProgressBarStyle.Blocks;
-                    }
-                    else
-                    {
-                        progressBar1.Style = ProgressBarStyle.Marquee;
-                        this.Text = "Adım " + Convert.ToString(Talep.SonTalepNo + 1) + " " + Talep.Tanım + " / " + Convert.ToString(Talep.ToplamDosyaSayısı) + " / " + D_DosyaBoyutu.Metne(Talep.ToplamBoyut) + " " + ProgAdVer;
-
-                        PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Belirsiz);
-                    }
-                    break;
-
-                case (Yapilacak_İşler.tarihsel_karşilaştir):
-                    if (!TaKa.Calistir)
-                    {
-                        dataGridView1[1, 0].Value = Convert.ToString(TaKa.biten);
-                        dataGridView1[2, 0].Value = Convert.ToString(Talep.YedeklenenDosyaSayısı);
-                        dataGridView1[5, 0].Value = Convert.ToString(TaKa.hatalı) + " / " + Convert.ToString(TaKa.GenelHatalı);
-                        try
-                        { progressBar1.Value = TaKa.biten; } catch (Exception) { progressBar1.Value = progressBar1.Maximum-1; }
-                        
-                        if (Talep.FazlaDosyalarıSil)
-                        {
-                            FaDo.Calistir = true;
-                            Thread_FazlaDosyalarıSilen = new Thread(Object_FazlaDosyalarıSilen.FazlaDosyalarıSil);
-                            Thread_FazlaDosyalarıSilen.Start();
-                            Yapilacak_İşler_Sayaç = Yapilacak_İşler.fazla_dosyaları_sil;
-                        }
-                        else
-                        {
-                            if (Talep.FarklıKlasörSayisi > 1)
-                            {
-                                if (KarsilastirKlasör(Talep.Hedef, Talep.BirdenFazlaKlasörİleÇalışma_EnYeniÜye))
-                                {
-                                    Talep.YedeklenenDosyaSayısı = 0;
-                                    SilKlasör(Talep.Hedef);
-                                    GosterLog("Bilgi", Talep.Tanım + " işleminde son üretilen ile bir önce üretilen klasörler özdeş, son üretilen silindi - " + Talep.Kaynak + " -> " + Talep.Hedef);
-                                }
-
-                                if (Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler != null)
-                                {
-                                    foreach (string yol in Talep.BirdenFazlaKlasörİleÇalışma_EnEskiÜyeler)
-                                    {
-                                        SilKlasör(yol);
-                                        Application.DoEvents();
-                                    }
-                                }
-                            }
-
-                            DegiştirTalep(Talep.SonTalepNo, 1, Convert.ToString(DateTime.Now));
-
-                            if (checkBox3.Checked) Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-                            else Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepArttır;
-
-                            string sonuc = Talep.Tanım;
-                            if (TaKa.hatalı > 0) sonuc += " " + Convert.ToString(TaKa.hatalı) + " HATALI işlem";
-                            sonuc += ", " + Convert.ToString(Talep.YedeklenenDosyaSayısı) + " yedeklenen dosya";
-                            if (FaDo.biten > 0) sonuc += ", " + Convert.ToString(FaDo.biten) + " fazla dosya";
-                            sonuc += ", toplamda " + Convert.ToString(Talep.ToplamDosyaSayısı) + " dosya ve ";
-                            sonuc += Convert.ToString(Talep.ToplamKlasörSayısı) + " klasör işlem gördü.";
-                            GosterLog("Rapor", sonuc);
-
-                            this.Text = ProgAdVer;
-                            if (Talep.YedeklenenDosyaSayısı > 0) PeTeİkKo.MetniBaloncuktaGöster(Talep.Tanım + " " + Convert.ToString(Talep.YedeklenenDosyaSayısı) + " / " + Convert.ToString(Talep.ToplamDosyaSayısı), ToolTipIcon.Info, 500);
-
-                            PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
-
-                            DosyaSistemiIzleyici.DeğişiklikVarMı(Talep.Tanım, Talep.Kaynak, Talep.OrjinalHedef);
-                        }
-                    }
-                    else
-                    {
-                        dataGridView1[1, 0].Value = Convert.ToString(TaKa.biten);
-                        dataGridView1[2, 0].Value = Convert.ToString(Talep.YedeklenenDosyaSayısı);
-                        dataGridView1[5, 0].Value = Convert.ToString(TaKa.hatalı) + " / " + Convert.ToString(TaKa.GenelHatalı);
-                        try
-                        {
-                            PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Normal, (ulong)progressBar1.Value, (ulong)progressBar1.Maximum);
-                            progressBar1.Value = TaKa.biten;
-                        } catch (Exception) { progressBar1.Value = progressBar1.Maximum - 1; }
-
-                        try
-                        {
-                            if (IslemGorenDosya.Contains(">"))
-                            {
-                                string[] gecici = IslemGorenDosya.Split('>');
-                                label5.Text = gecici[0];
-                                label4.Text = gecici[1];
-                            }
-                            else
-                            {
-                                label5.Text = Path.GetFileName(IslemGorenDosya);
-                                label4.Text = Path.GetDirectoryName(IslemGorenDosya);
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            label5.Text = "";
-                            label4.Text = IslemGorenDosya;
-                        }
-                        
-                        this.Text = "Adım " + Convert.ToString(Talep.SonTalepNo + 1) + " " + Talep.Tanım + " " + D_DosyaBoyutu.Metne(Talep.IslemormusBoyut) + "/" + D_DosyaBoyutu.Metne(Talep.ToplamBoyut) + " " + ProgAdVer;
-                    }
-                    break;
-
-                case (Yapilacak_İşler.fazla_dosyaları_sil):
-                    if (!FaDo.Calistir)
-                    {
-                        dataGridView1[3, 0].Value = Convert.ToString(FaDo.Toplam);
-                        dataGridView1[4, 0].Value = Convert.ToString(FaDo.biten);
-                        dataGridView1[5, 0].Value = Convert.ToString(TaKa.hatalı) + " / " + Convert.ToString(TaKa.GenelHatalı);
-
-                        DegiştirTalep(Talep.SonTalepNo, 1, Convert.ToString(DateTime.Now));
-
-                        if (checkBox3.Checked) Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-                        else                   Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepArttır;
-
-                        string sonuc = Talep.Tanım;
-                        if (TaKa.hatalı > 0) sonuc += " " + Convert.ToString(TaKa.hatalı) + " HATALI işlem";
-                        sonuc += ", " + Convert.ToString(Talep.YedeklenenDosyaSayısı) + " yedeklenen dosya";
-                        if (FaDo.biten > 0) sonuc += ", " + Convert.ToString(FaDo.biten) + " fazla dosya";
-                        sonuc += ", toplamda " + Convert.ToString(Talep.ToplamDosyaSayısı) + " dosya ve ";
-                        sonuc += Convert.ToString(Talep.ToplamKlasörSayısı) + " klasör işlem gördü.";
-                        GosterLog("Rapor", sonuc);
-
-                        this.Text = ProgAdVer;
-                        if (Talep.YedeklenenDosyaSayısı > 0) PeTeİkKo.MetniBaloncuktaGöster(Talep.Tanım + " " + Convert.ToString(Talep.YedeklenenDosyaSayısı) + " / " + Convert.ToString(Talep.ToplamDosyaSayısı),  ToolTipIcon.Info, 500);
-
-                        PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
-
-                        DosyaSistemiIzleyici.DeğişiklikVarMı(Talep.Tanım, Talep.Kaynak, Talep.OrjinalHedef);
-                    }
-                    else
-                    {
-                        dataGridView1[3, 0].Value = Convert.ToString(FaDo.Toplam);
-                        dataGridView1[4, 0].Value = Convert.ToString(FaDo.biten);
-                        dataGridView1[5, 0].Value = Convert.ToString(TaKa.hatalı) + " / " + Convert.ToString(TaKa.GenelHatalı);
-
-                        PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Durgun, (ulong)FaDo.biten, (ulong)FaDo.Toplam);
-
-                        try
-                        {
-                            label5.Text = Path.GetFileName(IslemGorenDosya);
-                            label4.Text = Path.GetDirectoryName(IslemGorenDosya);
-                        }
-                        catch (Exception)
-                        {
-                            label5.Text = "";
-                            label4.Text = IslemGorenDosya;
-                        }
-
-                        this.Text = "Adım " + Convert.ToString(Talep.SonTalepNo + 1) + " " + Talep.Tanım + " " + ProgAdVer;
-                    }
-                    break;
-            }
-
-            timer1.Enabled = true;
-        }
-        private void timer2_Tick(object sender, EventArgs e)
-        {
-            if (SüBıİş.FareTuşunaBasılıyor) return;
-
-            timer2.Enabled = false;
-            flowLayoutPanel1.Visible = false; 
-        }
-        private void timer3_Tick(object sender, EventArgs e)
-        {
-            try
-            {
-                int tick = Environment.TickCount + 250;
-                for (int i = 0; i < Liste_Hatalar.Count() && tick > Environment.TickCount; i++)
-                {
-                    GosterLog(Liste_Hatalar[0], Liste_Hatalar[1]);
-                    Liste_Hatalar.RemoveAt(0);
-                    Liste_Hatalar.RemoveAt(0);
-                }
-            }
-            catch (Exception ex) { Liste_Hatalar.Clear(); GosterLog("HATA", "Liste_Hatalar da sorun oluştu" + ex.Message); }
-
-            if (GeUyKa_Uygulama.Count > 0)
-            {
-                if (Thread_GereksizUygulamaKapatan == null) Thread_GereksizUygulamaKapatan = new Thread(Object_GereksizUygulamaKapatan.Calistir);
-                else if (Thread_GereksizUygulamaKapatan.ThreadState != ThreadState.Running &&
-                         Thread_GereksizUygulamaKapatan.ThreadState != ThreadState.WaitSleepJoin)
-                {
-                    Thread_GereksizUygulamaKapatan = new Thread(Object_GereksizUygulamaKapatan.Calistir);
-                    Thread_GereksizUygulamaKapatan.Start();
-                }
-            }
-
-            if (SüBıİş.Liste.Count > 0)
-            {
-                groupBox2.Enabled = false;
-
-                if (Thread_TaKa_SürükleBırakListesi == null) Thread_TaKa_SürükleBırakListesi = new Thread(Object_TarihselKarşilaştiran.SürükleBırakKlasörSifreleme);
-                else if (Thread_TaKa_SürükleBırakListesi.ThreadState != ThreadState.Running &&
-                         Thread_TaKa_SürükleBırakListesi.ThreadState != ThreadState.WaitSleepJoin)
-                {
-                    Thread_TaKa_SürükleBırakListesi = new Thread(Object_TarihselKarşilaştiran.SürükleBırakKlasörSifreleme);
-                    Thread_TaKa_SürükleBırakListesi.Start();
-                }
-
-                if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Çöz) label6.Text = "Düzeltme ";
-                else if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Şifrele) label6.Text = "Karıştırma ";
-                else if (SüBıİş.EtkinOlan.yöntem == ŞifrelemeYöntem.Kopyala) label6.Text = "Kopyalama ";
-                else label6.Text = "..... ";
-                try { label6.Text += Convert.ToString(SüBıİş.DosyaAdet_İşlenen) + " / " + Convert.ToString(SüBıİş.DosyaAdet_Toplam) + " / " + Convert.ToString(SüBıİş.Liste.Count + " " + SüBıİş.Liste[0].Kaynak); } catch (Exception)  { }         
-            }
-            else { label6.Text = "Boşta"; groupBox2.Enabled = true; }
-
-            dataGridView1[6, 0].Value = UzSüDoİş.DurumuOku();
-            toolTip1.SetToolTip(dataGridView1, UzSüDoİş.DetaylıDurum);
-
-            if (!checkBox3.Checked) return;
-            if (Yapilacak_İşler_Sayaç != Yapilacak_İşler.Bekleme) return;
-            if (TaleplerDosyası.Count == 0) return;
-            if (SürekliYdeklemeZamanlama > DateTime.Now) return;
-
-            if (++Talep.SayacOtoYedek >= TaleplerDosyası.Count) Talep.SayacOtoYedek = 0;
-            GosterTalepBilgileri(Talep.SayacOtoYedek);
-
-            label5.Text = "...";
-            label4.Text = "Adım " + Convert.ToString(Talep.SayacOtoYedek + 1) + " " + textBox3.Text;
-
-            if (!GosterArkaPlanTalepBilgileri(Talep.SayacOtoYedek))
-            {
-                label5.Text = "Durgun";
-                return;
-            }
-
-            DateTime dates_simdi = new DateTime();
-            dates_simdi = DateTime.Now;
-  
-            bool Devam = false;
-            if      (dates_simdi.DayOfWeek == DayOfWeek.Monday && Talep.Pzt) Devam = true;
-            else if (dates_simdi.DayOfWeek == DayOfWeek.Tuesday && Talep.Sa) Devam = true;
-            else if (dates_simdi.DayOfWeek == DayOfWeek.Wednesday && Talep.Çrş) Devam = true;
-            else if (dates_simdi.DayOfWeek == DayOfWeek.Thursday && Talep.Per) Devam = true;
-            else if (dates_simdi.DayOfWeek == DayOfWeek.Friday && Talep.Cu) Devam = true;
-            else if (dates_simdi.DayOfWeek == DayOfWeek.Saturday && Talep.Cts) Devam = true;
-            else if (dates_simdi.DayOfWeek == DayOfWeek.Sunday && Talep.Paz) Devam = true;
-            if (!Devam)
-            {
-                label5.Text = "Bugün Durgun";
-                return;
-            }
-
-            int şimdi = dates_simdi.Hour * 60 + dates_simdi.Minute;
-            int başla = Talep.Başlangıç.Hour * 60 + Talep.Başlangıç.Minute;
-            int bitir = Talep.Bitiş.Hour * 60 + Talep.Bitiş.Minute;
-            if (şimdi < başla || şimdi > bitir)
-            {
-                label5.Text = "Bu Saatte Durgun";
-                return;
-            }
-
-            Talep.SonYedekTarihi = Talep.SonYedekTarihi.Replace(".", " ");
-            Talep.SonYedekTarihi = Talep.SonYedekTarihi.Replace(":", " ");
-            string[] ta1 = Talep.SonYedekTarihi.Split(' ');
-            while (ta1.Length < 6)
-            {
-                Talep.SonYedekTarihi += " 00";
-                ta1 = Talep.SonYedekTarihi.Split(' ');
-            }
-
-            DateTime date_talep = new DateTime(Convert.ToInt16(ta1[2]), Convert.ToInt16(ta1[1]), Convert.ToInt16(ta1[0]), Convert.ToInt16(ta1[3]), Convert.ToInt16(ta1[4]), Convert.ToInt16(ta1[5]));
-            TimeSpan difference = dates_simdi - date_talep;
-            if (difference.TotalMinutes < Talep.Süre)
-            {
-                label5.Text = D_Süre.Metne.Saniyeden(Convert.ToUInt64(Talep.Süre - difference.TotalMinutes) * 60) + " var.";
-                return;
-            }
-
-            Yapilacak_İşler_Sayaç = Yapilacak_İşler.Hazirlik;
-            Talep.SonTalepNo = Talep.SayacOtoYedek;
-            label5.Text = "Çalışıyor";
-        }
         
-        private void button4_Click(object sender, EventArgs e)
-        {
-            if (Directory.Exists(textBox1.Text)) openFileDialog1.InitialDirectory = textBox1.Text;
-            openFileDialog1.ShowDialog();
-            textBox1.Text = Path.GetDirectoryName(openFileDialog1.FileName) + "\\";
-        }
-        private void button5_Click(object sender, EventArgs e)
-        {
-            if (Directory.Exists(textBox2.Text)) openFileDialog1.InitialDirectory = textBox2.Text;
-            openFileDialog1.ShowDialog();
-            textBox2.Text = Path.GetDirectoryName(openFileDialog1.FileName) + "\\";
-        }
-        private void button6_Click(object sender, EventArgs e)
-        {
-            if (textBox3.Text == "" || textBox2.Text == "") { MessageBox.Show("Tanım veya Hedef boş olamaz."); return; }
-
-            if (!textBox3.Text.StartsWith(">>>>>Komut>"))
-            {
-                textBox1.Text = textBox1.Text.Trim().TrimEnd('\\');
-                if (!Directory.Exists(textBox1.Text)) { MessageBox.Show("Kaynak ulaşılabilir değil."); return; }
-            }
-
-            YazTalep("Evet");
-            TazeleChecedBox1();
-            GosterTalepBilgileri(0);
-        }
-        private void button2_Click(object sender, EventArgs e)
-        {
-            Aş.AcilDur(); Durdur = true;
-            GeUyKa_Uygulama.Clear();
-            button2.Enabled = false;
-            checkBox3.Checked = false;
-            UzSüDoİş.ListeyiTemizle();
-            PeTeİkKo.İlerlemeyiYüzdeOlarakGöster(PencereVeTepsiIkonuKontrolu_.GörevÇubuğundaYüzdeGösterimiDurumu.Kapalı);
-            if (SüBıİş.Liste.Count > 0) Thread.Sleep(2000);
-            
-            while (DoSaBu.Calistir || FaDo.Calistir || TaKa.Calistir || TaFaA.Calistir) { Durdur = true; Application.DoEvents(); }
-            
-            if (Thread_DosyaSayisiniBulan != null)
-            {
-                while (Thread_DosyaSayisiniBulan.IsAlive) { Thread_DosyaSayisiniBulan.Abort(); Application.DoEvents(); }
-            }
-
-            if (Thread_FazlaDosyalarıSilen != null)
-            {
-                while (Thread_FazlaDosyalarıSilen.IsAlive) { Thread_FazlaDosyalarıSilen.Abort(); Application.DoEvents(); }
-            }
-
-            if (Thread_TarihselKarşilaştiran != null)
-            {
-                while (Thread_TarihselKarşilaştiran.IsAlive) { Thread_TarihselKarşilaştiran.Abort(); Application.DoEvents(); }
-            }
-
-            if (Thread_TarihselFarkArayan != null)
-            {
-                while (Thread_TarihselFarkArayan.IsAlive) { Thread_TarihselFarkArayan.Abort(); Application.DoEvents(); }
-            }
-
-            if (Thread_TaKa_SürükleBırakListesi != null)
-            {
-                while (Thread_TaKa_SürükleBırakListesi.IsAlive) { Thread_TaKa_SürükleBırakListesi.Abort(); Application.DoEvents(); }
-            }
-
-            SüBıİş.Liste.Clear();     
-            Yapilacak_İşler_Sayaç = Yapilacak_İşler.Bekleme;
-            button2.Enabled = true;
-            Durdur = false;
-        }
-        private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (checkedListBox1.SelectedIndex < 0) return;
-            if (checkedListBox1.SelectedIndex >= TaleplerDosyası.Count) return;
-
-            GosterTalepBilgileri(checkedListBox1.SelectedIndex);
-        }
-        private void button3_Click(object sender, EventArgs e)
-        {
-            KlasorGezgini frm2 = new KlasorGezgini(this, true);
-            frm2.Show();
-            frm2.Baslangiçİşlemleri(textBox1.Text);
-        }
-        private void textBox5_DoubleClick(object sender, EventArgs e)
-        {
-            textBox5.Clear();
-            TaKa.GenelHatalı = 0;
-        }
-
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-        private void silToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (checkedListBox1.SelectedIndex < 0) return;
-            SilTalep(checkedListBox1.SelectedIndex);
-            TazeleChecedBox1();
-            GosterTalepBilgileri(0);
-        }
-        private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
-        {
-            if (checkedListBox1_iptalEt) e.NewValue = e.CurrentValue;
-        }
-        private void bekleSüreToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textBox3.Text = ">>>>>Komut>Bekle>BURAYAsüreyiYAZINIZ";
-            textBox1.Text = "Örnek Kullanım >>>>>Komut>Bekle>30";
-            textBox2.Text = "Dakika olarak giriş yapılır, belirtilen süre kadar programı dondurur";
-        }
-        private void uygulamayıAçToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textBox3.Text = ">>>>>Komut>Calistir>kısayol>parametreler>boşVEYAverb>BoşVeyaNormalMaximizedMinimizedHidden>8oşVeyaDontUseShellExecute>";
-            textBox1.Text = "Örnek Kullanım >>>>>Komut>Çalistir>C:\\a.exe>+p-s>runas>Normal>> >>>>>Komut>Çalistir>chrome>wwww.argemup.com>>Maximized";
-            textBox2.Text = "Belirtilen uygulamayı ilgili seçenekler ile çalıştırır";
-        }
-        private void programıKapatToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textBox3.Text = ">>>>>Komut>Kapat>";
-            textBox1.Text = "Örnek Kullanım >>>>>Komut>Kapat yada >>>>>Komut>Kapat>abc.exe yada >>>>>Komut>Kapat>abc.exe>50";
-            textBox2.Text = "parametre almaz is kendini, alır ise o programı, son parameter cpu yüzdesi değerin üzerinde ise kapatır";
-
-            System.Diagnostics.Process[] processes = System.Diagnostics.Process.GetProcesses();
-            textBox5.AppendText(Environment.NewLine);
-            foreach (var proc in processes) textBox5.AppendText("Seçilebilir " + proc.ProcessName + Environment.NewLine);
-            textBox5.ScrollToCaret();
-        }
-
-        public void TazeleChecedBox1()
-        {
-            int yedek = checkedListBox1.SelectedIndex;
-
-            try
-            {
-                checkedListBox1.Items.Clear();
-                checkedListBox1_iptalEt = false;
-                for (int i = 0; i < TaleplerDosyası.Count; i++)
-                {
-                    string okunan = TaleplerDosyası[i].İçeriği;
-                   
-                    if (Ayarlar.Oku_AltDal(okunan, "etkin mi") == "Evet") checkedListBox1.Items.Add(Convert.ToString(checkedListBox1.Items.Count + 1) + " : " + TaleplerDosyası[i].Adı.Remove(0, "Talep_".Length), true);
-                    else checkedListBox1.Items.Add(Convert.ToString(checkedListBox1.Items.Count + 1) + " : " + TaleplerDosyası[i].Adı.Remove(0, "Talep_".Length), false);
-                }
-                if (TaleplerDosyası.Count > 0) checkedListBox1.SelectedIndex = yedek;
-            }
-            catch (Exception ex)
-            {
-                YazLog("HATA", "DoldurTalepListesi " + ex.Message);
-            }
-
-            checkedListBox1_iptalEt = true;
-        }
-        private void button7_Click(object sender, EventArgs e)
-        {
-            flowLayoutPanel1_MouseMove(null, null);
-
-            if (TaleplerDosyası.Count == 0) return;
-            if (checkedListBox1.SelectedIndex < 0) return;
-            if (checkedListBox1.SelectedIndex >= TaleplerDosyası.Count) return;
-
-            DegiştirTalep(checkedListBox1.SelectedIndex, 0, "Evet");
-            TazeleChecedBox1();
-        }
-        private void button8_Click(object sender, EventArgs e)
-        {
-            flowLayoutPanel1_MouseMove(null, null);
-
-            if (TaleplerDosyası.Count == 0) return;
-            if (checkedListBox1.SelectedIndex < 0) return;
-            if (checkedListBox1.SelectedIndex >= TaleplerDosyası.Count) return;
-
-            DegiştirTalep(checkedListBox1.SelectedIndex, 0, "Hayır");
-            TazeleChecedBox1();
-        }
-        private void button11_Click(object sender, EventArgs e)
-        {
-            flowLayoutPanel1_MouseMove(null, null);
-
-            if (TaleplerDosyası.Count == 0) return;
-            if (checkedListBox1.SelectedIndex < 0) return;
-            if (Yapilacak_İşler_Sayaç != Yapilacak_İşler.Bekleme) return;
-
-            button2_Click(null, null);
-            checkBox3.Checked = false;
-
-            Talep.SonTalepNo = checkedListBox1.SelectedIndex;
-            Yapilacak_İşler_Sayaç = Yapilacak_İşler.TalepBul;
-        }
-        private void button9_Click(object sender, EventArgs e)
-        {
-            flowLayoutPanel1_MouseMove(null, null);
-
-            if (TaleplerDosyası.Count == 0) return;
-            if (checkedListBox1.SelectedIndex < 1) return;
-
-            try
-            {
-                TaleplerDosyası.Insert(checkedListBox1.SelectedIndex - 1, TaleplerDosyası[checkedListBox1.SelectedIndex]);
-                TaleplerDosyası.RemoveAt(checkedListBox1.SelectedIndex + 1);
-                ListeyiTaleplerDosyasınaYaz();
-                checkedListBox1.SelectedIndex--;
-            }
-
-            catch (Exception ex)
-            {
-                YazLog("HATA", "toolStripMenuItem1_Click " + ex.Message);
-            }
-
-            TazeleChecedBox1();
-        }
-        private void button10_Click(object sender, EventArgs e)
-        {
-            flowLayoutPanel1_MouseMove(null, null);
-
-            if (TaleplerDosyası.Count == 0) return;
-            if (checkedListBox1.SelectedIndex < 0) return;
-            if (checkedListBox1.SelectedIndex + 1 >= TaleplerDosyası.Count) return;
-
-            try
-            {
-                TaleplerDosyası.Insert(checkedListBox1.SelectedIndex + 2, TaleplerDosyası[checkedListBox1.SelectedIndex]);
-                TaleplerDosyası.RemoveAt(checkedListBox1.SelectedIndex);
-                ListeyiTaleplerDosyasınaYaz();
-                checkedListBox1.SelectedIndex++;
-            }
-
-            catch (Exception ex)
-            {
-                YazLog("HATA", "toolStripMenuItem2_Click " + ex.Message);
-            }
-
-            TazeleChecedBox1();
-        }
-        private void checkBox3_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox3.Checked)
-            {
-                checkBox3.ForeColor = System.Drawing.Color.Black;
-                Talep.SayacOtoYedek = TaleplerDosyası.Count + 1;
-                SürekliYdeklemeZamanlama = DateTime.Now;
-                progressBar1.MarqueeAnimationSpeed = 75;
-            }
-            else
-            {
-                checkBox3.ForeColor = System.Drawing.Color.Red;
-                progressBar1.MarqueeAnimationSpeed = 0;
-            }
-            Sağ_Menu_Durum.SelectedIndex = (int)checkBox3.CheckState;
-
-            EkleDeğiştir.Enabled = !checkBox3.Checked;
-        }
-
-        private void textBox1_DragDrop(object sender, DragEventArgs e)
-        {
-            Form1_DragLeave(null, null);
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string file in files)
-            {
-                if (Directory.Exists(file))
-                {
-                    textBox1.Text = file;
-                    return;
-                }
-                else if (File.Exists(file))
-                {
-                    textBox1.Text = Path.GetDirectoryName(file);
-                    return;
-                }
-            }
-        }
-        private void textBox2_DragDrop(object sender, DragEventArgs e)
-        {
-            Form1_DragLeave(null, null);
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string file in files)
-            {
-                if (Directory.Exists(file))
-                {
-                    textBox2.Text = file;
-                    return;
-                }
-                else if (File.Exists(file))
-                {
-                    textBox2.Text = Path.GetDirectoryName(file);
-                    return;
-                }
-            }
-        }
-        private void textBox4_DragDrop(object sender, DragEventArgs e)
-        {
-            Form1_DragLeave(null, null);
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string file in files)
-            {
-                if (Directory.Exists(file))
-                {
-                    textBox4.Text = file;
-                    return;
-                }
-                else if (File.Exists(file))
-                {
-                    textBox4.Text = Path.GetDirectoryName(file);
-                    return;
-                }
-            }
-        }
-        private void textBox6_DragDrop(object sender, DragEventArgs e)
-        {
-            Form1_DragLeave(null, null);
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string file in files)
-            {
-                if (Directory.Exists(file))
-                {
-                    textBox6.Text = file;
-                    return;
-                }
-                else if (File.Exists(file))
-                {
-                    textBox6.Text = Path.GetDirectoryName(file);
-                    return;
-                }
-            }
-        }
-
-        private void button13_Click(object sender, EventArgs e)
-        {
-            //ipucu
-            if (string.IsNullOrEmpty(textBox8.Text)) textBox8.Text = "İpucu";
-            else textBox8.Text = textBox8.Text.Replace(";", ".,");
-            if (textBox8.Text != "İpucu") SüBıİş.kaydedilen_ipucu = textBox8.Text;
-            else SüBıİş.kaydedilen_ipucu = "";
-
-            //şifre
-            if (textBox7.Text == "")
-            {
-                SüBıİş.şifre = "";
-                PeTeİkKo.MetniBaloncuktaGöster("Parola doldurulmadan işlem yapılamaz.", ToolTipIcon.Error);
-                textBox7.Focus();
-                return;
-            }  
-            else if (textBox7.Text != ">>>>> Kullanıcının Parolası")
-            {
-                SüBıİş.şifre = D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(textBox7.Text), 128));
-                textBox7.Text = ">>>>> Kullanıcının Şifresi";
-                PeTeİkKo.MetniBaloncuktaGöster("Parola kaydedilmediğinden unutulursa geri dönülemez.", ToolTipIcon.Info);
-            }    
-
-            if (string.IsNullOrEmpty(textBox4.Text)) textBox4.Text = ">>>>> Kaynak Konumu + \"\\Karistirma\"";
-            if (string.IsNullOrEmpty(textBox6.Text)) textBox6.Text = ">>>>> Kaynak Konumu + \"\\Duzeltme\"";
-            
-            SüBıİş.kaydedilen_konum_sifrecozme = textBox6.Text;
-            SüBıİş.kaydedilen_konum_sifreleme = textBox4.Text;
-            SüBıİş.kaydedilen_yöntem = (ŞifrelemeYöntem)comboBox1.SelectedIndex;
-
-            SüBıİş.kaydedilen_İsimlerideŞifrele = checkBox4.Checked;
-            ListeyiTaleplerDosyasınaYaz();
-        }
-
-        private void flowLayoutPanel1_MouseDown(object sender, MouseEventArgs e)
-        {
-            SüBıİş.FareTuşunaBasılıyor = true;
-            SüBıİş.FareTuşunaBasılıyorX = e.X;
-            SüBıİş.FareTuşunaBasılıyorY = e.Y;
-        }
-        private void flowLayoutPanel1_MouseUp(object sender, MouseEventArgs e)
-        {
-            SüBıİş.FareTuşunaBasılıyor = false;
-        }
-        public void flowLayoutPanel1_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (SüBıİş.FareTuşunaBasılıyor)
-            {
-                flowLayoutPanel1.Left -= SüBıİş.FareTuşunaBasılıyorX - e.X;
-                flowLayoutPanel1.Top -= SüBıİş.FareTuşunaBasılıyorY - e.Y;
-                Application.DoEvents();
-            }
-
-            timer2.Enabled = true;
-            timer2.Stop();
-            flowLayoutPanel1.Visible = true;
-            timer2.Start();
-        }
-
-        private void Sağ_Menu_Durum_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            checkBox3.CheckState = (CheckState)Sağ_Menu_Durum.SelectedIndex;
-        }
-
-        void KaynakSecici_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            textBox1.Text = textBox1.Text.Trim().TrimEnd('\\');
-            if (!Directory.Exists(textBox1.Text)) { MessageBox.Show("Kaynak ulaşılabilir değil."); return; }
-
-            KaynakSecici_ KaynakSecici = new KaynakSecici_(this);
-            KaynakSecici.TamListe = (string)textBox1.Tag;
-            KaynakSecici.ÖnYüzüDoldur(textBox1.Text);
-            KaynakSecici.ShowDialog();
-            textBox1.Tag = KaynakSecici.TamListe;
-        }
-        static bool KaynakSecici_YedeklensinMi_Klasör(string Yol)
-        {
-            foreach (var Filtre in Talep.Kaynakça.Filreler)
-            {
-                if (Filtre.Tip == Kaynakça_.Tip_.Atla && Yol.ToLower() == Filtre.Yol) return false;
-            }
-            return true;
-        }
-        static bool KaynakSecici_YedeklensinMi_Dosya(string Yol)
-        {
-            Yol = Yol.ToLower();
-            string klasör = Path.GetDirectoryName(Yol);
-
-            foreach (var Filtre in Talep.Kaynakça.Filreler)
-            {
-                if (klasör.StartsWith(Filtre.Yol))
-                {
-                    klasör += "\\";
-                    if (klasör[Filtre.Yol.Length] == '\\')
-                    {
-                        if (Filtre.Tip == Kaynakça_.Tip_.SoyadlarınıAtla)
-                        {
-                            foreach (var Soyad in Filtre.Soyadları)
-                            {
-                                if (Yol.EndsWith(Soyad)) return false;
-                            }
-
-                            return true;
-                        }
-                        else if (Filtre.Tip == Kaynakça_.Tip_.SoyadlarınıYedekle)
-                        {
-                            foreach (var Soyad in Filtre.Soyadları)
-                            {
-                                if (Yol.EndsWith(Soyad)) return true;
-                            }
-
-                            return false;
-                        }
-
-                        return true;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        private void Zamanlama_Click(object sender, EventArgs e)
-        {
-            checkBox3.Checked = false;
-
-            AyarlarEkranı_ AyarlarEkranı = new AyarlarEkranı_(this);
-            AyarlarEkranı.Süre_Arka.Value = Convert.ToInt32(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Süre_Arka", "15"));
-            AyarlarEkranı.Pzt.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Pzt", bool.TrueString));
-            AyarlarEkranı.Sa.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Sa", bool.TrueString));
-            AyarlarEkranı.Çrş.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Çrş", bool.TrueString));
-            AyarlarEkranı.Per.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Per", bool.TrueString));
-            AyarlarEkranı.Cu.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Cu", bool.TrueString));
-            AyarlarEkranı.Cts.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Cts", bool.TrueString));
-            AyarlarEkranı.Paz.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Paz", bool.TrueString));
-            AyarlarEkranı.Başlangıç.Value = DateTime.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Başlangıç", (new DateTime(1938, 11, 10, 0, 0, 0)).ToString()));
-            AyarlarEkranı.Bitiş.Value = DateTime.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Bitiş", (new DateTime(1938, 11, 10, 23, 59, 59)).ToString()));
-            AyarlarEkranı.FarklıKlasörSayısı.Value = Convert.ToInt32(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "FarklıKlasörSayısı", "1"));
-            AyarlarEkranı.FazlaDosyalarıSil.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "FazlaDosyalarıSil", bool.FalseString));
-            AyarlarEkranı.ArkaPlandaÇalıştır.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "ArkaPlandaÇalıştır", bool.TrueString));
-            AyarlarEkranı.SadeceKopyala.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "SadeceKopyala", bool.TrueString));
-            AyarlarEkranı.Karıştır.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Karıştır", bool.FalseString));
-            AyarlarEkranı.Düzelt.Checked = bool.Parse(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Düzelt", bool.FalseString));
-            AyarlarEkranı.Parola.Text = string.IsNullOrEmpty(Ayarlar.Oku_AltDal((string)Zamanlama.Tag, "Parola")) ? "" : "TEKRAR YAZINIZ";
-
-            AyarlarEkranı.ShowDialog();
-
-            string yazılan = "";
-            Ayarlar.Yaz_AltDal(ref yazılan, "Süre_Arka", AyarlarEkranı.Süre_Arka.Value.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Pzt", AyarlarEkranı.Pzt.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Sa", AyarlarEkranı.Sa.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Çrş", AyarlarEkranı.Çrş.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Per", AyarlarEkranı.Per.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Cu", AyarlarEkranı.Cu.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Cts", AyarlarEkranı.Cts.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Paz", AyarlarEkranı.Paz.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Başlangıç", AyarlarEkranı.Başlangıç.Value.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Bitiş", AyarlarEkranı.Bitiş.Value.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "FarklıKlasörSayısı", AyarlarEkranı.FarklıKlasörSayısı.Value.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "FazlaDosyalarıSil", AyarlarEkranı.FazlaDosyalarıSil.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "ArkaPlandaÇalıştır", AyarlarEkranı.ArkaPlandaÇalıştır.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "SadeceKopyala", AyarlarEkranı.SadeceKopyala.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Karıştır", AyarlarEkranı.Karıştır.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Düzelt", AyarlarEkranı.Düzelt.Checked.ToString());
-            Ayarlar.Yaz_AltDal(ref yazılan, "Parola", string.IsNullOrEmpty(AyarlarEkranı.Parola.Text) ? "" : D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(AyarlarEkranı.Parola.Text), 128)));
-
-            Zamanlama.Tag = yazılan;
-        }
-
-        private void textBox3_TextChanged(object sender, EventArgs e)
-        {
-            foreach (var biri in TaleplerDosyası)
-            {
-                if (biri.Adı.Remove(0, "Talep_".Length) == textBox3.Text)
-                {
-                    EkleDeğiştir.Text = "Değiştir";
-                    return;
-                }
-            }
-
-            EkleDeğiştir.Text = "Ekle";
-        }
     }
 }
-
-        
-           

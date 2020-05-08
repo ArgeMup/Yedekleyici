@@ -1,0 +1,110 @@
+#
+# işareti ilgili satırın yorum satırı olarak görülmesine sebep olur
+# isareti parametrenin saginda da olabilir
+#		
+# Tanim "Tanım"								# Mecburi alan
+# Tanim;Örnek Senaryo							# Senaryonun komut ile çalıştırılabilmesi için tanımı					
+#		
+# TekrarCalistirmaZamanAraligi "0-4250000" <Süre Saniye - 0 Durgun> 	# =0 ise kendiliğinden çalışamaz, Komut;Senaryo;Calistir ile çalıştırılır
+# TekrarCalistirmaZamanAraligi;86400 #1 gün				# >0 ise ilk kez hemen ve  belirtilen süre sonra tekrar tekrar çalıştırılır
+#									# İsteğe bağlı - "0"
+#
+# BeklenmeyenDurumEtiketi "Senaryo içinde tanımlı bir etiketin tanımı" "Beklenmeyen duruma sebep olan adımın satır numarasının kopyalanacağı değişkenin adı"	# Akışın beklenmedik şekilde bozulması durumunda dallanır. 
+# BeklenmeyenDurumEtiketi;Örnek Etiket;<Örnek Değişken>					# Örneğin {MetinBilgi} değişkeninin {SayiBilgi} miş gibi arttir komutunda kullanılması gibi. Ayrıca <Örnek Değişken> içine de satır noyu kopyalar
+#									# İsteğe bağlı - tanımsız	
+#                 
+# MetinBilgi	->	Metin veya <DegiskenAdı> veya Karışım
+#				"Örnek" veya "<Degisken1>" veya "<Degisken1>Örnek Metin<Degisken2>" 
+# SayıBilgi	->	Sayı veya <DegiskenAdı>
+#				"35" veya "<Degisken1>"	
+# EtiketBilgi	->	Bos veya "Dur" veya "Tekrarla" veya "Tekrarla,{SayıBilgi}" veya {MetinBilgi}
+#				Bos			: Alt dala gider
+#				Dur			: İlgili daldaki akış durur
+#				Tekrarla		: Aynı adımı hemen tekrar çalıştırır.
+#				Tekrarla,{SayıBilgi}	: Aynı adımı Sayı kadar saniye sonra tekrar çalıştırır.
+#				{MetinBilgi}		: Belirtilen etikete gider
+# 
+# Adımların Genel Kullanımı
+# Katman	EtkinMi	Tür	Alttür	Diğerleri
+# >		E/H		...	...		...
+# 
+# Kosul Kullanımı
+# Katman	;	EtkinMi	;	Kosul	;	Tür	;	Alttür	;	Kosula uygun ise {EtiketBilgi}	;	Kosula zıt ise {EtiketBilgi}
+# >		;	"E"/"H"	;	Kosul	;	...	;	...	;	Etiket				;	Etiket
+#
+# Komut Kullanımı
+# Katman	;	EtkinMi	;	Komut	;	Tür	;	Alttür
+# >		;	"E"/"H"	;	Komut	;	...	;	...
+#
+# >;E;Kosul;Zamanlama;GunSaat;Gunler,Saatler;Uygun {EtiketBilgi};Zıt {EtiketBilgi}
+# >;E;Kosul;Zamanlama;GunSaat;1011001,08:00-18:00;Tekrarla;Çık # Bugün Pzt, Çrş, Per veya Paz ise ve Saat 8 ile 18 arasında ise					
+#
+# >;E;Kosul;Degisken;Değişken {MetinBilgi};MevcutMu;Uygun {EtiketBilgi};Zıt {EtiketBilgi}
+# >;E;Kosul;Degisken;<Örnek Değişken>;MevcutMu;Tekrarla;Çık #<Örnek Değişken> değişkeni daha önceden tanımlandı ise
+#
+# >;E;Kosul;Degisken;Girdi1 {MetinBilgi};Ayni veya Icerir;Girdi2 {MetinBilgi};Uygun {EtiketBilgi};Zıt {EtiketBilgi}
+# >;E;Kosul;Degisken;ArgeMup;Icerir;Mup;Tekrarla;Çık #ArgeMup içerisinde Mup var ise
+#
+# >;E;Kosul;Degisken;Girdi1 {SayıBilgi};Esit veya Kucuk veya Buyuk;Girdi2 {SayıBilgi};Uygun {EtiketBilgi};Zıt {EtiketBilgi}
+# >;E;Kosul;Degisken;35;Kucuk;45;Tekrarla;Çık # 35 küçüktür 45 ise
+# 
+# >;E;Komut;Talep;TalepTanımı {MetinBilgi} (iş talep dosyasının içindeki Tanim parametresi)
+# >;E;Komut;Talep;Örnek Talep
+#
+# >;E;Komut;Etiket;Ata;EtiketAdı
+# >;E;Komut;Etiket;Ata;Örnek Etiket # Örnek Etiket isimli etiketi tanımlar
+#
+# >;E;Komut;Etiket;AtaVeDur;EtiketAdı
+# >;E;Komut;Etiket;AtaVeDur;Örnek Etiket # Örnek Etiket isimli etiketi tanımlar fakat Komut;Etiket;Git haricinde çalıştırılmaz
+#
+# >;E;Komut;Etiket;Git;EtiketAdı {MetinBilgi}
+# >;E;Komut;Etiket;Git;Örnek Etiket
+#
+# >;E;Komut;Senaryo;Calistir veya Durdur;SenaryoTanımı {MetinBilgi} (senaryo dosyasının içindeki Tanim parametresi)
+# >;E;Komut;Senaryo;Calistir;ÖrnekSenaryo
+#
+# >;E;Komut;Mesaj;Uyari veya Hata veya Tepsi veya Gunluk;Açıklama {MetinBilgi}
+# >;E;Komut;Mesaj;Uyari;Örnek Açıklama
+#
+# >;E;Komut;Mesaj;Ses;Tanımı {MetinBilgi} - Melodi1 veya Melodi2 veya DosyaYolu
+# >;E;Komut;Mesaj;Ses;Melodi1 - C:\Windows\Media\Ring01.wav
+#
+# >;E;Komut;Zamanlama;Bekle;Saniye veya Dakika veya Saat veya Gun;Süre {SayıBilgi}
+# >;E;Komut;Zamanlama;Bekle;Saniye;5
+#
+# >;E;Komut;Degisken;Kopyala veya IceriginiKopyala;<DegiskeninAdı>;Girdi {MetinBilgi}
+# >;E;Komut;Degisken;Kopyala;<ÖrnekDegişken>;ArgeMup 
+#
+# >;E;Komut;Degisken;Arttir veya Azalt veya Kopyala;<DegiskeninAdı>;Girdi {SayıBilgi}
+# >;E;Komut;Degisken;Kopyala;<ÖrnekDegişken>;35
+#
+# >;E;Komut;Uygulama;Calistir;DosyaYolu {MetinBilgi};Bos veya Normal veya TamEkran veya Kucultulmus veya Gizli;Parametreler;Bos veya verb;Bos veya DontUseShellExecute
+# >;E;Komut;Uygulama;Calistir;C:\Ornek.exe;Normal;-p1 a -p2 b;;
+#
+# >;E;Komut;Uygulama;Durdur veya Yoket;UygulamaAdı {Kendi veya MetinBilgi}
+# >;E;Komut;Uygulama;Durdur;Ornek.exe
+#
+# Dahili Metin Degiskenleri (Sadece Okunabilir)
+# <Saat>							-> "23:59:00"
+# <Tarih>							-> "31.12.2020
+# <UygulamaninAdi>						-> "asd.exe"
+# <UygulamaninKonumu>						-> "C:\Klasör1"
+# <BilgisayarAdi>						-> "Ad"
+# <KullaniciAdi>						-> "Ad"
+# <KlasorMevcutMu(Yol {MetinBilgi})>				-> "Evet" yada "Hayir"
+# <ListedekiEleman(Liste {MetinBilgi} | SıraNo {SayiBilgi})>	-> içerik (ilk eleman SıraNo = 0)
+# <KlasorleriListele(Yol {MetinBilgi})>				-> Yoldaki klasörlerin listesi (| ile ayrılmış metin)
+# <DosyalariListele(Yol {MetinBilgi})>				-> Yoldaki dosyaların listesi
+# <RastgeleMetin(Karakter Sayısı {SayiBilgi})>			-> Metin
+# <InternetPing(IP veya adres {MetinBilgi})>			-> "Evet" yada "Hayir"
+# <KullaniciSecimi(Tür {MetinBilgi} | Mesaj {MetinBilgi})>	-> Metin (Tür : Tamam, TamamIptal, YenidendeneIptal, EvetHayir, EvetHayirIptal, DurdurYenidendeneYoksay)
+#
+# Dahili Sayı Degiskenleri (Sadece Okunabilir)
+# <HddYuzdesi(Bilgisayar {MetinBilgi})>				-> yüzde 0-100 arasında
+# <CpuYuzdesi(Bilgisayar {MetinBilgi})>				-> yüzde 0-100 arasında
+# <CpuYuzdesi(Ornek.exe {MetinBilgi})>				-> yüzde =-1 ise çalışmıyor >=0 ise çalışıyor
+# <SenaryodaCalisanAdimSayisi(Tanımı {MetinBilgi})>		-> adet =0 ise senaryo durdu >0 ise calısıyor
+# <ListedekiElemanSayisi(Liste {MetinBilgi})>			-> adet
+#
+# Dahili Sayı Degiskenleri (Yazılabilir - Okunabilir)
+# <SenaryoSonrakiAdimaGecmeSuresi>				-> milisaniye 500
