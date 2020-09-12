@@ -406,7 +406,7 @@ namespace Talep
                     }
 
                     long toplam = long.MaxValue;
-                    long en_Fazla = Talep.Versiyonla_mb * 1024 * 1024;
+                    long en_Fazla = (long)Talep.Versiyonla_mb * 1024 * 1024;
                     while (toplam > en_Fazla && !Senaryo.Durdurmaİsteği)
                     {
                         toplam = 0;
@@ -952,6 +952,8 @@ namespace Talep
             Bir_Dosya_Listesi_ Çıktı = new Bir_Dosya_Listesi_();
             List<Bir_Dosya_> Dosyalar = new List<Bir_Dosya_>();
 
+            List<Bir_Dosya_> Hedefin_kopyası = Hedef.Dosyalar.ToList();
+
             for (int i = 0; i < Kaynak.Dosyalar.Length; i++)
             {
                 int yüzde = i * 100 / Kaynak.Dosyalar.Length;
@@ -959,9 +961,11 @@ namespace Talep
                 if (GörseliGüncelle_ÇıkışİsteniyorMu("Kaynak ve hedef karşılaştırılıyor",
                     Kaynak.Kök + Environment.NewLine + Hedef.Kök, yüzde)) break;
 
-                Bir_Dosya_ Hedef_in_örneği = Hedef.Bul(Kaynak.Dosyalar[i].Yolu);
+                Bir_Dosya_ Hedef_in_örneği = Hedefin_kopyası.Find(x => (x.Yolu == Kaynak.Dosyalar[i].Yolu) );
                 if (Hedef_in_örneği != null)
                 {
+                    Hedefin_kopyası.Remove(Hedef_in_örneği);
+
                     TimeSpan Fark_Süre = Kaynak.Dosyalar[i].DeğiştirilmeTarihi - Hedef_in_örneği.DeğiştirilmeTarihi;
                     if (Math.Abs(Fark_Süre.TotalSeconds) <= 3) continue;
                 }

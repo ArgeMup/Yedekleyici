@@ -13,7 +13,7 @@ namespace Yedekleyici
     {
         public string Sürüm = "V1.2";
         decimal DosyaSayisi, KlasörSayisi, DosyaBoyutu;
-        int sayacDeğiştir, rowindex_grid;
+        int sayacDeğiştir;
         PencereVeTepsiIkonuKontrolu_ PeTeİkKo;
         bool durdur, çalışıyor;
 
@@ -33,7 +33,6 @@ namespace Yedekleyici
 
         private void Etiket_GeçerliYol_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            rowindex_grid = 0;
             string b = Etiket_GeçerliYol.Text;
 
             if (b.Length > 3)
@@ -267,8 +266,6 @@ namespace Yedekleyici
 
         private void Liste_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            rowindex_grid = 0;
-
             if (çalışıyor || e.RowIndex == -1) return;
             if (string.IsNullOrEmpty(Liste[3, e.RowIndex].ToolTipText)) return;
             string gecici = Convert.ToString(Liste[3, e.RowIndex].Value);
@@ -326,42 +323,35 @@ namespace Yedekleyici
 
         private void MenuSağ_GösterGizle_Click(object sender, EventArgs e)
         {
-            if (rowindex_grid < 0) return;
-            string b = Convert.ToString(Liste[3, rowindex_grid].Value);
+            if (Liste.SelectedRows.Count == 0) return;
+            if (Liste.SelectedRows.Count > 1) return;
+
+            int rowindex_grid = Liste.SelectedRows[0].Index;
+            string yol = Liste[3, rowindex_grid].ToolTipText;
+
             bool gizli = false;
-            if (b.Substring(0, 1) == "*")
+            if (File.Exists(yol))
             {
-                //klasör
-                b = b.Remove(0, 1);
-                b = Etiket_GeçerliYol.Text + b;
-
-                try
-                {
-                    DirectoryInfo dir = new DirectoryInfo(b);
-                    if ((dir.Attributes & FileAttributes.Hidden) > 0) gizli = true;
-                    if (gizli) dir.Attributes = FileAttributes.Normal;
-                    else dir.Attributes = FileAttributes.Hidden | FileAttributes.System;
-                }
-                catch (Exception)
-                {
-                }
-            }
-            else
-            {
-                //dosya
-                b = Etiket_GeçerliYol.Text + b;
-
-                FileAttributes fileAttributes = File.GetAttributes(b);
+                FileAttributes fileAttributes = File.GetAttributes(yol);
                 if (fileAttributes.HasFlag(FileAttributes.Hidden)) gizli = true;
 
                 try
                 {
-                    if (gizli) File.SetAttributes(b, FileAttributes.Normal);
-                    else File.SetAttributes(b, FileAttributes.Hidden | FileAttributes.System);
+                    if (gizli) File.SetAttributes(yol, FileAttributes.Normal);
+                    else File.SetAttributes(yol, FileAttributes.Hidden | FileAttributes.System);
                 }
-                catch (Exception)
+                catch (Exception) { }
+            }
+            else if (Directory.Exists(yol))
+            {
+                try
                 {
+                    DirectoryInfo dir = new DirectoryInfo(yol);
+                    if ((dir.Attributes & FileAttributes.Hidden) > 0) gizli = true;
+                    if (gizli) dir.Attributes = FileAttributes.Normal;
+                    else dir.Attributes = FileAttributes.Hidden | FileAttributes.System;
                 }
+                catch (Exception) { }
             }
         }
         private void MenuSağ_YeniSayfadaAç_Click(object sender, EventArgs e)
@@ -369,7 +359,7 @@ namespace Yedekleyici
             if (Liste.SelectedRows.Count == 0) return;
             if (Liste.SelectedRows.Count > 1) return;
 
-            rowindex_grid = Liste.SelectedRows[0].Index;
+            int rowindex_grid = Liste.SelectedRows[0].Index;
 
             string b = Convert.ToString(Liste[3, rowindex_grid].Value), den = "";
             if (b == "") return;
@@ -403,7 +393,7 @@ namespace Yedekleyici
             if (Liste.SelectedRows.Count == 0) return;
             if (Liste.SelectedRows.Count > 1) return;
 
-            rowindex_grid = Liste.SelectedRows[0].Index;
+            int rowindex_grid = Liste.SelectedRows[0].Index;
 
             Process.Start("explorer.exe", string.Format("/select,\"{0}\"", Liste[3, rowindex_grid].ToolTipText));
         }
