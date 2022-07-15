@@ -152,7 +152,7 @@ namespace Yedekleyici
                         {
                             if (DaÇoKa.Düzelt_ÇıktısınıOku().AsılDosyaAdı == "MupYedekleyiciKlasorAdiDosyasi.mup")
                             {
-                                string st = Directory.GetParent(subdirectory).FullName + "\\" + DaÇoKa.Düzelt(D_HexMetin.BaytDizisinden(File.ReadAllBytes(fileName)), Parola);
+                                string st = Directory.GetParent(subdirectory).FullName + "\\" + DaÇoKa.Düzelt(D_HexYazı.BaytDizisinden(File.ReadAllBytes(fileName)), Parola);
                                 Değiştir("*", st, DosyaBoyutu, KlasörSayisi, DosyaSayisi, subdirectory);
                                 break;
                             }
@@ -221,7 +221,7 @@ namespace Yedekleyici
                 {
                     Liste[3, 0].Value = b1;
                     Liste[3, 0].ToolTipText = ipucu;
-                    Liste[2, 0].Value = D_DosyaBoyutu.Metne(b2);
+                    Liste[2, 0].Value = D_DosyaBoyutu.Yazıya(b2);
                     Liste[2, 0].Tag = b2;
                     Liste[0, 0].Value = b3;
                     Liste[1, 0].Value = b4;
@@ -231,7 +231,7 @@ namespace Yedekleyici
                     Liste.RowCount++;
                     Liste[3, Liste.RowCount - 1].Value = b1;
                     Liste[3, Liste.RowCount - 1].ToolTipText = ipucu;
-                    Liste[2, Liste.RowCount - 1].Value = D_DosyaBoyutu.Metne(b2);
+                    Liste[2, Liste.RowCount - 1].Value = D_DosyaBoyutu.Yazıya(b2);
                     Liste[2, Liste.RowCount - 1].Tag = b2;
                     Liste[0, Liste.RowCount - 1].Value = b3;
                     Liste[1, Liste.RowCount - 1].Value = b4;
@@ -242,7 +242,7 @@ namespace Yedekleyici
                 Liste.RowCount++;
                 Liste[3, Liste.RowCount - 1].Value = b1;
                 Liste[3, Liste.RowCount - 1].ToolTipText = ipucu;
-                Liste[2, Liste.RowCount - 1].Value = D_DosyaBoyutu.Metne(b2);
+                Liste[2, Liste.RowCount - 1].Value = D_DosyaBoyutu.Yazıya(b2);
                 Liste[2, Liste.RowCount - 1].Tag = b2;
                 Liste[0, Liste.RowCount - 1].Value = b3;
                 Liste[1, Liste.RowCount - 1].Value = b4;
@@ -258,7 +258,7 @@ namespace Yedekleyici
 
             Liste[3, Liste.RowCount - 1].Value = b1;
             Liste[3, Liste.RowCount - 1].ToolTipText = ipucu;
-            Liste[2, Liste.RowCount - 1].Value = D_DosyaBoyutu.Metne(b2);
+            Liste[2, Liste.RowCount - 1].Value = D_DosyaBoyutu.Yazıya(b2);
             Liste[2, Liste.RowCount - 1].Tag = b2;
             Liste[0, Liste.RowCount - 1].Value = b3;
             Liste[1, Liste.RowCount - 1].Value = b4;

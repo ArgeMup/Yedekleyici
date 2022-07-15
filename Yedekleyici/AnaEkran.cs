@@ -94,7 +94,7 @@ namespace Yedekleyici
 
                 byte[] dosyaiçeriği_dizi = File.ReadAllBytes(dosya);
                 dosyaiçeriği_dizi = D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(dosyaiçeriği_dizi);
-                string dosyaiçeriği_metin = D_HexMetin.BaytDizisinden(dosyaiçeriği_dizi);
+                string dosyaiçeriği_metin = D_HexYazı.BaytDizisinden(dosyaiçeriği_dizi);
                 if (kalıp != dosyaiçeriği_metin) { sonuç = false; break; }
             }
             if (!sonuç)
@@ -263,7 +263,7 @@ namespace Yedekleyici
             {
                 byte[] dosyaiçeriği_dizi = File.ReadAllBytes(dosya);
                 dosyaiçeriği_dizi = D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(dosyaiçeriği_dizi);
-                string dosyaiçeriği_metin = D_HexMetin.BaytDizisinden(dosyaiçeriği_dizi);
+                string dosyaiçeriği_metin = D_HexYazı.BaytDizisinden(dosyaiçeriği_dizi);
 
                 Ortak.Ayarlar.Yaz_AltDal(ref kalıplar, dosya, dosyaiçeriği_metin);
             }
@@ -306,7 +306,7 @@ namespace Yedekleyici
             ParŞab_Liste.Items.Add(ParŞab_Tanım.Text);
 
             string g = ""; 
-            Ortak.ParolaŞablonu.Add(new Depo.Biri(ParŞab_Tanım.Text, Ortak.Karıştır(D_HexMetin.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Metin.BaytDizisine(ParŞab_Par1.Text), 128)), Ortak.Parola)));
+            Ortak.ParolaŞablonu.Add(new Depo.Biri(ParŞab_Tanım.Text, Ortak.Karıştır(D_HexYazı.BaytDizisinden(D_GeriDönülemezKarmaşıklaştırmaMetodu.BaytDizisinden(D_Yazı.BaytDizisine(ParŞab_Par1.Text), 128)), Ortak.Parola)));
             Ortak.Ayarlar.ListeyiEkle_AltDal(ref g, Ortak.ParolaŞablonu);
             Ortak.Ayarlar.Yaz("ParolaŞablonu", g);
         }

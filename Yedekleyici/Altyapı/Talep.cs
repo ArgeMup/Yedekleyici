@@ -488,7 +488,7 @@ namespace Talep
 
         KaynakVeHedefÖzdeş:
             string msga = "Kaynak ve hedef özdeş.";
-            if (Kaynak_DosyaListesi != null) msga = "Tamamlandı. " + D_DosyaBoyutu.Metne(Kaynak_DosyaListesi.Boyutu) + ", " + Kaynak_DosyaListesi.Dosyalar.Length + " dosya işlem gördü.";
+            if (Kaynak_DosyaListesi != null) msga = "Tamamlandı. " + D_DosyaBoyutu.Yazıya(Kaynak_DosyaListesi.Boyutu) + ", " + Kaynak_DosyaListesi.Dosyalar.Length + " dosya işlem gördü.";
             if (Senaryo.Durdurmaİsteği) msga = "Senaryo durduruldu";
 
             Görsel.Güncelle(100, 100, Talep.Kaynak + Environment.NewLine + Başarılıİşlem + " başarılı, " + Hatalıİşlem + " hatalı işlem. " + DateTime.Now.ToString("d MMMM ddd HH:mm:ss:fff"), msga);
@@ -863,7 +863,7 @@ namespace Talep
                     while (Yedekleyici.Ortak.CpuYüzdesi() > Talep.CpuYuzdesi && !iptal_talebi_görsel && !Senaryo.Durdurmaİsteği)
                     {
                         iptal_talebi_görsel = Görsel.Güncelle(-1, -1, "!!! İşlemci %" + Talep.CpuYuzdesi + " yoğun olduğundan talep beklemede !!!",
-                                                Durum + " -> " + (SıraNo + 1) + " / " + Kaynak_DosyaListesi.Dosyalar.Length + ", " + D_DosyaBoyutu.Metne(İşlenenDosyaBoyutu) + " / " + D_DosyaBoyutu.Metne(Kaynak_DosyaListesi.Boyutu));
+                                                Durum + " -> " + (SıraNo + 1) + " / " + Kaynak_DosyaListesi.Dosyalar.Length + ", " + D_DosyaBoyutu.Yazıya(İşlenenDosyaBoyutu) + " / " + D_DosyaBoyutu.Yazıya(Kaynak_DosyaListesi.Boyutu));
                         System.Threading.Thread.Sleep(1000);
                     }
                 }
@@ -873,7 +873,7 @@ namespace Talep
                     while (Yedekleyici.Ortak.HddYüzdesi() > Talep.HddYuzdesi && !iptal_talebi_görsel && !Senaryo.Durdurmaİsteği)
                     {
                         iptal_talebi_görsel = Görsel.Güncelle(-1, -1, "!!! Sabit Disk %" + Talep.HddYuzdesi + " yoğun olduğundan talep beklemede !!!",
-                                                Durum + " -> " + (SıraNo + 1) + " / " + Kaynak_DosyaListesi.Dosyalar.Length + ", " + D_DosyaBoyutu.Metne(İşlenenDosyaBoyutu) + " / " + D_DosyaBoyutu.Metne(Kaynak_DosyaListesi.Boyutu));
+                                                Durum + " -> " + (SıraNo + 1) + " / " + Kaynak_DosyaListesi.Dosyalar.Length + ", " + D_DosyaBoyutu.Yazıya(İşlenenDosyaBoyutu) + " / " + D_DosyaBoyutu.Yazıya(Kaynak_DosyaListesi.Boyutu));
                         System.Threading.Thread.Sleep(1000);
                     }
                 }
@@ -884,7 +884,7 @@ namespace Talep
                     iptal_talebi_görsel = Görsel.Güncelle(SıraNo * 100 / Kaynak_DosyaListesi.Dosyalar.Length,
                                                         (int)(İşlenenDosyaBoyutu * 100 / Kaynak_DosyaListesi.Boyutu),
                                                         Kaynak_DosyaListesi.Dosyalar[SıraNo].Yolu,
-                                                        Durum + " -> " + (SıraNo + 1) + " / " + Kaynak_DosyaListesi.Dosyalar.Length + " -> " + D_DosyaBoyutu.Metne(İşlenenDosyaBoyutu) + " / " + D_DosyaBoyutu.Metne(Kaynak_DosyaListesi.Boyutu));
+                                                        Durum + " -> " + (SıraNo + 1) + " / " + Kaynak_DosyaListesi.Dosyalar.Length + " -> " + D_DosyaBoyutu.Yazıya(İşlenenDosyaBoyutu) + " / " + D_DosyaBoyutu.Yazıya(Kaynak_DosyaListesi.Boyutu));
                 }
 
                 tick = Environment.TickCount + 250;
@@ -995,7 +995,7 @@ namespace Talep
                 string[] KlasördekiDosyalar = Yedekleyici.Ortak.Listele.Dosya(k, SearchOption.TopDirectoryOnly);
                 foreach (var d in KlasördekiDosyalar)
                 {
-                    if (GörseliGüncelle_ÇıkışİsteniyorMu("Dosya adedi sayılıyor" + " -> " + Dosyalar.Count + " -> " + D_DosyaBoyutu.Metne(DosyaListesi.Boyutu), d)) break;
+                    if (GörseliGüncelle_ÇıkışİsteniyorMu("Dosya adedi sayılıyor" + " -> " + Dosyalar.Count + " -> " + D_DosyaBoyutu.Yazıya(DosyaListesi.Boyutu), d)) break;
                     if (Ayıkla && !FiltrelemeSonucundaDosyayıKullan(d.Remove(0, Kök.Length))) continue;
 
                     Bir_Dosya_ Yeni = new Bir_Dosya_(Kök, d);
@@ -1007,7 +1007,7 @@ namespace Talep
             string[] KlasördekiDosyalar_ = Yedekleyici.Ortak.Listele.Dosya(Kök, SearchOption.TopDirectoryOnly);
             foreach (var d in KlasördekiDosyalar_)
             {
-                if (GörseliGüncelle_ÇıkışİsteniyorMu("Dosya adedi sayılıyor" + " -> " + Dosyalar.Count + " -> " + D_DosyaBoyutu.Metne(DosyaListesi.Boyutu), d)) break;
+                if (GörseliGüncelle_ÇıkışİsteniyorMu("Dosya adedi sayılıyor" + " -> " + Dosyalar.Count + " -> " + D_DosyaBoyutu.Yazıya(DosyaListesi.Boyutu), d)) break;
                 if (Ayıkla && !FiltrelemeSonucundaDosyayıKullan(d.Remove(0, Kök.Length))) continue;
 
                 Bir_Dosya_ Yeni = new Bir_Dosya_(Kök, d);
@@ -1033,7 +1033,7 @@ namespace Talep
             {
                 foreach (ZipArchiveEntry Biri in Arşiv.Entries)
                 {
-                    if (GörseliGüncelle_ÇıkışİsteniyorMu("Dosya adedi sayılıyor" + " -> " + Dosyalar.Count + " -> " + D_DosyaBoyutu.Metne(DosyaListesi.Boyutu), Biri.Name)) break;
+                    if (GörseliGüncelle_ÇıkışİsteniyorMu("Dosya adedi sayılıyor" + " -> " + Dosyalar.Count + " -> " + D_DosyaBoyutu.Yazıya(DosyaListesi.Boyutu), Biri.Name)) break;
                     if (string.IsNullOrEmpty(Biri.Name)) continue; //klasör
 
                     if (Ayıkla && !FiltrelemeSonucundaKlasörüKullan(Path.GetDirectoryName(Biri.FullName), Talep.Filtreler_Klasör)) continue;
