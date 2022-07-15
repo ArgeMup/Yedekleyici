@@ -78,8 +78,8 @@
 # >;E;Komut;Degisken;Arttir veya Azalt veya Kopyala;<DegiskeninAdı>;Girdi {SayıBilgi}
 # >;E;Komut;Degisken;Kopyala;<ÖrnekDegişken>;35
 #
-# >;E;Komut;Uygulama;Calistir;DosyaYolu {MetinBilgi};Bos veya Normal veya TamEkran veya Kucultulmus veya Gizli;Parametreler;Bos veya verb;Bos veya DontUseShellExecute
-# >;E;Komut;Uygulama;Calistir;C:\Ornek.exe;Normal;-p1 a -p2 b;;
+# >;E;Komut;Uygulama;Calistir;DosyaYolu {MetinBilgi};Bos veya Normal veya TamEkran veya Kucultulmus veya Gizli {MetinBilgi};Parametreler {MetinBilgi};Bos veya verb {MetinBilgi};Bos veya DontUseShellExecute {MetinBilgi};Bos veya CalisiyorsadaCalistir {MetinBilgi}
+# >;E;Komut;Uygulama;Calistir;C:\Ornek.exe;Normal;-p1 a -p2 b;;;
 #
 # >;E;Komut;Uygulama;Durdur veya Yoket;UygulamaAdı {Kendi veya MetinBilgi}
 # >;E;Komut;Uygulama;Durdur;Ornek.exe

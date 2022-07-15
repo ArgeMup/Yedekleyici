@@ -20,6 +20,7 @@ namespace Yedekleyici
         public static string pak_Banka = pak_AnaKlasör + (Environment.MachineName + "." + Environment.UserName).ToUpper() + "\\";
         public static string pak_Şablon = pak_AnaKlasör + "Sablon\\";
         public static string pak_Geçici = pak_AnaKlasör + "Gecici\\";
+        public static string UzunDosyaAdıEki = @"\\?\";
         #endregion
 
         #region Önyüz Malzemeleri
@@ -95,7 +96,7 @@ namespace Yedekleyici
                     if (Tür == "HATA") Buton_Günlük.Image = Properties.Resources.M_Gunluk_Yeni;
                 });
             }
-            catch (Exception ex) { System.Windows.Forms.MessageBox.Show("İstenmeyen Durum " + ex); }
+            catch (Exception ex) { System.Windows.Forms.MessageBox.Show("İstenmeyen Durum " + ex.ToString()); }
 
             Günlük_Mutex.ReleaseMutex();
         }
@@ -173,18 +174,26 @@ namespace Yedekleyici
             }
             catch (Exception) { return -1; }
         }
-        public static int HddYüzdesi()
+        public static int HddYüzdesi(string Uygulama = "")
         {
             try
             {
-                if (HddYüzdesi_Bilgisayar == null)
+                if (string.IsNullOrEmpty(Uygulama))
                 {
-                    HddYüzdesi_Bilgisayar = new PerformanceCounter("PhysicalDisk", "% Disk Time", "_Total");
+                    if (HddYüzdesi_Bilgisayar == null)
+                    {
+                        HddYüzdesi_Bilgisayar = new PerformanceCounter("PhysicalDisk", "% Disk Time", "_Total");
                     HddYüzdesi_Bilgisayar.NextValue();
                     Thread.Sleep(1000);
-                }
+                    }
 
-                return (int)HddYüzdesi_Bilgisayar.NextValue();
+                    return (int)HddYüzdesi_Bilgisayar.NextValue();
+                }
+                else
+                {
+                    PerformanceCounter HddYüzdesi_Uygulama = new PerformanceCounter("Process", "IO Data Bytes/sec", Path.GetFileNameWithoutExtension(Uygulama));
+                    return (int)HddYüzdesi_Uygulama.NextValue();
+                }
             }
             catch (Exception) { return -1; }
         }
@@ -341,6 +350,7 @@ namespace Yedekleyici
 
                 public Bir_DosyaSistemi_İzleyicisi_(string Kaynak, string Hedef)
                 {
+                    if (Kaynak.StartsWith(UzunDosyaAdıEki)) Kaynak = Kaynak.Substring(UzunDosyaAdıEki.Length);
                     fsw = new FileSystemWatcher(Kaynak);
                     fsw.NotifyFilter = NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size;
                     fsw.Filter = "*";

@@ -5,10 +5,10 @@
 # Tanim;Deneme	
 #		
 # Kaynak "Yol" <MetinBilgi>			# İsleme girecek olan dosyaların yolu
-# Kaynak;C:\Kaynak\Yedekler		
+# Kaynak;C:\Kaynak\Yedekler		    # Uzun dosya yolları için \\?\ eklenebilir -> Kaynak;\\?\C:\Kaynak\Yedekler
 #		
 # Hedef "Yol" <MetinBilgi>			# Kaynak klasördeki dosyaları HedefKlasör e yedekler
-# Hedef;C:\Hedef\Yedekler		
+# Hedef;C:\Hedef\Yedekler		    # Uzun dosya yolları için \\?\ eklenebilir -> Hedef;\\?\C:\Hedef\Yedekler
 # 
 # TamKopya "Evet" veya "Hayir" <MetinBilgi>	# Hedefte olup kaynakta olmayan fazla dosyaları hedeften siler 
 # TamKopya;Evet  

@@ -54,7 +54,7 @@ namespace Talep
 
                     string AyıklanmışGirdi = TekTek[1];
                     try { AyıklanmışGirdi = Senaryo.Değişken.Oku_MetinVeyaDeğişken(TekTek[1]); }
-                    catch (Exception ex) { Hata += "\r\n[" + DenetlenenDosya + "] " + ex.Message; }
+                    catch (Exception ex) { Hata += "\r\n[" + DenetlenenDosya + "] " + ex.ToString(); }
 
                     if (DosAtlLis == null && TekTek[0] == "Tanim")
                     {
@@ -62,11 +62,11 @@ namespace Talep
                     }
                     else if (DosAtlLis == null && TekTek[0] == "Kaynak")
                     {
-                        Kaynak = AyıklanmışGirdi.Trim('\\', ' ') + "\\";
+                        Kaynak = AyıklanmışGirdi.Trim(' ').TrimEnd('\\') + "\\";
                     }
                     else if (DosAtlLis == null && TekTek[0] == "Hedef")
                     {
-                        Hedef = AyıklanmışGirdi.Trim('\\', ' ') + "\\";
+                        Hedef = AyıklanmışGirdi.Trim(' ').TrimEnd('\\') + "\\";
                     }
                     else if (TekTek[0] == "ParolaSablonu")
                     {
@@ -105,7 +105,7 @@ namespace Talep
                     }
                     else if (TekTek[0] == "AtlaKlasor")
                     {
-                        string[] dizi = AyıklanmışGirdi.Trim('\\', ' ').Split('\\');
+                        string[] dizi = AyıklanmışGirdi.Trim(' ').TrimEnd('\\').Split('\\');
                         if (dizi.Length > 0)
                         {
                             for (int iii = 0; iii < dizi.Length; iii++) dizi[iii] = dizi[iii].Trim('\\', ' ');
@@ -184,7 +184,7 @@ namespace Talep
         }
         public Bir_Dosya_(string Kök, string DosyaYolu)
         {
-            Yolu = DosyaYolu.Remove(0, Kök.Length).Trim('\\', ' ');
+            Yolu = DosyaYolu.Remove(0, Kök.Length).Trim(' ').TrimEnd('\\');
 
             if (File.Exists(DosyaYolu))
             {
@@ -269,7 +269,7 @@ namespace Talep
             {
                 Görsel = new Görsel_();
                 Yedekleyici.Ortak.Düzlem.Invoke((MethodInvoker)delegate () { Yedekleyici.Ortak.Düzlem.Controls.Add(Görsel); });
-                Görsel.Başlat(Senaryo.Tanim, Talep.Tanım, Yedekleyici.Ortak.KarakterBüyüklüğü, Yedekleyici.Ortak.Düzlem.Width - 25);
+                Görsel.Başlat(Senaryo.Tanim, Talep.Tanım, Yedekleyici.Ortak.KarakterBüyüklüğü, Yedekleyici.Ortak.Düzlem.Width - 25, Talep.Kaynak, Talep.Hedef);
             }
             #endregion
 
@@ -296,7 +296,7 @@ namespace Talep
                 string[] klasörler = Yedekleyici.Ortak.Listele.Klasör(Talep.Hedef, SearchOption.TopDirectoryOnly);
                 if (klasörler.Count() > 0)
                 {
-                    foreach (string klasör in klasörler) { try { Tarihler.Add(DateTime.ParseExact(klasör.Remove(0, Talep.Hedef.Length).Trim(' ', '\\'), "dd_MM_yyyy_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture)); } catch (Exception) { } }
+                    foreach (string klasör in klasörler) { try { Tarihler.Add(DateTime.ParseExact(klasör.Remove(0, Talep.Hedef.Length).Trim(' ').TrimEnd('\\'), "dd_MM_yyyy_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture)); } catch (Exception) { } }
 
                     Tarihler.Sort((a, b) => a.CompareTo(b)); //silmeye 0. elemandan başlanacak
 
@@ -353,7 +353,7 @@ namespace Talep
             else if (Talep.Dosyaları == Dosyaları.DüzeltAç)
             {
                 BirdenFazlaAşamalıİşlem_GeciciKlasör = Yedekleyici.Ortak.pak_Geçici + D_GeriDönülemezKarmaşıklaştırmaMetodu.Metinden(Path.GetRandomFileName(), 4);
-
+               
                 BirdenFazlaAşamalıİşlem = new İşlem_();
                 BirdenFazlaAşamalıİşlem.Görsel = Görsel;
                 BirdenFazlaAşamalıİşlem.Senaryo = Senaryo;
@@ -491,7 +491,7 @@ namespace Talep
             if (Kaynak_DosyaListesi != null) msga = "Tamamlandı. " + D_DosyaBoyutu.Metne(Kaynak_DosyaListesi.Boyutu) + ", " + Kaynak_DosyaListesi.Dosyalar.Length + " dosya işlem gördü.";
             if (Senaryo.Durdurmaİsteği) msga = "Senaryo durduruldu";
 
-            Görsel.Güncelle(100, 100, Talep.Kaynak.Trim('\\') + Environment.NewLine + Başarılıİşlem + " başarılı, " + Hatalıİşlem + " hatalı işlem. " + DateTime.Now.ToString("d MMMM ddd HH:mm:ss:fff"), msga);
+            Görsel.Güncelle(100, 100, Talep.Kaynak + Environment.NewLine + Başarılıİşlem + " başarılı, " + Hatalıİşlem + " hatalı işlem. " + DateTime.Now.ToString("d MMMM ddd HH:mm:ss:fff"), msga);
             Yedekleyici.Ortak.Günlük_Ekle("Kaynak : " + Talep.Kaynak + Environment.NewLine +
                                           "Hedef : " + Talep.Hedef + Environment.NewLine +
                                           Başarılıİşlem + " başarılı, " + Hatalıİşlem + " hatalı işlem." + Environment.NewLine +
@@ -541,7 +541,10 @@ namespace Talep
                     if (File.Exists(H)) Yedekleyici.Ortak.Sil.Dosya(H);
                     if (File.Exists(H + "_mup_")) File.Move(H + "_mup_", H);
 
-                    if (HataMesajı.Contains("-Şifre Hatalı")) throw new Exception(Senaryo.Tanim + " / " + Talep.Tanım + " / Parola hatalı");
+                    if (HataMesajı.Contains("-Şifre Hatalı"))
+                    {
+                        if (Kaynak_DosyaListesi.Dosyalar[SıraNo].Boyutu > 0) throw new Exception(Senaryo.Tanim + " / " + Talep.Tanım + " / Parola hatalı");
+                    }
                 }
 
                 İşlenenDosyaBoyutu = SonGeçerliİşlenenDosyaBoyutu + Kaynak_DosyaListesi.Dosyalar[SıraNo].Boyutu;
@@ -671,7 +674,7 @@ namespace Talep
                         {
                             İşlenenDosyaBoyutu = SonGeçerliİşlenenDosyaBoyutu;
                             Hatalıİşlem++;
-                            Yedekleyici.Ortak.Günlük_Ekle(ex.Message);
+                            Yedekleyici.Ortak.Günlük_Ekle(ex.ToString());
 
                             if (biri != null) biri.Delete();
                         }
@@ -683,7 +686,7 @@ namespace Talep
             catch (Exception ex)
             {
                 Hatalıİşlem++;
-                Yedekleyici.Ortak.Günlük_Ekle(ex.Message);
+                Yedekleyici.Ortak.Günlük_Ekle(ex.ToString());
 
                 if (File.Exists(Talep.Hedef)) Yedekleyici.Ortak.Sil.Dosya(Talep.Hedef);
                 if (File.Exists(Talep.Hedef + "_mup_")) File.Move(Talep.Hedef + "_mup_", Talep.Hedef);
@@ -783,7 +786,7 @@ namespace Talep
                                 catch (Exception ex)
                                 {
                                     Hatalıİşlem++;
-                                    Yedekleyici.Ortak.Günlük_Ekle(ex.Message);
+                                    Yedekleyici.Ortak.Günlük_Ekle(ex.ToString());
 
                                     if (File.Exists(H)) Yedekleyici.Ortak.Sil.Dosya(H);
                                     if (File.Exists(H + "_mup_")) File.Move(H + "_mup_", H);
@@ -799,7 +802,7 @@ namespace Talep
                 {
                     İşlenenDosyaBoyutu = SonGeçerliİşlenenDosyaBoyutu;
                     Hatalıİşlem++;
-                    Yedekleyici.Ortak.Günlük_Ekle(ex.Message);
+                    Yedekleyici.Ortak.Günlük_Ekle(ex.ToString());
                 }
             }
         }

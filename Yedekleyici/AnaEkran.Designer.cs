@@ -35,10 +35,10 @@
             this.Buton_Senaryo = new System.Windows.Forms.ToolStripDropDownButton();
             this.Buton_Talepler = new System.Windows.Forms.ToolStripDropDownButton();
             this.Buton_KlasörleriListele = new System.Windows.Forms.ToolStripDropDownButton();
+            this.Buton_Çalışıyor = new System.Windows.Forms.ToolStripDropDownButton();
             this.Buton_KlasörleriKarıştır = new System.Windows.Forms.ToolStripDropDownButton();
             this.Buton_Ayarlar = new System.Windows.Forms.ToolStripDropDownButton();
             this.Buton_Günlük = new System.Windows.Forms.ToolStripDropDownButton();
-            this.Buton_Çalışıyor = new System.Windows.Forms.ToolStripDropDownButton();
             this.Panel_Senaryo = new System.Windows.Forms.Panel();
             this.Ağaç_Senaryo = new System.Windows.Forms.TreeView();
             this.MenuSağ_Senaryo = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -83,7 +83,6 @@
             this.ParŞab_Par2 = new System.Windows.Forms.TextBox();
             this.ParŞab_Par1 = new System.Windows.Forms.TextBox();
             this.ParŞab_Tanım = new System.Windows.Forms.TextBox();
-            this.Ayarlar_DallarıKendiliğinden_AçKapat = new System.Windows.Forms.CheckBox();
             this.Ayarlar_KarakterBüyüklüğü = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.Tab_Günlük = new System.Windows.Forms.TabPage();
@@ -138,10 +137,10 @@
             this.Buton_Senaryo,
             this.Buton_Talepler,
             this.Buton_KlasörleriListele,
+            this.Buton_Çalışıyor,
             this.Buton_KlasörleriKarıştır,
             this.Buton_Ayarlar,
-            this.Buton_Günlük,
-            this.Buton_Çalışıyor});
+            this.Buton_Günlük});
             this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
             this.statusStrip1.Location = new System.Drawing.Point(0, 0);
             this.statusStrip1.Name = "statusStrip1";
@@ -187,6 +186,18 @@
             this.Buton_KlasörleriListele.ToolTipText = "Klasörleri Listele";
             this.Buton_KlasörleriListele.Click += new System.EventHandler(this.Buton_KlasörleriListele_Click);
             // 
+            // Buton_Çalışıyor
+            // 
+            this.Buton_Çalışıyor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.Buton_Çalışıyor.Image = global::Yedekleyici.Properties.Resources.D_Tamam;
+            this.Buton_Çalışıyor.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.Buton_Çalışıyor.Name = "Buton_Çalışıyor";
+            this.Buton_Çalışıyor.ShowDropDownArrow = false;
+            this.Buton_Çalışıyor.Size = new System.Drawing.Size(35, 28);
+            this.Buton_Çalışıyor.Text = "toolStripDropDownButton1";
+            this.Buton_Çalışıyor.ToolTipText = "Ana İzin";
+            this.Buton_Çalışıyor.Click += new System.EventHandler(this.Buton_Çalışıyor_Click);
+            // 
             // Buton_KlasörleriKarıştır
             // 
             this.Buton_KlasörleriKarıştır.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -225,18 +236,6 @@
             this.Buton_Günlük.Text = "toolStripDropDownButton5";
             this.Buton_Günlük.ToolTipText = "Günlük";
             this.Buton_Günlük.Click += new System.EventHandler(this.Buton_Günlük_Click);
-            // 
-            // Buton_Çalışıyor
-            // 
-            this.Buton_Çalışıyor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.Buton_Çalışıyor.Image = global::Yedekleyici.Properties.Resources.D_Tamam;
-            this.Buton_Çalışıyor.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.Buton_Çalışıyor.Name = "Buton_Çalışıyor";
-            this.Buton_Çalışıyor.ShowDropDownArrow = false;
-            this.Buton_Çalışıyor.Size = new System.Drawing.Size(35, 28);
-            this.Buton_Çalışıyor.Text = "toolStripDropDownButton1";
-            this.Buton_Çalışıyor.ToolTipText = "Ana İzin";
-            this.Buton_Çalışıyor.Click += new System.EventHandler(this.Buton_Çalışıyor_Click);
             // 
             // Panel_Senaryo
             // 
@@ -362,7 +361,7 @@
             this.Tab_Talep.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Tab_Talep.Name = "Tab_Talep";
             this.Tab_Talep.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Tab_Talep.Size = new System.Drawing.Size(463, 249);
+            this.Tab_Talep.Size = new System.Drawing.Size(464, 249);
             this.Tab_Talep.TabIndex = 1;
             this.Tab_Talep.Text = "Talepler";
             this.Tab_Talep.UseVisualStyleBackColor = true;
@@ -375,7 +374,7 @@
             this.Panel_Talepler.Location = new System.Drawing.Point(3, 2);
             this.Panel_Talepler.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Panel_Talepler.Name = "Panel_Talepler";
-            this.Panel_Talepler.Size = new System.Drawing.Size(457, 245);
+            this.Panel_Talepler.Size = new System.Drawing.Size(458, 245);
             this.Panel_Talepler.TabIndex = 0;
             // 
             // Düzlem_Talepler
@@ -385,7 +384,7 @@
             this.Düzlem_Talepler.FlowDirection = System.Windows.Forms.FlowDirection.BottomUp;
             this.Düzlem_Talepler.Location = new System.Drawing.Point(0, 0);
             this.Düzlem_Talepler.Name = "Düzlem_Talepler";
-            this.Düzlem_Talepler.Size = new System.Drawing.Size(457, 245);
+            this.Düzlem_Talepler.Size = new System.Drawing.Size(458, 245);
             this.Düzlem_Talepler.TabIndex = 1;
             this.Düzlem_Talepler.WrapContents = false;
             // 
@@ -396,7 +395,7 @@
             this.Tab_KlasörleriListele.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Tab_KlasörleriListele.Name = "Tab_KlasörleriListele";
             this.Tab_KlasörleriListele.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Tab_KlasörleriListele.Size = new System.Drawing.Size(463, 249);
+            this.Tab_KlasörleriListele.Size = new System.Drawing.Size(464, 249);
             this.Tab_KlasörleriListele.TabIndex = 2;
             this.Tab_KlasörleriListele.Text = "Klasörleri Listele";
             this.Tab_KlasörleriListele.UseVisualStyleBackColor = true;
@@ -411,7 +410,7 @@
             this.Panel_KlasörleriListele.Location = new System.Drawing.Point(3, 2);
             this.Panel_KlasörleriListele.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Panel_KlasörleriListele.Name = "Panel_KlasörleriListele";
-            this.Panel_KlasörleriListele.Size = new System.Drawing.Size(457, 245);
+            this.Panel_KlasörleriListele.Size = new System.Drawing.Size(458, 245);
             this.Panel_KlasörleriListele.TabIndex = 0;
             this.Panel_KlasörleriListele.DragDrop += new System.Windows.Forms.DragEventHandler(this.Panel_KlasörleriListele_DragDrop);
             this.Panel_KlasörleriListele.DragEnter += new System.Windows.Forms.DragEventHandler(this.Panel_KlasörleriListele_DragEnter);
@@ -424,7 +423,7 @@
             this.GeDönülemezKa.Controls.Add(this.GeDönülemezKa_Girdi);
             this.GeDönülemezKa.Location = new System.Drawing.Point(3, 160);
             this.GeDönülemezKa.Name = "GeDönülemezKa";
-            this.GeDönülemezKa.Size = new System.Drawing.Size(244, 79);
+            this.GeDönülemezKa.Size = new System.Drawing.Size(245, 79);
             this.GeDönülemezKa.TabIndex = 3;
             this.GeDönülemezKa.TabStop = false;
             this.GeDönülemezKa.Text = "Geri dönülemez karmaşıklaştırma";
@@ -435,7 +434,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GeDönülemezKa_Çıktı.Location = new System.Drawing.Point(6, 49);
             this.GeDönülemezKa_Çıktı.Name = "GeDönülemezKa_Çıktı";
-            this.GeDönülemezKa_Çıktı.Size = new System.Drawing.Size(232, 22);
+            this.GeDönülemezKa_Çıktı.Size = new System.Drawing.Size(233, 22);
             this.GeDönülemezKa_Çıktı.TabIndex = 4;
             this.GeDönülemezKa_Çıktı.Text = "Çıktı";
             this.İpucu.SetToolTip(this.GeDönülemezKa_Çıktı, "Çıktı");
@@ -446,7 +445,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GeDönülemezKa_Girdi.Location = new System.Drawing.Point(6, 21);
             this.GeDönülemezKa_Girdi.Name = "GeDönülemezKa_Girdi";
-            this.GeDönülemezKa_Girdi.Size = new System.Drawing.Size(232, 22);
+            this.GeDönülemezKa_Girdi.Size = new System.Drawing.Size(233, 22);
             this.GeDönülemezKa_Girdi.TabIndex = 3;
             this.GeDönülemezKa_Girdi.Text = "32|Girdi";
             this.İpucu.SetToolTip(this.GeDönülemezKa_Girdi, "Girdi");
@@ -461,7 +460,7 @@
             this.GeDönülebilirKa.Controls.Add(this.GeDönülebilirKa_Parola);
             this.GeDönülebilirKa.Location = new System.Drawing.Point(3, 46);
             this.GeDönülebilirKa.Name = "GeDönülebilirKa";
-            this.GeDönülebilirKa.Size = new System.Drawing.Size(244, 107);
+            this.GeDönülebilirKa.Size = new System.Drawing.Size(245, 107);
             this.GeDönülebilirKa.TabIndex = 2;
             this.GeDönülebilirKa.TabStop = false;
             this.GeDönülebilirKa.Text = "Geri dönülebilir karmaşıklaştırma";
@@ -472,7 +471,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GeDönülebilirKa_Çıktı.Location = new System.Drawing.Point(6, 77);
             this.GeDönülebilirKa_Çıktı.Name = "GeDönülebilirKa_Çıktı";
-            this.GeDönülebilirKa_Çıktı.Size = new System.Drawing.Size(232, 22);
+            this.GeDönülebilirKa_Çıktı.Size = new System.Drawing.Size(233, 22);
             this.GeDönülebilirKa_Çıktı.TabIndex = 2;
             this.GeDönülebilirKa_Çıktı.Text = "Çıktı";
             this.İpucu.SetToolTip(this.GeDönülebilirKa_Çıktı, "Çıktı");
@@ -483,7 +482,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GeDönülebilirKa_Girdi.Location = new System.Drawing.Point(6, 49);
             this.GeDönülebilirKa_Girdi.Name = "GeDönülebilirKa_Girdi";
-            this.GeDönülebilirKa_Girdi.Size = new System.Drawing.Size(232, 22);
+            this.GeDönülebilirKa_Girdi.Size = new System.Drawing.Size(233, 22);
             this.GeDönülebilirKa_Girdi.TabIndex = 1;
             this.GeDönülebilirKa_Girdi.Text = "Girdi";
             this.İpucu.SetToolTip(this.GeDönülebilirKa_Girdi, "Girdi");
@@ -496,7 +495,7 @@
             this.GeDönülebilirKa_Parola.Location = new System.Drawing.Point(6, 21);
             this.GeDönülebilirKa_Parola.Name = "GeDönülebilirKa_Parola";
             this.GeDönülebilirKa_Parola.PasswordChar = '|';
-            this.GeDönülebilirKa_Parola.Size = new System.Drawing.Size(232, 22);
+            this.GeDönülebilirKa_Parola.Size = new System.Drawing.Size(233, 22);
             this.GeDönülebilirKa_Parola.TabIndex = 0;
             this.İpucu.SetToolTip(this.GeDönülebilirKa_Parola, "Parola");
             this.GeDönülebilirKa_Parola.TextChanged += new System.EventHandler(this.GeDönülebilirKa_Parola_TextChanged);
@@ -508,7 +507,7 @@
             this.label2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.label2.Location = new System.Drawing.Point(5, 9);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(447, 22);
+            this.label2.Size = new System.Drawing.Size(448, 22);
             this.label2.TabIndex = 0;
             this.label2.Text = "Buraya sürükle";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -611,7 +610,7 @@
             this.SüBıKa_İsimlerideKarıştır.AutoSize = true;
             this.SüBıKa_İsimlerideKarıştır.Location = new System.Drawing.Point(6, 77);
             this.SüBıKa_İsimlerideKarıştır.Name = "SüBıKa_İsimlerideKarıştır";
-            this.SüBıKa_İsimlerideKarıştır.Size = new System.Drawing.Size(135, 21);
+            this.SüBıKa_İsimlerideKarıştır.Size = new System.Drawing.Size(129, 20);
             this.SüBıKa_İsimlerideKarıştır.TabIndex = 4;
             this.SüBıKa_İsimlerideKarıştır.Text = "İsimleride karıştır";
             this.SüBıKa_İsimlerideKarıştır.UseVisualStyleBackColor = true;
@@ -623,7 +622,7 @@
             this.Tab_Ayarlar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Tab_Ayarlar.Name = "Tab_Ayarlar";
             this.Tab_Ayarlar.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Tab_Ayarlar.Size = new System.Drawing.Size(463, 249);
+            this.Tab_Ayarlar.Size = new System.Drawing.Size(464, 249);
             this.Tab_Ayarlar.TabIndex = 4;
             this.Tab_Ayarlar.Text = "Ayarlar";
             this.Tab_Ayarlar.UseVisualStyleBackColor = true;
@@ -632,14 +631,13 @@
             // 
             this.Panel_Ayarlar.Controls.Add(this.Buton_KalıplarıGüncelle);
             this.Panel_Ayarlar.Controls.Add(this.ParŞab_Grup);
-            this.Panel_Ayarlar.Controls.Add(this.Ayarlar_DallarıKendiliğinden_AçKapat);
             this.Panel_Ayarlar.Controls.Add(this.Ayarlar_KarakterBüyüklüğü);
             this.Panel_Ayarlar.Controls.Add(this.label1);
             this.Panel_Ayarlar.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Panel_Ayarlar.Location = new System.Drawing.Point(3, 2);
             this.Panel_Ayarlar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Panel_Ayarlar.Name = "Panel_Ayarlar";
-            this.Panel_Ayarlar.Size = new System.Drawing.Size(457, 245);
+            this.Panel_Ayarlar.Size = new System.Drawing.Size(458, 245);
             this.Panel_Ayarlar.TabIndex = 0;
             // 
             // Buton_KalıplarıGüncelle
@@ -668,7 +666,7 @@
             this.ParŞab_Grup.Controls.Add(this.ParŞab_Par2);
             this.ParŞab_Grup.Controls.Add(this.ParŞab_Par1);
             this.ParŞab_Grup.Controls.Add(this.ParŞab_Tanım);
-            this.ParŞab_Grup.Location = new System.Drawing.Point(171, 8);
+            this.ParŞab_Grup.Location = new System.Drawing.Point(172, 8);
             this.ParŞab_Grup.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ParŞab_Grup.Name = "ParŞab_Grup";
             this.ParŞab_Grup.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -747,19 +745,6 @@
             this.ParŞab_Tanım.TabIndex = 11;
             this.İpucu.SetToolTip(this.ParŞab_Tanım, "Parola şablonunun tanımı");
             // 
-            // Ayarlar_DallarıKendiliğinden_AçKapat
-            // 
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.AutoSize = true;
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.Checked = true;
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.Location = new System.Drawing.Point(14, 56);
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.Name = "Ayarlar_DallarıKendiliğinden_AçKapat";
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.Size = new System.Drawing.Size(340, 21);
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.TabIndex = 15;
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.Text = "Ağacın dallarını kendiliğinden genişlet veya daralt";
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.UseVisualStyleBackColor = true;
-            this.Ayarlar_DallarıKendiliğinden_AçKapat.CheckedChanged += new System.EventHandler(this.Ayarlar_DallarıKendiliğinden_AçKapat_CheckedChanged);
-            // 
             // Ayarlar_KarakterBüyüklüğü
             // 
             this.Ayarlar_KarakterBüyüklüğü.Location = new System.Drawing.Point(14, 28);
@@ -784,7 +769,7 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(10, 10);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(131, 17);
+            this.label1.Size = new System.Drawing.Size(121, 16);
             this.label1.TabIndex = 12;
             this.label1.Text = "Karakter büyüklüğü";
             // 
@@ -795,7 +780,7 @@
             this.Tab_Günlük.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Tab_Günlük.Name = "Tab_Günlük";
             this.Tab_Günlük.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Tab_Günlük.Size = new System.Drawing.Size(463, 249);
+            this.Tab_Günlük.Size = new System.Drawing.Size(464, 249);
             this.Tab_Günlük.TabIndex = 5;
             this.Tab_Günlük.Text = "Günlük";
             this.Tab_Günlük.UseVisualStyleBackColor = true;
@@ -807,7 +792,7 @@
             this.Panel_Günlük.Location = new System.Drawing.Point(3, 2);
             this.Panel_Günlük.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Panel_Günlük.Name = "Panel_Günlük";
-            this.Panel_Günlük.Size = new System.Drawing.Size(457, 245);
+            this.Panel_Günlük.Size = new System.Drawing.Size(458, 245);
             this.Panel_Günlük.TabIndex = 1;
             // 
             // Günlük_MetinKutusu
@@ -818,7 +803,7 @@
             this.Günlük_MetinKutusu.Multiline = true;
             this.Günlük_MetinKutusu.Name = "Günlük_MetinKutusu";
             this.Günlük_MetinKutusu.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.Günlük_MetinKutusu.Size = new System.Drawing.Size(457, 245);
+            this.Günlük_MetinKutusu.Size = new System.Drawing.Size(458, 245);
             this.Günlük_MetinKutusu.TabIndex = 0;
             this.Günlük_MetinKutusu.WordWrap = false;
             // 
@@ -1002,7 +987,6 @@
         private System.Windows.Forms.ToolStripMenuItem MenuSağ_Uyg_Çıkış;
         private System.Windows.Forms.ToolStripMenuItem MenuSağ_Uyg_Senaryo_TümünüDurdur;
         private System.Windows.Forms.ToolStripDropDownButton Buton_Çalışıyor;
-        private System.Windows.Forms.CheckBox Ayarlar_DallarıKendiliğinden_AçKapat;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox SüBıKa_Yöntem;
         private System.Windows.Forms.TextBox SüBıKa_İpucu;

@@ -15,12 +15,15 @@ namespace Talep
         {
             InitializeComponent();
         }
-        public void Başlat(string Senaryo, string Talep, float Boyut, int Genişlik)
+        public void Başlat(string Senaryo, string Talep, float Boyut, int Genişlik, string Kaynak, string Hedef)
         {
             Yedekleyici.Ortak.AnaEkran.Invoke((MethodInvoker)delegate ()
             {
                 Senaryo_Tanımı.Text = Senaryo;
                 Talep_Tanımı.Text = Talep;
+
+                İpUcu.SetToolTip(Senaryo_Tanımı, Kaynak);
+                İpUcu.SetToolTip(Talep_Tanımı, Hedef);
 
                 int tanım_genişliği = Senaryo_Tanımı.Size.Width > Talep_Tanımı.Size.Width ?
                                     Senaryo_Tanımı.Size.Width :
@@ -65,6 +68,9 @@ namespace Talep
 
                 Detay.Text = Açıklama;
                 İşelmGörenDosya.Text = DosyaAdı;
+
+                İpUcu.SetToolTip(Detay, Açıklama);
+                İpUcu.SetToolTip(İşelmGörenDosya, DosyaAdı);
             });
 
             SonGüncellenme = DateTime.Now;

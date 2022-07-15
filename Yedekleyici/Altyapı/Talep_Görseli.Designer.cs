@@ -30,6 +30,7 @@ namespace Talep
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.Detay = new System.Windows.Forms.Label();
             this.İşelmGörenDosya = new System.Windows.Forms.Label();
             this.Talep_Tanımı = new System.Windows.Forms.Label();
@@ -37,6 +38,7 @@ namespace Talep
             this.İlerlemeÇubuğu_üst = new System.Windows.Forms.ProgressBar();
             this.İlerlemeÇubuğu_alt = new System.Windows.Forms.ProgressBar();
             this.İptal = new System.Windows.Forms.PictureBox();
+            this.İpUcu = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.İptal)).BeginInit();
             this.SuspendLayout();
             // 
@@ -67,7 +69,7 @@ namespace Talep
             this.Talep_Tanımı.AutoSize = true;
             this.Talep_Tanımı.Location = new System.Drawing.Point(12, 23);
             this.Talep_Tanımı.Name = "Talep_Tanımı";
-            this.Talep_Tanımı.Size = new System.Drawing.Size(87, 17);
+            this.Talep_Tanımı.Size = new System.Drawing.Size(82, 16);
             this.Talep_Tanımı.TabIndex = 5;
             this.Talep_Tanımı.Text = "Örnek Talep";
             // 
@@ -76,7 +78,7 @@ namespace Talep
             this.Senaryo_Tanımı.AutoSize = true;
             this.Senaryo_Tanımı.Location = new System.Drawing.Point(12, 7);
             this.Senaryo_Tanımı.Name = "Senaryo_Tanımı";
-            this.Senaryo_Tanımı.Size = new System.Drawing.Size(104, 17);
+            this.Senaryo_Tanımı.Size = new System.Drawing.Size(97, 16);
             this.Senaryo_Tanımı.TabIndex = 0;
             this.Senaryo_Tanımı.Text = "Örnek Senaryo";
             // 
@@ -149,5 +151,6 @@ namespace Talep
         private System.Windows.Forms.ProgressBar İlerlemeÇubuğu_üst;
         private System.Windows.Forms.ProgressBar İlerlemeÇubuğu_alt;
         private System.Windows.Forms.PictureBox İptal;
+        private System.Windows.Forms.ToolTip İpUcu;
     }
 }

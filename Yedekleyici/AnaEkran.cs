@@ -13,6 +13,8 @@ namespace Yedekleyici
 {
     public partial class AnaEkran : Form
     {
+        bool Ayarlar_DallarıKendiliğinden_AçKapat = true;
+
         public AnaEkran()
         {
             InitializeComponent();
@@ -61,10 +63,10 @@ namespace Yedekleyici
 
             Directory.CreateDirectory(Ortak.pak_Banka);
             Directory.CreateDirectory(Ortak.pak_Şablon);
-            if (!File.Exists(Ortak.pak_Şablon + ".Yedekleyici_Senaryo")) File.WriteAllBytes(Ortak.pak_Şablon + ".Yedekleyici_Senaryo", Properties.Resources.Senaryo);
-            if (!File.Exists(Ortak.pak_Şablon + ".Yedekleyici_Talep")) File.WriteAllBytes(Ortak.pak_Şablon + ".Yedekleyici_Talep", Properties.Resources.Talep);
-            if (!File.Exists(Ortak.pak_Şablon + ".Yedekleyici_DosyaAtlamaListesi")) File.WriteAllBytes(Ortak.pak_Şablon + ".Yedekleyici_DosyaAtlamaListesi", Properties.Resources.DosyaAtlamaListesi);
-            if (!File.Exists(Ortak.pak_Şablon + "GizliMenuleriGoster.Ayarlar")) File.WriteAllBytes(Ortak.pak_Şablon + "GizliMenuleriGoster.Ayarlar", Properties.Resources.GizliMenuleriGoster);
+            File.WriteAllBytes(Ortak.pak_Şablon + ".Yedekleyici_Senaryo", Properties.Resources.Senaryo);
+            File.WriteAllBytes(Ortak.pak_Şablon + ".Yedekleyici_Talep", Properties.Resources.Talep);
+            File.WriteAllBytes(Ortak.pak_Şablon + ".Yedekleyici_DosyaAtlamaListesi", Properties.Resources.DosyaAtlamaListesi);
+            File.WriteAllBytes(Ortak.pak_Şablon + "GizliMenuleriGoster.Ayarlar", Properties.Resources.GizliMenuleriGoster);
 
             File.Delete(Ortak.pak_Banka + "Gunluk.csv");
         }
@@ -174,8 +176,6 @@ namespace Yedekleyici
                 //Günlük_Zamanlayıcı.Interval = 100;
                 Buton_Deneme.Visible = true;
             }
-
-            Ayarlar_DallarıKendiliğinden_AçKapat.Checked = Convert.ToBoolean(Ortak.Ayarlar.Oku("Ayarlar_DallarıKendiliğinden_AçKapat", "true"));
 
             if (Directory.Exists(Ortak.pak_Geçici))
             {
@@ -331,10 +331,6 @@ namespace Yedekleyici
             PuntoDeğişti((float)Ayarlar_KarakterBüyüklüğü.Value);
             Ortak.Ayarlar.Yaz("Ayarlar_KarakterBüyüklüğü", Ayarlar_KarakterBüyüklüğü.Value.ToString());
         }
-        void Ayarlar_DallarıKendiliğinden_AçKapat_CheckedChanged(object sender, EventArgs e)
-        {
-            Ortak.Ayarlar.Yaz("Ayarlar_DallarıKendiliğinden_AçKapat", Ayarlar_DallarıKendiliğinden_AçKapat.Checked.ToString());
-        }
         void Günlük_Zamanlayıcı_Tick(object sender, EventArgs e)
         {
             try
@@ -414,7 +410,7 @@ namespace Yedekleyici
 
             int EnDüşük = AltDallar.Min();
 
-            if (Ayarlar_DallarıKendiliğinden_AçKapat.Checked)
+            if (Ayarlar_DallarıKendiliğinden_AçKapat)
             {
                 if (EnDüşük >= (int)Ortak.Resimler.Tamam) { if (Dal.IsExpanded) Dal.Collapse(true); }
                 else { if (!Dal.IsExpanded) Dal.Expand(); }
@@ -441,10 +437,10 @@ namespace Yedekleyici
         }
         void MenuSağ_Senaryo_Durdur_Click(object sender, EventArgs e)
         {
-            if (Ağaç_Senaryo.SelectedNode.Parent == null)
-            {
-                Senaryo.Ortak.Senaryo_Durdur(Ağaç_Senaryo.SelectedNode.Text);
-            }
+            TreeNode tn = Ağaç_Senaryo.SelectedNode;
+            while (tn.Parent != null) tn = tn.Parent;
+
+            Senaryo.Ortak.Senaryo_Durdur(tn.Text);
         }
         void MenuSağ_Senaryo_Dosya_Click(object sender, EventArgs e)
         {
@@ -469,6 +465,7 @@ namespace Yedekleyici
         void Ağaç_Senaryo_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             Ağaç_Senaryo.SelectedNode = e.Node;
+            Ayarlar_DallarıKendiliğinden_AçKapat = false;
         }
         void Ağaç_Senaryo_BeforeCheck(object sender, TreeViewCancelEventArgs e)
         {
@@ -509,6 +506,8 @@ namespace Yedekleyici
         }
         void Panel_Aç(Ortak.PanelListesi Adı)
         {
+            Ayarlar_DallarıKendiliğinden_AçKapat = true;
+
             if (Ortak.EtkinPanel == Adı) return;
 
             for (int i = 0; i < Panel_AnaEkran.Controls.Count; i++) Panel_AnaEkran.Controls[i].Visible = false;
@@ -536,6 +535,7 @@ namespace Yedekleyici
                 }
 
                 Ortak.Dsi.TümünüDurdur();
+                Senaryo.Değişken.TümünüSil();
             }
         }
 		void Panel_KlasörleriListele_DragEnter(object sender, DragEventArgs e)
@@ -577,7 +577,5 @@ namespace Yedekleyici
             if (sonuç == "") sonuç = Ortak.Karıştır(GeDönülebilirKa_Girdi.Text, GeDönülebilirKa_Parola.Text);
             GeDönülebilirKa_Çıktı.Text = sonuç;
         }
-
-        
     }
 }

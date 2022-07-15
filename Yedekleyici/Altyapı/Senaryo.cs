@@ -83,10 +83,12 @@ namespace Senaryo
                 else if (Paremetre == "<HddYuzdesi>")
                 {
                     if (AltParemetre == "Bilgisayar") return Yedekleyici.Ortak.HddYüzdesi().ToString();
+
+                    return Yedekleyici.Ortak.HddYüzdesi(AltParemetre).ToString();
                 }
                 else if (Paremetre == "<KlasorMevcutMu>")
                 {
-                    return Directory.Exists(AltParemetre.Trim('\\', ' ')) ? "Evet" : "Hayir";
+                    return Directory.Exists(AltParemetre.Trim(' ').TrimEnd('\\')) ? "Evet" : "Hayir";
                 }
                 else if (Paremetre == "<SenaryodaCalisanAdimSayisi>")
                 {
@@ -208,6 +210,10 @@ namespace Senaryo
             if (int.TryParse(metin_olarak, out sayı_olarak)) return sayı_olarak;
 
             throw new Exception(Girdi + " bilgisi sayı olarak kullanılamıyor");
+        }
+        public static void TümünüSil()
+        {
+            Tümü.Clear();
         }
     }
 
@@ -479,7 +485,7 @@ namespace Senaryo
                     }
                     else if (AltTür == AltTür.Uygulama)
                     {
-                        if (İçerik.Length == 6)
+                        if (İçerik.Length == 7)
                         {
                             if (İçerik[0] == "Calistir")
                             {
@@ -625,7 +631,7 @@ namespace Senaryo
             }
             catch (Exception ex) 
             { 
-                Yedekleyici.Ortak.Günlük_Ekle(ex.Message.ToString());
+                Yedekleyici.Ortak.Günlük_Ekle(ex.ToString());
                 Yedekleyici.Ortak.AğaçGörseliniGüncelle(Dal, (int)Yedekleyici.Ortak.Resimler.Hata, ex.Message + " " + DateTime.Now.ToString("d MMMM ddd HH:mm:ss:fff"));
 
                 if (Değişken.UygunMu(Senaryo.BeklenmeyenDurumSatırNonunKopyalanacağıDeğişkeninAdı))
@@ -825,24 +831,25 @@ namespace Senaryo
                 if (İçerik[0] == "Calistir")
                 {
                     System.Diagnostics.Process[] uyglm = System.Diagnostics.Process.GetProcessesByName(Path.GetFileNameWithoutExtension(UygulamaYolu));
-                    if (uyglm.Length > 0) Yedekleyici.Ortak.Günlük_Ekle(UygulamaYolu + " belirtilen uygulama zaten çalıştığı için atlandı.", "Bilgi");
-                    else
+                    if ((uyglm.Length == 0) || (Değişken.Oku_MetinVeyaDeğişken(İçerik[6]) == "CalisiyorsadaCalistir"))
                     {
                         System.Diagnostics.Process process = new System.Diagnostics.Process();
                         process.StartInfo.UseShellExecute = true;
                         process.StartInfo.FileName = Path.GetFileName(UygulamaYolu);
                         process.StartInfo.WorkingDirectory = Path.GetDirectoryName(UygulamaYolu);
-                        process.StartInfo.Arguments = İçerik[3];
-                        if (İçerik[4] != "") process.StartInfo.Verb = İçerik[4];
+                        process.StartInfo.Arguments = Değişken.Oku_MetinVeyaDeğişken(İçerik[3]);
+                        if (İçerik[4] != "") process.StartInfo.Verb = Değişken.Oku_MetinVeyaDeğişken(İçerik[4]);
 
+                        İçerik[2] = Değişken.Oku_MetinVeyaDeğişken(İçerik[2]);
                         if (İçerik[2] == "TamEkran") process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Maximized;
                         else if (İçerik[2] == "Kucultulmus") process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Minimized;
                         else if (İçerik[2] == "Gizli") process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                         else process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
 
-                        if (İçerik[5] == "DontUseShellExecute") process.StartInfo.UseShellExecute = false;
+                        if (Değişken.Oku_MetinVeyaDeğişken(İçerik[5]) == "DontUseShellExecute") process.StartInfo.UseShellExecute = false;
                         process.Start();
                     }
+                    else Yedekleyici.Ortak.Günlük_Ekle(UygulamaYolu + " belirtilen uygulama zaten çalıştığı için atlandı.", "Bilgi");
                 }
                 else if (İçerik[0] == "Durdur")
                 {
